@@ -3,7 +3,7 @@
 import MicInput from "./MicInput";
 import Distortion from "./Distortion";
 import Delay from "./Delay";
-import BasicWorklet from "./BasicWorklet";
+import BitCrush from "./BitCrush";
 
 function Stack() {
   return (
@@ -11,7 +11,7 @@ function Stack() {
       <MicInput index={0} />
       <Distortion index={1} />
       <Distortion index={2} />
-      <BasicWorklet index={3} />
+      <BitCrush index={3} />
       <Delay index={4} />
     </div>
   );
