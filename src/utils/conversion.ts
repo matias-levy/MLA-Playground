@@ -20,6 +20,13 @@ export function convertUint8ToFloat32(uint8Array: Uint8Array, byte1: boolean) {
     );
 
     // Create a Float32Array that views the same memory
-    return new Float32Array(buffer);
+    const float32Array = new Float32Array(buffer);
+
+    // Clamp values between -1 and 1
+    for (let i = 0; i < float32Array.length; i++) {
+      float32Array[i] = Math.max(-1, Math.min(1, float32Array[i]));
+    }
+
+    return float32Array;
   }
 }

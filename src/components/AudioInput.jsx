@@ -5,11 +5,13 @@ import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { convertUint8ToFloat32 } from "@/utils/conversion";
 import { createSafeAudioNode } from "@/utils/utils";
 import { Loader2, CirclePlay, CircleStop } from "lucide-react";
+import Waveform from "./Waveform";
 
 import {
   Select,
@@ -35,6 +37,10 @@ export default function AudioInput({ index }) {
   const [playing, setPlaying] = useState(false);
   const [audioBuffer, setAudioBuffer] = useState(null);
   const [audioBufferNode, setAudioBufferNode] = useState(null);
+  const [cues, setCues] = useState([0, 100]);
+  const [loop, setLoop] = useState(true);
+  const [detune, setDetune] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1);
 
   // General State
   const [selectedTab, setSelectedTab] = useState("File");
@@ -148,6 +154,7 @@ export default function AudioInput({ index }) {
             <div className="flex gap-3">
               <Select
                 onValueChange={setSelectedDevice}
+                value={selectedDevice}
                 onOpenChange={scanDevices}
               >
                 <SelectTrigger className="w-full">
@@ -204,7 +211,12 @@ export default function AudioInput({ index }) {
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="audio" id="r1" disabled={!fileIsAudio} />
-                <Label htmlFor="r1">Audio</Label>
+                <Label
+                  htmlFor="r1"
+                  className={!fileIsAudio ? "text-gray-400" : ""}
+                >
+                  Audio
+                </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="1byte" id="r2" />
@@ -212,9 +224,62 @@ export default function AudioInput({ index }) {
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="4byte" id="r3" />
-                <Label htmlFor="r3">Raw 4-byte to Float</Label>
+                <Label htmlFor="r3">Raw 4-byte to Clamped Float </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="c1" checked={loop} onCheckedChange={setLoop} />
+                <Label htmlFor="c1">Loop</Label>
               </div>
             </RadioGroup>
+            {audioBuffer && (
+              <>
+                <Waveform
+                  audioBuffer={audioBuffer}
+                  loop={loop}
+                  start={cues[0]}
+                  end={cues[1]}
+                />
+                <Label>Loop Start and End</Label>
+                <Slider
+                  min={0}
+                  max={100}
+                  step={0.001}
+                  defaultValue={[0, 100]}
+                  onValueChange={(e) => {
+                    setCues(e);
+                  }}
+                />
+                <Label>Detune</Label>
+                <Slider
+                  min={-1200}
+                  max={1200}
+                  step={0.001}
+                  value={[detune]}
+                  defaultValue={[0]}
+                  onValueChange={(e) => {
+                    setDetune(e[0]);
+                    if (audioBufferNode) {
+                      audioBufferNode.detune.setValueAtTime(e[0], 0);
+                    }
+                  }}
+                />
+                <Label>Playback Speed</Label>
+                <Slider
+                  min={0.01}
+                  max={4}
+                  step={0.001}
+                  defaultValue={[1]}
+                  value={[playbackRate]}
+                  onValueChange={(e) => {
+                    setPlaybackRate(e[0]);
+                    if (audioBufferNode) {
+                      audioBufferNode.playbackRate.setValueAtTime(e[0], 0);
+                    }
+                  }}
+                />
+              </>
+            )}
+
             <Button
               disabled={!playing}
               onClick={() => {
@@ -227,7 +292,7 @@ export default function AudioInput({ index }) {
               <CircleStop />
             </Button>
             <Button
-              disabled={playing || !currentFile}
+              disabled={playing || !currentFile || loading}
               onClick={() => {
                 ctx.resume();
                 setPlaying(true);
@@ -246,7 +311,13 @@ export default function AudioInput({ index }) {
 
                 bufferNode.connect(gainNode);
                 bufferNode.playbackRate.value = 1;
-                bufferNode.start();
+                bufferNode.loop = loop;
+                bufferNode.loopStart = (audioBuffer.duration * cues[0]) / 100;
+                bufferNode.loopEnd = (audioBuffer.duration * cues[1]) / 100;
+                bufferNode.detune.setValueAtTime(detune, 0);
+                bufferNode.playbackRate.setValueAtTime(playbackRate, 0);
+                console.log(bufferNode);
+                bufferNode.start(0, (audioBuffer.duration * cues[0]) / 100);
               }}
             >
               Start
