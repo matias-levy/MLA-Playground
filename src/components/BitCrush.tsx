@@ -38,6 +38,7 @@ export default function BitCrush({ index }: { index: number }) {
         defaultValue={[1]}
         step={0.001}
         onValueChange={(e) => {
+          ctx.resume();
           workletNode?.parameters.get("reduction")?.setValueAtTime(e[0], 0);
         }}
       />
@@ -49,8 +50,9 @@ export default function BitCrush({ index }: { index: number }) {
         defaultValue={[31]}
         step={1}
         onValueChange={(e) => {
-          setBits(31 - e[0]);
-          workletNode?.parameters.get("bits")?.setValueAtTime(31 - e[0], 0);
+          ctx.resume();
+          setBits(32 - e[0]);
+          workletNode?.parameters.get("bits")?.setValueAtTime(32 - e[0], 0);
         }}
       />
     </div>

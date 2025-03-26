@@ -10,6 +10,10 @@ class BitCrushProcessor extends AudioWorkletProcessor {
   process(inputs, outputs, parameters) {
     const inputChannels = inputs[0];
     const outputChannels = outputs[0];
+    const reduction = parameters["reduction"].length
+      ? parameters["reduction"][0]
+      : 1;
+    const bits = parameters["bits"].length ? parameters["bits"][0] : 31;
 
     for (let c = 0; c < outputChannels.length; c++) {
       let input = inputChannels[c] || new Float32Array(128); // Default to silence if no input
@@ -17,15 +21,15 @@ class BitCrushProcessor extends AudioWorkletProcessor {
 
       for (let i = 0; i < input.length; i++) {
         // Actual proccesing block
-        if (this.count >= parameters["reduction"][i]) {
-          const bits = parameters["bits"][i];
+        if (this.count >= reduction) {
           this.count = 0;
-          let bit32int = Math.floor(this.scale(input[i], -1, 1, 0, 1 << 31));
-          bit32int = bit32int >> (32 - bits);
-          let float = this.scale(bit32int, 0, 1 << (bits - 1), -1, 1);
+          let bit32int = Math.floor(this.scale(input[i], -1, 1, 0, 2 ** 31));
+          bit32int = (bit32int | 0) >> (32 - bits);
+          let float = this.scale(bit32int, 0, 2 ** (bits - 1), -1, 1);
           this.holdValue = float;
         }
         this.count++;
+
         output[i] = this.holdValue;
       }
     }
