@@ -4,6 +4,7 @@ import Distortion from "./Distortion";
 import Delay from "./Delay";
 import BitCrush from "./BitCrush";
 import AudioInput from "./AudioInput";
+import Recorder from "./Recorder";
 
 function Stack() {
   return (
@@ -13,6 +14,7 @@ function Stack() {
       <Distortion index={2} />
       <BitCrush index={3} />
       <Delay index={4} />
+      <Recorder index={5} />
     </div>
   );
 }

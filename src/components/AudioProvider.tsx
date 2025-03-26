@@ -38,15 +38,13 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         return;
       }
     }
-    for (let i = 0; i < nodes.length; i++) {
+    for (let i = 0; i < nodes.length - 1; i++) {
       const node = nodes[i];
-      // if (!node) {
-      //   break;
-      // }
-      if (i == nodes.length - 1) {
+      if (i == nodes.length - 2) {
         //Last Element Connects to output
         if (ctx) {
           node.connect(ctx.destination);
+          node.connect(nodes[nodes.length - 1]);
         }
       } else {
         node.connect(nodes[i + 1]);

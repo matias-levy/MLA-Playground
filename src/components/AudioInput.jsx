@@ -280,49 +280,54 @@ export default function AudioInput({ index }) {
               </>
             )}
 
-            <Button
-              disabled={!playing}
-              onClick={() => {
-                setPlaying(false);
-                audioBufferNode.stop();
-                setAudioBufferNode(null);
-              }}
-            >
-              Stop
-              <CircleStop />
-            </Button>
-            <Button
-              disabled={playing || !currentFile || loading}
-              onClick={() => {
-                ctx.resume();
-                setPlaying(true);
-                const bufferNode = new AudioBufferSourceNode(ctx, {
-                  buffer: audioBuffer,
-                });
-                setAudioBufferNode(bufferNode);
+            <div className="flex flex-row gap-2 justify-between items-stretch">
+              <Button
+                className="grow"
+                disabled={playing || !currentFile || loading}
+                onClick={() => {
+                  ctx.resume();
+                  setPlaying(true);
+                  const bufferNode = new AudioBufferSourceNode(ctx, {
+                    buffer: audioBuffer,
+                  });
+                  setAudioBufferNode(bufferNode);
 
-                if (micNode) {
-                  micNode.disconnect();
-                }
+                  if (micNode) {
+                    micNode.disconnect();
+                  }
 
-                bufferNode.addEventListener("ended", () => {
+                  bufferNode.addEventListener("ended", () => {
+                    setPlaying(false);
+                  });
+
+                  bufferNode.connect(gainNode);
+                  bufferNode.playbackRate.value = 1;
+                  bufferNode.loop = loop;
+                  bufferNode.loopStart = (audioBuffer.duration * cues[0]) / 100;
+                  bufferNode.loopEnd = (audioBuffer.duration * cues[1]) / 100;
+                  bufferNode.detune.setValueAtTime(detune, 0);
+                  bufferNode.playbackRate.setValueAtTime(playbackRate, 0);
+                  console.log(bufferNode);
+                  bufferNode.start(0, (audioBuffer.duration * cues[0]) / 100);
+                }}
+              >
+                Start
+                <CirclePlay />
+              </Button>
+              <Button
+                className="grow"
+                disabled={!playing}
+                onClick={() => {
                   setPlaying(false);
-                });
+                  audioBufferNode.stop();
+                  setAudioBufferNode(null);
+                }}
+              >
+                Stop
+                <CircleStop />
+              </Button>
+            </div>
 
-                bufferNode.connect(gainNode);
-                bufferNode.playbackRate.value = 1;
-                bufferNode.loop = loop;
-                bufferNode.loopStart = (audioBuffer.duration * cues[0]) / 100;
-                bufferNode.loopEnd = (audioBuffer.duration * cues[1]) / 100;
-                bufferNode.detune.setValueAtTime(detune, 0);
-                bufferNode.playbackRate.setValueAtTime(playbackRate, 0);
-                console.log(bufferNode);
-                bufferNode.start(0, (audioBuffer.duration * cues[0]) / 100);
-              }}
-            >
-              Start
-              <CirclePlay />
-            </Button>
             <Label>Volume</Label>
             <Slider
               min={0}
