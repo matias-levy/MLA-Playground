@@ -38,7 +38,6 @@ export default function Recorder({
     const recorder = new MediaRecorder(mediaStreamAudioDestinationNode.stream);
     setMediaRecorder(recorder);
     recorder.start();
-    console.log(recorder);
     chunks = [];
     recorder.ondataavailable = (evt) => {
       // Push each chunk (blobs) in an array
@@ -49,16 +48,12 @@ export default function Recorder({
       const blob = new Blob(chunks, { type: "audio/wav; codecs=opus" });
       setRecordingBlob(blob);
       audioRef.current.src = URL.createObjectURL(blob);
-      console.log(audioRef);
     };
   }
 
   function stop() {
-    console.log(mediaRecorder);
     mediaRecorder.stop();
     setRecording(false);
-    console.log(mediaRecorder);
-    console.log(audioRef);
   }
 
   function downloadRecording() {
@@ -84,7 +79,6 @@ export default function Recorder({
     const date = new Date();
     const formattedDate = date.toISOString().replace(/:/g, "-").split(".")[0]; // Ensures a valid filename
     const filename = `recording-${formattedDate}.wav`;
-    console.log(recordingBlob);
 
     const file = new File([recordingBlob], filename, {
       type: "audio/wav",

@@ -12,6 +12,7 @@ import { convertUint8ToFloat32 } from "@/utils/conversion";
 import { createSafeAudioNode } from "@/utils/utils";
 import { Loader2, CirclePlay, CircleStop } from "lucide-react";
 import Waveform from "./Waveform";
+import FreeSound from "./FreeSound";
 
 import {
   Select,
@@ -295,11 +296,9 @@ export default function AudioInput({
                     buffer: audioBuffer,
                   });
                   setAudioBufferNode(bufferNode);
-
                   if (micNode) {
                     micNode.disconnect();
                   }
-
                   bufferNode.addEventListener("ended", () => {
                     setPlaying(false);
                   });
@@ -311,7 +310,6 @@ export default function AudioInput({
                   bufferNode.loopEnd = (audioBuffer.duration * cues[1]) / 100;
                   bufferNode.detune.setValueAtTime(detune, 0);
                   bufferNode.playbackRate.setValueAtTime(playbackRate, 0);
-                  console.log(bufferNode);
                   bufferNode.start(0, (audioBuffer.duration * cues[0]) / 100);
                 }}
               >
@@ -344,7 +342,12 @@ export default function AudioInput({
             />
           </div>
         </TabsContent>
-        <TabsContent value="FreeSound">Change your password here.</TabsContent>
+        <TabsContent value="FreeSound">
+          <FreeSound
+            setCurrentFile={setCurrentFile}
+            setFileIsAudio={setFileIsAudio}
+          />
+        </TabsContent>
       </Tabs>
     </div>
   );
