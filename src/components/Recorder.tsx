@@ -4,12 +4,26 @@ import { useEffect, useState, useRef } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { createSafeAudioNode } from "@/utils/utils";
 import { Label } from "./ui/label";
-import { CircleStop, CirclePlay, Download } from "lucide-react";
+import { CircleStop, CirclePlay, Download, ArrowUpFromDot } from "lucide-react";
 import { Button } from "./ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 let chunks = [];
 
-export default function Recorder({ index }: { index: number }) {
+export default function Recorder({
+  index,
+  setCurrentFile,
+  setFileIsAudio,
+}: {
+  index: number;
+  setCurrentFile: Function;
+  setFileIsAudio: Function;
+}) {
   const audioRef = useRef(null);
   const [recording, setRecording] = useState(false);
   const [recordingBlob, setRecordingBlob] = useState(null);
@@ -64,6 +78,22 @@ export default function Recorder({ index }: { index: number }) {
     URL.revokeObjectURL(url);
   }
 
+  function feedbackRecording() {
+    if (!recordingBlob) return;
+
+    const date = new Date();
+    const formattedDate = date.toISOString().replace(/:/g, "-").split(".")[0]; // Ensures a valid filename
+    const filename = `recording-${formattedDate}.wav`;
+    console.log(recordingBlob);
+
+    const file = new File([recordingBlob], filename, {
+      type: "audio/wav",
+    });
+
+    setCurrentFile(file);
+    setFileIsAudio(true);
+  }
+
   useEffect(() => {
     addNode(mediaStreamAudioDestinationNode, index);
 
@@ -87,9 +117,32 @@ export default function Recorder({ index }: { index: number }) {
       </div>
       <div className="flex flex-row justify-between items-center gap-2">
         <audio ref={audioRef} controls className="grow rounded-md" />
-        <Button disabled={!recordingBlob} onClick={downloadRecording}>
-          <Download />
-        </Button>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button disabled={!recordingBlob} onClick={downloadRecording}>
+                <Download />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Download recording</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button disabled={!recordingBlob} onClick={feedbackRecording}>
+                <ArrowUpFromDot />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Feedback into file input</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );

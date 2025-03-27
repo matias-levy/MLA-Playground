@@ -22,7 +22,13 @@ import {
 } from "@/components/ui/select";
 import { Label } from "./ui/label";
 
-export default function AudioInput({ index }) {
+export default function AudioInput({
+  index,
+  currentFile,
+  setCurrentFile,
+  fileIsAudio,
+  setFileIsAudio,
+}) {
   // External Input Revelant State
   const [stream, setStream] = useState(null);
   const [devices, setDevices] = useState([]);
@@ -30,9 +36,7 @@ export default function AudioInput({ index }) {
   const [micNode, setMicNodeNode] = useState(null);
 
   // File Relevant State
-  const [currentFile, setCurrentFile] = useState(null);
   const [fileMode, setFileMode] = useState("audio");
-  const [fileIsAudio, setFileIsAudio] = useState(true);
   const [loading, setLoading] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [audioBuffer, setAudioBuffer] = useState(null);
