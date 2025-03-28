@@ -34,6 +34,7 @@ export default function Delay({ index, unregisterModule }: AudioModuleProps) {
           variant="ghost"
           className="rounded-full"
           onClick={() => {
+            console.log("exec");
             unregisterModule(index);
           }}
         >

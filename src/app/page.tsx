@@ -19,8 +19,13 @@ export default function Home() {
   }, [acc]);
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col row-start-2 items-center sm:items-start">
+        <h1 className="font-bold text-2xl mb-4">
+          <b>MLA Labs'</b>{" "}
+          <u className="underline-offset-8 decoration-2">no-nonsense</u> audio
+          playground
+        </h1>
         <AudioProvider>
           <Stack />
         </AudioProvider>
