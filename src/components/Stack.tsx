@@ -2,15 +2,37 @@
 
 import { useState } from "react";
 
+import AudioInput from "./AudioInput";
+import Recorder from "./Recorder";
+import AddModule from "./AddModule";
+
 import Distortion from "./Distortion";
 import Delay from "./Delay";
 import BitCrush from "./BitCrush";
-import AudioInput from "./AudioInput";
-import Recorder from "./Recorder";
+
+export interface AudioModuleProps {
+  index: number;
+  unregisterModule: Function;
+}
+
+export type AudioModuleComponent = React.FC<AudioModuleProps>;
 
 function Stack() {
   const [currentFile, setCurrentFile] = useState(null);
   const [fileIsAudio, setFileIsAudio] = useState(true);
+  const [modules, setModules] = useState<AudioModuleComponent[]>([
+    Distortion,
+    BitCrush,
+    Delay,
+  ]);
+
+  function registerModule(Module: AudioModuleComponent) {
+    setModules((prev) => [...prev, Module]);
+  }
+
+  function unregisterModule(index: number) {
+    setModules((prevModules) => prevModules.filter((_, i) => i !== index));
+  }
 
   return (
     <div className="flex flex-col gap-8 row-start-2 items-center sm:items-start w-2xl">
@@ -21,12 +43,14 @@ function Stack() {
         fileIsAudio={fileIsAudio}
         setFileIsAudio={setFileIsAudio}
       />
-      <Distortion index={1} />
-      <Distortion index={2} />
-      <BitCrush index={3} />
-      <Delay index={4} />
+      {modules.map((Module, i) => {
+        return (
+          <Module index={i + 1} key={i} unregisterModule={unregisterModule} />
+        );
+      })}
+      <AddModule registerModule={registerModule} />
       <Recorder
-        index={5}
+        index={modules.length + 1}
         setCurrentFile={setCurrentFile}
         setFileIsAudio={setFileIsAudio}
       />

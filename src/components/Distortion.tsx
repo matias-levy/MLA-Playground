@@ -5,6 +5,9 @@ import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
 import { createSafeAudioNode } from "@/utils/utils";
 import { Label } from "./ui/label";
+import { AudioModuleProps } from "./Stack";
+import { Button } from "./ui/button";
+import { X } from "lucide-react";
 
 function makeDistortionCurve(amount: number) {
   const k = typeof amount === "number" ? amount : 50;
@@ -19,7 +22,10 @@ function makeDistortionCurve(amount: number) {
   return curve;
 }
 
-export default function Distortion({ index }) {
+export default function Distortion({
+  index,
+  unregisterModule,
+}: AudioModuleProps) {
   const { audioContext: ctx, addNode, removeNode, nodes } = useAudioContext();
   const [waveshaperNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new WaveShaperNode(ctx))
@@ -34,7 +40,18 @@ export default function Distortion({ index }) {
 
   return (
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
-      <Label>Waveshapper</Label>
+      <div className="flex flex-row justify-between items-center">
+        <Label>Waveshapper</Label>
+        <Button
+          variant="ghost"
+          className="rounded-full"
+          onClick={() => {
+            unregisterModule(index - 1);
+          }}
+        >
+          <X />
+        </Button>
+      </div>
       <Slider
         min={1}
         max={400}

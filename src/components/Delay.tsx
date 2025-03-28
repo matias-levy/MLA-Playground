@@ -5,8 +5,11 @@ import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
 import { createSafeAudioNode } from "@/utils/utils";
 import { Label } from "./ui/label";
+import { AudioModuleProps } from "./Stack";
+import { Button } from "./ui/button";
+import { X } from "lucide-react";
 
-export default function Delay({ index }: { index: number }) {
+export default function Delay({ index, unregisterModule }: AudioModuleProps) {
   const { audioContext: ctx, addNode, removeNode } = useAudioContext();
   const [delayNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new DelayNode(ctx))
@@ -25,7 +28,18 @@ export default function Delay({ index }: { index: number }) {
 
   return (
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
-      <Label>Delay</Label>
+      <div className="flex flex-row justify-between items-center">
+        <Label>Delay</Label>
+        <Button
+          variant="ghost"
+          className="rounded-full"
+          onClick={() => {
+            unregisterModule(index - 1);
+          }}
+        >
+          <X />
+        </Button>
+      </div>
       <Slider
         min={0}
         max={2}
