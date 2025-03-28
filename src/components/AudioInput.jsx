@@ -140,6 +140,34 @@ export default function AudioInput({
     convert(currentFile);
   }, [currentFile, fileMode]);
 
+  useEffect(() => {
+    if (playing) {
+      restartBufferWithNewLoopPoints(cues[0], cues[1], loop);
+    }
+  }, [cues, playing, loop]);
+
+  const restartBufferWithNewLoopPoints = (newStart, newEnd, loop) => {
+    if (audioBufferNode) {
+      audioBufferNode.disconnect();
+    }
+
+    const bufferNode = new AudioBufferSourceNode(ctx, {
+      buffer: audioBuffer,
+    });
+
+    bufferNode.loop = loop;
+    bufferNode.loopStart = (audioBuffer.duration * newStart) / 100;
+    bufferNode.loopEnd = (audioBuffer.duration * newEnd) / 100;
+    bufferNode.detune.setValueAtTime(detune, 0);
+    bufferNode.playbackRate.setValueAtTime(playbackRate, 0);
+    bufferNode.addEventListener("ended", () => {
+      setPlaying(false);
+    });
+    bufferNode.connect(gainNode);
+    bufferNode.start(0, bufferNode.loopStart);
+    setAudioBufferNode(bufferNode);
+  };
+
   return (
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
       <Label>Input Module</Label>
@@ -304,7 +332,7 @@ export default function AudioInput({
                   });
 
                   bufferNode.connect(gainNode);
-                  bufferNode.playbackRate.value = 1;
+                  // bufferNode.playbackRate.value = 1;
                   bufferNode.loop = loop;
                   bufferNode.loopStart = (audioBuffer.duration * cues[0]) / 100;
                   bufferNode.loopEnd = (audioBuffer.duration * cues[1]) / 100;

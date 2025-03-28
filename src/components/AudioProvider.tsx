@@ -41,6 +41,7 @@ export default function AudioProvider({
   };
 
   const removeNode = (module: AudioModule) => {
+    module.output.disconnect();
     setModules((prevModules) =>
       prevModules.filter(
         (n) => n.input !== module.input || n.output !== module.output
