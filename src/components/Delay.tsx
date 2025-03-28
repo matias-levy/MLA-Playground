@@ -11,18 +11,50 @@ import { X } from "lucide-react";
 
 export default function Delay({ index, unregisterModule }: AudioModuleProps) {
   const { audioContext: ctx, addNode, removeNode } = useAudioContext();
-  const [delayNode] = useState(
-    createSafeAudioNode(ctx, (ctx) => new DelayNode(ctx))
+
+  // Create nodes
+  const [delayNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new DelayNode(ctx, { delayTime: 0.5 }))
   );
 
-  const [mixNode] = useState(
-    createSafeAudioNode(ctx, (ctx) => new ChannelMergerNode(ctx))
+  const [outputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
+  const [inputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
+  const [feedbackGain] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 0.3 }))
+  );
+
+  const [wetGain] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
+  const [dryGain] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
 
   useEffect(() => {
-    addNode(delayNode, index);
+    // Connect feedback loop
+    inputNode?.connect(delayNode);
+    feedbackGain?.connect(delayNode);
+    delayNode?.connect(feedbackGain);
+
+    // Connect wet (delayed) signal to mixGain
+    delayNode?.connect(wetGain);
+    // Dry signal passes through dryGain and merges at mixGain
+    inputNode?.connect(dryGain);
+    wetGain?.connect(outputNode);
+    dryGain?.connect(outputNode);
+
+    // Register module with the main processing chain
+    addNode({ input: inputNode, output: outputNode }, index);
+
     return () => {
-      removeNode(delayNode);
+      removeNode({ input: inputNode, output: outputNode });
     };
   }, [index]);
 
@@ -33,21 +65,47 @@ export default function Delay({ index, unregisterModule }: AudioModuleProps) {
         <Button
           variant="ghost"
           className="rounded-full"
-          onClick={() => {
-            console.log("exec");
-            unregisterModule(index);
-          }}
+          onClick={() => unregisterModule(index)}
         >
           <X />
         </Button>
       </div>
+
+      {/* Delay Time */}
+      <Label>Delay Time</Label>
       <Slider
         min={0}
         max={2}
-        defaultValue={[0]}
+        defaultValue={[0.5]}
         step={0.001}
         onValueChange={(e) => {
-          delayNode?.delayTime.setValueAtTime(e[0], 1);
+          delayNode?.delayTime.setValueAtTime(e[0], ctx.currentTime);
+        }}
+      />
+
+      {/* Feedback */}
+      <Label>Feedback</Label>
+      <Slider
+        min={0}
+        max={1.2}
+        defaultValue={[0.3]}
+        step={0.01}
+        onValueChange={(e) => {
+          feedbackGain?.gain.setValueAtTime(e[0], ctx.currentTime);
+        }}
+      />
+
+      {/* Mix */}
+      <Label>Mix</Label>
+      <Slider
+        min={0}
+        max={1}
+        defaultValue={[0.5]}
+        step={0.01}
+        onValueChange={(e) => {
+          const mix = e[0];
+          dryGain?.gain.setValueAtTime(1 - mix, ctx.currentTime);
+          wetGain?.gain.setValueAtTime(mix, ctx.currentTime);
         }}
       />
     </div>

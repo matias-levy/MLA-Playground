@@ -16,6 +16,11 @@ export interface AudioContextInterface {
   removeNode: Function;
 }
 
+export interface AudioModule {
+  input: AudioNode;
+  output: AudioNode;
+}
+
 const AudioContextContext = createContext<AudioContextInterface | null>(null);
 
 export default function AudioProvider({
@@ -23,32 +28,34 @@ export default function AudioProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [nodes, setNodes] = useState<AudioNode[]>([]);
+  const [modules, setModules] = useState<AudioModule[]>([]);
   const [input, setInput] = useState<AudioNode>();
   const [output, setOutput] = useState<AudioNode>();
 
-  const addNode = (node: AudioNode, index: number) => {
-    setNodes((prevNodes) => {
-      const newNodes = [...prevNodes]; // Create a new array (avoids mutation)
-      newNodes[index] = node;
-      return newNodes;
+  const addNode = (module: AudioModule, index: number) => {
+    setModules((prevModules) => {
+      const newModules = [...prevModules]; // Create a new array (avoids mutation)
+      newModules[index] = module;
+      return newModules;
     });
   };
 
-  const removeNode = (node: AudioNode) => {
-    setNodes((prevNodes) => {
-      return prevNodes.filter((n) => n !== node);
-    });
+  const removeNode = (module: AudioModule) => {
+    setModules((prevModules) =>
+      prevModules.filter(
+        (n) => n.input !== module.input || n.output !== module.output
+      )
+    );
   };
 
   // This effect is used to connect the actual nodes of the chain
   useEffect(() => {
-    console.log("use effect provider", nodes);
+    console.log("use effect provider", modules);
     if (ctx) {
       if (!input || !output) {
         return;
       }
-      if (!nodes.length) {
+      if (!modules.length) {
         // There are no nodes
         input.disconnect();
         input.connect(output);
@@ -56,39 +63,39 @@ export default function AudioProvider({
       } else {
         // There are nodes
         input.disconnect();
-        for (let i = 0; i < nodes.length; i++) {
-          const node = nodes[i];
-          if (node) {
-            node.disconnect();
+        for (let i = 0; i < modules.length; i++) {
+          const module = modules[i];
+          if (module) {
+            module.output.disconnect();
           }
         }
-        for (let i = 0; i < nodes.length; i++) {
-          const node = nodes[i];
-          if (!node) {
+        for (let i = 0; i < modules.length; i++) {
+          const module = modules[i];
+          if (!module) {
             return;
           }
         }
-        input.connect(nodes[0]);
+        input.connect(modules[0].input);
 
-        for (let i = 0; i < nodes.length; i++) {
-          const node = nodes[i];
-          if (i == nodes.length - 1) {
+        for (let i = 0; i < modules.length; i++) {
+          const module = modules[i];
+          if (i == modules.length - 1) {
             //Last Element Connects to output
-            node.connect(ctx.destination);
-            node.connect(output);
+            module.output.connect(ctx.destination);
+            module.output.connect(output);
           } else {
-            node.connect(nodes[i + 1]);
+            module.output.connect(modules[i + 1].input);
           }
         }
       }
     }
-  }, [nodes, input, output, ctx]);
+  }, [modules, input, output, ctx]);
 
   return (
     <AudioContextContext.Provider
       value={{
         audioContext: ctx,
-        nodes,
+        modules,
         addNode,
         removeNode,
         setInput,

@@ -32,9 +32,9 @@ export default function Distortion({
   );
 
   useEffect(() => {
-    addNode(waveshaperNode, index);
+    addNode({ input: waveshaperNode, output: waveshaperNode }, index);
     return () => {
-      removeNode(waveshaperNode);
+      removeNode({ input: waveshaperNode, output: waveshaperNode });
     };
   }, [index]);
 

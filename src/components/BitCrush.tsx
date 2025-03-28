@@ -23,13 +23,16 @@ export default function BitCrush({
       await ctx.audioWorklet.addModule("worklets/bit-crush-processor.js");
       const newNode = new AudioWorkletNode(ctx, "bit-crush-processor");
       workletNodeRef.current = newNode; // Update ref instead of state
-      addNode(newNode, index);
+      addNode({ input: newNode, output: newNode }, index);
     }
     loadAudioWorklet();
 
     return () => {
       if (workletNodeRef.current) {
-        removeNode(workletNodeRef.current);
+        removeNode({
+          input: workletNodeRef.current,
+          output: workletNodeRef.current,
+        });
       }
     };
   }, [index]);
