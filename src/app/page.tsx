@@ -1,10 +1,11 @@
 "use client";
+
+import { useEffect } from "react";
+import { redirect, useSearchParams } from "next/navigation";
+
 import { Toaster } from "@/components/ui/sonner";
 
-import { redirect, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-
-import { AudioProvider } from "@/components/AudioProvider";
+import AudioProvider from "@/components/AudioProvider";
 import Stack from "@/components/Stack";
 
 export default function Home() {

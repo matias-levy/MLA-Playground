@@ -24,7 +24,6 @@ import {
 import { Label } from "./ui/label";
 
 export default function AudioInput({
-  index,
   currentFile,
   setCurrentFile,
   fileIsAudio,
@@ -49,7 +48,7 @@ export default function AudioInput({
 
   // General State
   const [selectedTab, setSelectedTab] = useState("File");
-  const { audioContext: ctx, addNode } = useAudioContext();
+  const { audioContext: ctx, addNode, setInput } = useAudioContext();
   const [gainNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx))
   );
@@ -104,7 +103,8 @@ export default function AudioInput({
   }
 
   useEffect(() => {
-    addNode(gainNode, index);
+    setInput(gainNode);
+    // addNode(gainNode, index);
   }, []);
 
   useEffect(() => {

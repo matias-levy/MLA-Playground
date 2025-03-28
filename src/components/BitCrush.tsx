@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "./ui/label";
@@ -14,23 +14,23 @@ export default function BitCrush({
 }: AudioModuleProps) {
   const { audioContext: ctx, addNode, removeNode } = useAudioContext();
   const [bits, setBits] = useState(31); // Start at "max" since we are reversing
-  const [workletNode, setWorkletNode] = useState<AudioWorkletNode | undefined>(
-    undefined
-  );
+
+  const workletNodeRef = useRef<AudioWorkletNode | null>(null);
 
   useEffect(() => {
     // Load the AudioWorklet
     async function loadAudioWorklet() {
       await ctx.audioWorklet.addModule("worklets/bit-crush-processor.js");
       const newNode = new AudioWorkletNode(ctx, "bit-crush-processor");
-      setWorkletNode(newNode);
+      workletNodeRef.current = newNode; // Update ref instead of state
       addNode(newNode, index);
     }
-
     loadAudioWorklet();
 
     return () => {
-      removeNode(workletNode);
+      if (workletNodeRef.current) {
+        removeNode(workletNodeRef.current);
+      }
     };
   }, [index]);
 
@@ -42,7 +42,7 @@ export default function BitCrush({
           variant="ghost"
           className="rounded-full"
           onClick={() => {
-            unregisterModule(index - 1);
+            unregisterModule(index);
           }}
         >
           <X />
@@ -56,7 +56,9 @@ export default function BitCrush({
         step={0.001}
         onValueChange={(e) => {
           ctx.resume();
-          workletNode?.parameters.get("reduction")?.setValueAtTime(e[0], 0);
+          workletNodeRef.current?.parameters
+            .get("reduction")
+            ?.setValueAtTime(e[0], 0);
         }}
       />
       <Label>Bit Reduction</Label>
@@ -69,7 +71,9 @@ export default function BitCrush({
         onValueChange={(e) => {
           ctx.resume();
           setBits(32 - e[0]);
-          workletNode?.parameters.get("bits")?.setValueAtTime(32 - e[0], 0);
+          workletNodeRef.current?.parameters
+            .get("bits")
+            ?.setValueAtTime(32 - e[0], 0);
         }}
       />
     </div>

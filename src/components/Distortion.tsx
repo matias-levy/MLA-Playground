@@ -46,7 +46,7 @@ export default function Distortion({
           variant="ghost"
           className="rounded-full"
           onClick={() => {
-            unregisterModule(index - 1);
+            unregisterModule(index);
           }}
         >
           <X />

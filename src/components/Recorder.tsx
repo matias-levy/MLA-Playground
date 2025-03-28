@@ -16,18 +16,21 @@ import {
 let chunks = [];
 
 export default function Recorder({
-  index,
   setCurrentFile,
   setFileIsAudio,
 }: {
-  index: number;
   setCurrentFile: Function;
   setFileIsAudio: Function;
 }) {
   const audioRef = useRef(null);
   const [recording, setRecording] = useState(false);
   const [recordingBlob, setRecordingBlob] = useState(null);
-  const { audioContext: ctx, addNode, removeNode } = useAudioContext();
+  const {
+    audioContext: ctx,
+    addNode,
+    removeNode,
+    setOutput,
+  } = useAudioContext();
   const [mediaStreamAudioDestinationNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new MediaStreamAudioDestinationNode(ctx))
   );
@@ -89,12 +92,13 @@ export default function Recorder({
   }
 
   useEffect(() => {
-    addNode(mediaStreamAudioDestinationNode, index);
+    setOutput(mediaStreamAudioDestinationNode);
+    // addNode(mediaStreamAudioDestinationNode, index);
 
-    return () => {
-      removeNode(mediaStreamAudioDestinationNode);
-    };
-  }, [index]);
+    // return () => {
+    //   removeNode(mediaStreamAudioDestinationNode);
+    // };
+  }, []);
 
   return (
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">

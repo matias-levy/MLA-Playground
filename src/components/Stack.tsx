@@ -21,9 +21,10 @@ function Stack() {
   const [currentFile, setCurrentFile] = useState(null);
   const [fileIsAudio, setFileIsAudio] = useState(true);
   const [modules, setModules] = useState<AudioModuleComponent[]>([
-    Distortion,
-    BitCrush,
-    Delay,
+    // Distortion,
+    // BitCrush,
+    // BitCrush,
+    // BitCrush,
   ]);
 
   function registerModule(Module: AudioModuleComponent) {
@@ -37,20 +38,17 @@ function Stack() {
   return (
     <div className="flex flex-col gap-8 row-start-2 items-center sm:items-start w-2xl">
       <AudioInput
-        index={0}
         currentFile={currentFile}
         setCurrentFile={setCurrentFile}
         fileIsAudio={fileIsAudio}
         setFileIsAudio={setFileIsAudio}
       />
       {modules.map((Module, i) => {
-        return (
-          <Module index={i + 1} key={i} unregisterModule={unregisterModule} />
-        );
+        return <Module index={i} key={i} unregisterModule={unregisterModule} />;
       })}
       <AddModule registerModule={registerModule} />
       <Recorder
-        index={modules.length + 1}
+        // index={modules.length + 1}
         setCurrentFile={setCurrentFile}
         setFileIsAudio={setFileIsAudio}
       />
