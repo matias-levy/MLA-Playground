@@ -3,14 +3,19 @@
 import { useEffect, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
-import { createSafeAudioNode } from "@/utils/utils";
-import { Label } from "./ui/label";
-import { AudioModuleProps } from "./Stack";
-import { Button } from "./ui/button";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { createSafeAudioNode } from "@/utils/utils";
+import { AudioModuleProps } from "@/components/Chain";
 
-export default function Delay({ index, unregisterModule }: AudioModuleProps) {
-  const { audioContext: ctx, addNode, removeNode } = useAudioContext();
+export default function Delay({
+  index,
+  unregisterModule,
+  addNode,
+  removeNode,
+}: AudioModuleProps) {
+  const { audioContext: ctx } = useAudioContext();
 
   // Create nodes
   const [delayNode] = useState(() =>

@@ -7,22 +7,38 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import Distortion from "./Distortion";
-import Delay from "./Delay";
-import BitCrush from "./BitCrush";
-import { AudioModuleComponent } from "./Stack";
-import { Button } from "./ui/button";
-
+import Distortion from "@/components/modules/Distortion";
+import Delay from "@/components/modules/Delay";
+import BitCrush from "@/components/modules/BitCrush";
+import Splitter from "@/components/modules/Splitter";
+import { AudioModuleComponent } from "@/components/Chain";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-const availableModules: AudioModuleComponent[] = [Distortion, Delay, BitCrush];
+const availableModules: AudioModuleComponent[] = [
+  Distortion,
+  Delay,
+  BitCrush,
+  Splitter,
+];
+
+const availableModulesWithoutSplitter: AudioModuleComponent[] = [
+  Distortion,
+  Delay,
+  BitCrush,
+];
 
 export default function AddModule({
   registerModule,
+  shouldAllowSplitter,
 }: {
   registerModule: Function;
+  shouldAllowSplitter?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const modulesArray = shouldAllowSplitter
+    ? availableModules
+    : availableModulesWithoutSplitter;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="relative group w-full flex flex-col items-center gap-5 border-1 text-gray-400 border-gray-200 p-6 rounded-3xl shadow-xl shadow-gray-100 hover:text-gray-800 transition-all hover:scale-105 duration-300 hover:pb-11">
@@ -32,12 +48,12 @@ export default function AddModule({
           Add module
         </h3>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="rounded-3xl">
         <DialogHeader>
           <DialogTitle>Add module</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-2">
-          {availableModules.map((Module, i) => (
+          {modulesArray.map((Module, i) => (
             <Button
               key={i}
               onClick={() => {

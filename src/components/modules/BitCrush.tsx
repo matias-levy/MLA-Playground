@@ -2,17 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
+import { AudioModuleProps } from "@/components/Chain";
 import { Slider } from "@/components/ui/slider";
-import { Label } from "./ui/label";
-import { AudioModuleProps } from "./Stack";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { Button } from "./ui/button";
 
 export default function BitCrush({
   index,
   unregisterModule,
+  addNode,
+  removeNode,
 }: AudioModuleProps) {
-  const { audioContext: ctx, addNode, removeNode } = useAudioContext();
+  const { audioContext: ctx } = useAudioContext();
   const [bits, setBits] = useState(31); // Start at "max" since we are reversing
 
   const workletNodeRef = useRef<AudioWorkletNode | null>(null);

@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
-import { createSafeAudioNode } from "@/utils/utils";
-import { Label } from "./ui/label";
-import { AudioModuleProps } from "./Stack";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
+import { createSafeAudioNode } from "@/utils/utils";
+import { useAudioContext } from "@/components/AudioProvider";
+import { AudioModuleProps } from "@/components/Chain";
 
 function makeDistortionCurve(amount: number) {
   const k = typeof amount === "number" ? amount : 50;
@@ -25,8 +25,11 @@ function makeDistortionCurve(amount: number) {
 export default function Distortion({
   index,
   unregisterModule,
+  addNode,
+  removeNode,
 }: AudioModuleProps) {
-  const { audioContext: ctx, addNode, removeNode, nodes } = useAudioContext();
+  const { audioContext: ctx } = useAudioContext();
+  const [distortion, setDistortion] = useState(100);
   const [waveshaperNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new WaveShaperNode(ctx))
   );
@@ -37,6 +40,11 @@ export default function Distortion({
       removeNode({ input: waveshaperNode, output: waveshaperNode });
     };
   }, [index]);
+
+  useEffect(() => {
+    const curve = makeDistortionCurve(distortion);
+    waveshaperNode.curve = curve;
+  }, [distortion]);
 
   return (
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
@@ -58,8 +66,7 @@ export default function Distortion({
         defaultValue={[100]}
         step={0.001}
         onValueChange={(e) => {
-          const curve = makeDistortionCurve(e[0]);
-          waveshaperNode.curve = curve;
+          setDistortion(e[0]);
         }}
       />
     </div>

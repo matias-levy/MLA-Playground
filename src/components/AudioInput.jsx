@@ -6,13 +6,13 @@ import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { convertUint8ToFloat32 } from "@/utils/conversion";
 import { createSafeAudioNode } from "@/utils/utils";
 import { Loader2, CirclePlay, CircleStop } from "lucide-react";
-import Waveform from "./Waveform";
-import FreeSound from "./FreeSound";
+import Waveform from "@/components/Waveform";
+import FreeSound from "@/components/FreeSound";
 
 import {
   Select,
@@ -28,6 +28,7 @@ export default function AudioInput({
   setCurrentFile,
   fileIsAudio,
   setFileIsAudio,
+  setInput,
 }) {
   // External Input Revelant State
   const [stream, setStream] = useState(null);
@@ -48,7 +49,7 @@ export default function AudioInput({
 
   // General State
   const [selectedTab, setSelectedTab] = useState("File");
-  const { audioContext: ctx, addNode, setInput } = useAudioContext();
+  const { audioContext: ctx } = useAudioContext();
   const [gainNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx))
   );

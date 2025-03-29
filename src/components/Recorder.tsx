@@ -1,36 +1,33 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useAudioContext } from "@/components/AudioProvider";
-import { createSafeAudioNode } from "@/utils/utils";
-import { Label } from "./ui/label";
-import { CircleStop, CirclePlay, Download, ArrowUpFromDot } from "lucide-react";
-import { Button } from "./ui/button";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { CircleStop, CirclePlay, Download, ArrowUpFromDot } from "lucide-react";
+import { useAudioContext } from "@/components/AudioProvider";
+import { createSafeAudioNode } from "@/utils/utils";
 
 let chunks = [];
 
 export default function Recorder({
   setCurrentFile,
   setFileIsAudio,
+  setOutput,
 }: {
   setCurrentFile: Function;
   setFileIsAudio: Function;
+  setOutput: Function;
 }) {
   const audioRef = useRef(null);
   const [recording, setRecording] = useState(false);
   const [recordingBlob, setRecordingBlob] = useState(null);
-  const {
-    audioContext: ctx,
-    addNode,
-    removeNode,
-    setOutput,
-  } = useAudioContext();
+  const { audioContext: ctx } = useAudioContext();
   const [mediaStreamAudioDestinationNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new MediaStreamAudioDestinationNode(ctx))
   );
