@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { redirect, useSearchParams } from "next/navigation";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import AudioProvider from "@/components/AudioProvider";
 import Stack from "@/components/Stack";
 
-export default function Home() {
+function FreeSoundAuthParams() {
   const searchParams = useSearchParams();
   const acc = searchParams.get("acc");
   useEffect(() => {
@@ -17,7 +17,10 @@ export default function Home() {
       redirect(process.env.NEXT_PUBLIC_AUTH_REDIRECT!);
     }
   }, [acc]);
+  return <></>;
+}
 
+export default function Home() {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col row-start-2 items-center sm:items-start">
@@ -31,6 +34,9 @@ export default function Home() {
         </AudioProvider>
       </main>
       <Toaster />
+      <Suspense>
+        <FreeSoundAuthParams />
+      </Suspense>
     </div>
   );
 }
