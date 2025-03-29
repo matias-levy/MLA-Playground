@@ -49,7 +49,7 @@ export default function Distortion({
   return (
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
       <div className="flex flex-row justify-between items-center">
-        <Label>Waveshapper</Label>
+        <Label>Waveshaper</Label>
         <Button
           variant="ghost"
           className="rounded-full"

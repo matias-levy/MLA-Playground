@@ -22,6 +22,13 @@ const availableModules: AudioModuleComponent[] = [
   Splitter,
 ];
 
+const availableModulesNames: String[] = [
+  "Waveshaper",
+  "Delay",
+  "Bit Crush",
+  "Splitter",
+];
+
 const availableModulesWithoutSplitter: AudioModuleComponent[] = [
   Distortion,
   Delay,
@@ -38,7 +45,7 @@ export default function AddModule({
   const [open, setOpen] = useState(false);
   const modulesArray = shouldAllowSplitter
     ? availableModules
-    : availableModulesWithoutSplitter;
+    : availableModules.slice(0, -1);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="relative group w-full flex flex-col items-center gap-5 border-1 text-gray-400 border-gray-200 p-6 rounded-3xl shadow-xl shadow-gray-100 hover:text-gray-800 transition-all hover:scale-105 duration-300 hover:pb-11">
@@ -61,7 +68,7 @@ export default function AddModule({
                 setOpen(false);
               }}
             >
-              {Module.name || "Unknown Module"}
+              {availableModulesNames[i]}
             </Button>
           ))}
         </div>
