@@ -73,6 +73,9 @@ export default function BitCrush({
           ctx.resume();
           setSampleRate(e[0]);
         }}
+        onDoubleClick={() => {
+          setSampleRate(0);
+        }}
       />
       <Label>Bit Reduction</Label>
       <Slider
@@ -84,6 +87,9 @@ export default function BitCrush({
         onValueChange={(e) => {
           ctx.resume();
           setBits(32 - e[0]);
+        }}
+        onDoubleClick={() => {
+          setBits(31);
         }}
       />
     </div>

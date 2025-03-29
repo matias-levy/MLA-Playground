@@ -220,6 +220,9 @@ export default function AudioInput({
               onValueChange={(e) => {
                 setVolume(e[0]);
               }}
+              onDoubleClick={() => {
+                setVolume(1);
+              }}
             />
           </div>
         </TabsContent>
@@ -284,9 +287,13 @@ export default function AudioInput({
                   min={0}
                   max={100}
                   step={0.001}
+                  value={cues}
                   defaultValue={[0, 100]}
                   onValueChange={(e) => {
                     setCues(e);
+                  }}
+                  onDoubleClick={() => {
+                    setCues([0, 100]);
                   }}
                 />
                 <Label>Detune</Label>
@@ -302,6 +309,12 @@ export default function AudioInput({
                       audioBufferNode.detune.setValueAtTime(e[0], 0);
                     }
                   }}
+                  onDoubleClick={() => {
+                    setDetune(0);
+                    if (audioBufferNode) {
+                      audioBufferNode.detune.setValueAtTime(0, 0);
+                    }
+                  }}
                 />
                 <Label>Playback Speed</Label>
                 <Slider
@@ -314,6 +327,12 @@ export default function AudioInput({
                     setPlaybackRate(e[0]);
                     if (audioBufferNode) {
                       audioBufferNode.playbackRate.setValueAtTime(e[0], 0);
+                    }
+                  }}
+                  onDoubleClick={() => {
+                    setPlaybackRate(1);
+                    if (audioBufferNode) {
+                      audioBufferNode.playbackRate.setValueAtTime(1, 0);
                     }
                   }}
                 />
@@ -374,6 +393,9 @@ export default function AudioInput({
               defaultValue={[1]}
               onValueChange={(e) => {
                 setVolume(e[0]);
+              }}
+              onDoubleClick={() => {
+                setVolume(1);
               }}
             />
           </div>

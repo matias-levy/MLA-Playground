@@ -69,6 +69,9 @@ export default function Distortion({
         onValueChange={(e) => {
           setDistortion(e[0]);
         }}
+        onDoubleClick={() => {
+          setDistortion(100);
+        }}
       />
     </div>
   );

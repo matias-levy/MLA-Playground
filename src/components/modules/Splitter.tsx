@@ -80,6 +80,9 @@ export default function Splitter({
         onValueChange={(e) => {
           setCrossfade(e[0]);
         }}
+        onDoubleClick={() => {
+          setCrossfade(0.5);
+        }}
       />
       <div className="flex flex-row gap-4 items-stretch justify-between">
         <Chain input={in1} output={out1} />

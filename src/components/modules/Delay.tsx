@@ -99,6 +99,9 @@ export default function Delay({
         onValueChange={(e) => {
           setTime(e[0]);
         }}
+        onDoubleClick={() => {
+          setTime(0.5);
+        }}
       />
 
       {/* Feedback */}
@@ -112,6 +115,9 @@ export default function Delay({
         onValueChange={(e) => {
           setFeedback(e[0]);
         }}
+        onDoubleClick={() => {
+          setFeedback(0.3);
+        }}
       />
 
       {/* Mix */}
@@ -124,6 +130,9 @@ export default function Delay({
         step={0.01}
         onValueChange={(e) => {
           setMix(e[0]);
+        }}
+        onDoubleClick={() => {
+          setMix(0.5);
         }}
       />
     </div>
