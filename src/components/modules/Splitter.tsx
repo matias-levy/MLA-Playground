@@ -18,6 +18,8 @@ export default function Splitter({
 }: AudioModuleProps) {
   const { audioContext: ctx } = useAudioContext();
 
+  const [crossfade, setCrossfade] = useState(0.5);
+
   // Create nodes
   const [generalIn] = useState(() =>
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
@@ -27,13 +29,13 @@ export default function Splitter({
   );
 
   const [in1] = useState(() =>
-    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 0.5 }))
   );
   const [out1] = useState(() =>
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
   const [in2] = useState(() =>
-    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 0.5 }))
   );
   const [out2] = useState(() =>
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
@@ -51,6 +53,11 @@ export default function Splitter({
     };
   }, [index]);
 
+  useEffect(() => {
+    in1?.gain.setValueAtTime(1 - crossfade, ctx.currentTime);
+    in2?.gain.setValueAtTime(crossfade, ctx.currentTime);
+  }, [crossfade]);
+
   return (
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
       <div className="flex flex-row justify-between items-center">
@@ -63,6 +70,17 @@ export default function Splitter({
           <X />
         </Button>
       </div>
+      <Label>Crossfade</Label>
+      <Slider
+        min={0}
+        max={1}
+        value={[crossfade]}
+        defaultValue={[0.5]}
+        step={0.01}
+        onValueChange={(e) => {
+          setCrossfade(e[0]);
+        }}
+      />
       <div className="flex flex-row gap-4 items-stretch justify-between">
         <Chain input={in1} output={out1} />
         <Chain input={in2} output={out2} />
