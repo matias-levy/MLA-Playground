@@ -53,6 +53,7 @@ export default function AudioInput({
   const [gainNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx))
   );
+  const [volume, setVolume] = useState(1);
 
   async function scanDevices() {
     return await navigator.mediaDevices
@@ -147,6 +148,10 @@ export default function AudioInput({
     }
   }, [cues, playing, loop]);
 
+  useEffect(() => {
+    gainNode.gain.setValueAtTime(volume, 0);
+  }, [volume]);
+
   const restartBufferWithNewLoopPoints = (newStart, newEnd, loop) => {
     if (audioBufferNode) {
       audioBufferNode.disconnect();
@@ -210,9 +215,10 @@ export default function AudioInput({
               min={0}
               max={3}
               step={0.001}
+              value={[volume]}
               defaultValue={[1]}
               onValueChange={(e) => {
-                gainNode.gain.setValueAtTime(e[0], 0);
+                setVolume(e[0]);
               }}
             />
           </div>
@@ -363,10 +369,11 @@ export default function AudioInput({
             <Slider
               min={0}
               max={3}
+              value={[volume]}
               step={0.001}
               defaultValue={[1]}
               onValueChange={(e) => {
-                gainNode.gain.setValueAtTime(e[0], 0);
+                setVolume(e[0]);
               }}
             />
           </div>
