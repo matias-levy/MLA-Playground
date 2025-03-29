@@ -16,6 +16,7 @@ export default function BitCrush({
 }: AudioModuleProps) {
   const { audioContext: ctx } = useAudioContext();
   const [bits, setBits] = useState(31); // Start at "max" since we are reversing
+  const [sampleRate, setSampleRate] = useState(0);
 
   const workletNodeRef = useRef<AudioWorkletNode | null>(null);
 
@@ -39,6 +40,14 @@ export default function BitCrush({
     };
   }, [index]);
 
+  useEffect(() => {
+    workletNodeRef.current?.parameters
+      .get("reduction")
+      ?.setValueAtTime(sampleRate, 0);
+
+    workletNodeRef.current?.parameters.get("bits")?.setValueAtTime(bits, 0);
+  }, [bits, sampleRate]);
+
   return (
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
       <div className="flex flex-row justify-between items-center">
@@ -57,13 +66,12 @@ export default function BitCrush({
       <Slider
         min={0}
         max={88}
-        defaultValue={[1]}
+        defaultValue={[0]}
+        value={[sampleRate]}
         step={0.001}
         onValueChange={(e) => {
           ctx.resume();
-          workletNodeRef.current?.parameters
-            .get("reduction")
-            ?.setValueAtTime(e[0], 0);
+          setSampleRate(e[0]);
         }}
       />
       <Label>Bit Reduction</Label>
@@ -76,9 +84,6 @@ export default function BitCrush({
         onValueChange={(e) => {
           ctx.resume();
           setBits(32 - e[0]);
-          workletNodeRef.current?.parameters
-            .get("bits")
-            ?.setValueAtTime(32 - e[0], 0);
         }}
       />
     </div>

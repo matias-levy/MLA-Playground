@@ -65,6 +65,7 @@ export default function Distortion({
         max={400}
         defaultValue={[100]}
         step={0.001}
+        value={[distortion]}
         onValueChange={(e) => {
           setDistortion(e[0]);
         }}

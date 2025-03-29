@@ -17,6 +17,11 @@ export default function Delay({
 }: AudioModuleProps) {
   const { audioContext: ctx } = useAudioContext();
 
+  //UI Params
+  const [time, setTime] = useState(0.5);
+  const [feedback, setFeedback] = useState(0.3);
+  const [mix, setMix] = useState(0.5);
+
   // Create nodes
   const [delayNode] = useState(() =>
     createSafeAudioNode(ctx, (ctx) => new DelayNode(ctx, { delayTime: 0.5 }))
@@ -63,6 +68,13 @@ export default function Delay({
     };
   }, [index]);
 
+  useEffect(() => {
+    delayNode?.delayTime.setValueAtTime(time, ctx.currentTime);
+    feedbackGain?.gain.setValueAtTime(feedback, ctx.currentTime);
+    dryGain?.gain.setValueAtTime(1 - mix, ctx.currentTime);
+    wetGain?.gain.setValueAtTime(mix, ctx.currentTime);
+  }, [time, feedback, mix]);
+
   return (
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
       <div className="flex flex-row justify-between items-center">
@@ -81,10 +93,11 @@ export default function Delay({
       <Slider
         min={0}
         max={2}
+        value={[time]}
         defaultValue={[0.5]}
         step={0.001}
         onValueChange={(e) => {
-          delayNode?.delayTime.setValueAtTime(e[0], ctx.currentTime);
+          setTime(e[0]);
         }}
       />
 
@@ -93,10 +106,11 @@ export default function Delay({
       <Slider
         min={0}
         max={1.2}
+        value={[feedback]}
         defaultValue={[0.3]}
         step={0.01}
         onValueChange={(e) => {
-          feedbackGain?.gain.setValueAtTime(e[0], ctx.currentTime);
+          setFeedback(e[0]);
         }}
       />
 
@@ -105,12 +119,11 @@ export default function Delay({
       <Slider
         min={0}
         max={1}
+        value={[mix]}
         defaultValue={[0.5]}
         step={0.01}
         onValueChange={(e) => {
-          const mix = e[0];
-          dryGain?.gain.setValueAtTime(1 - mix, ctx.currentTime);
-          wetGain?.gain.setValueAtTime(mix, ctx.currentTime);
+          setMix(e[0]);
         }}
       />
     </div>
