@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
 import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 import Chain from "../Chain";
+import ModuleUI from "@/components/ModuleUI";
 
 export default function Splitter({
   index,
@@ -61,17 +60,7 @@ export default function Splitter({
   }, [crossfade]);
 
   return (
-    <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
-      <div className="flex flex-row justify-between items-center">
-        <Label>Splitter</Label>
-        <Button
-          variant="ghost"
-          className="rounded-full"
-          onClick={() => unregisterModule(index)}
-        >
-          <X />
-        </Button>
-      </div>
+    <ModuleUI index={index} name="Splitter" unregisterModule={unregisterModule}>
       <Label>Crossfade</Label>
       <Slider
         min={0}
@@ -92,6 +81,6 @@ export default function Splitter({
         {/* @ts-ignore:next-line */}
         <Chain input={in2} output={out2} />
       </div>
-    </div>
+    </ModuleUI>
   );
 }

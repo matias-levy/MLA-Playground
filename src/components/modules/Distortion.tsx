@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { X } from "lucide-react";
 import { createSafeAudioNode } from "@/utils/utils";
 import { useAudioContext } from "@/components/AudioProvider";
 import { AudioModuleProps } from "@/components/Chain";
+
+import ModuleUI from "@/components/ModuleUI";
 
 function makeDistortionCurve(amount: number) {
   const k = typeof amount === "number" ? amount : 50;
@@ -51,19 +51,12 @@ export default function Distortion({
   }, [distortion]);
 
   return (
-    <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
-      <div className="flex flex-row justify-between items-center">
-        <Label>Waveshaper</Label>
-        <Button
-          variant="ghost"
-          className="rounded-full"
-          onClick={() => {
-            unregisterModule(index);
-          }}
-        >
-          <X />
-        </Button>
-      </div>
+    <ModuleUI
+      name="Waveshaper"
+      index={index}
+      unregisterModule={unregisterModule}
+    >
+      <Label>Amount</Label>
       <Slider
         min={1}
         max={400}
@@ -77,6 +70,6 @@ export default function Distortion({
           setDistortion(100);
         }}
       />
-    </div>
+    </ModuleUI>
   );
 }

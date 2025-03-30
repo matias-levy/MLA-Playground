@@ -5,8 +5,8 @@ import { useAudioContext } from "@/components/AudioProvider";
 import { AudioModuleProps } from "@/components/Chain";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+
+import ModuleUI from "@/components/ModuleUI";
 
 export default function BitCrush({
   index,
@@ -49,19 +49,11 @@ export default function BitCrush({
   }, [bits, sampleRate]);
 
   return (
-    <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
-      <div className="flex flex-row justify-between items-center">
-        <Label>Bit Crush</Label>
-        <Button
-          variant="ghost"
-          className="rounded-full"
-          onClick={() => {
-            unregisterModule(index);
-          }}
-        >
-          <X />
-        </Button>
-      </div>
+    <ModuleUI
+      index={index}
+      name="Bit Crush"
+      unregisterModule={unregisterModule}
+    >
       <Label>Sample Rate Reduction</Label>
       <Slider
         min={0}
@@ -92,6 +84,6 @@ export default function BitCrush({
           setBits(31);
         }}
       />
-    </div>
+    </ModuleUI>
   );
 }

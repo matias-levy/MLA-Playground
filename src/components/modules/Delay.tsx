@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
 import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
+
+import ModuleUI from "@/components/ModuleUI";
 
 export default function Delay({
   index,
@@ -83,18 +83,7 @@ export default function Delay({
   }, [time, feedback, mix]);
 
   return (
-    <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
-      <div className="flex flex-row justify-between items-center">
-        <Label>Delay</Label>
-        <Button
-          variant="ghost"
-          className="rounded-full"
-          onClick={() => unregisterModule(index)}
-        >
-          <X />
-        </Button>
-      </div>
-
+    <ModuleUI index={index} name="Delay" unregisterModule={unregisterModule}>
       {/* Delay Time */}
       <Label>Delay Time</Label>
       <Slider
@@ -142,6 +131,6 @@ export default function Delay({
           setMix(0.5);
         }}
       />
-    </div>
+    </ModuleUI>
   );
 }
