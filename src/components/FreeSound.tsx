@@ -13,12 +13,23 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
-export default function FreeSound({ setCurrentFile, setFileIsAudio }) {
-  const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-  const [selectedSound, setSelectedSound] = useState(null);
-  const [result, setResult] = useState(null);
+export default function FreeSound({
+  setCurrentFile,
+  setFileIsAudio,
+  freeSoundObjectProps,
+}) {
+  const {
+    selectedSound,
+    setSelectedSound,
+    result,
+    setResult,
+    query,
+    setQuery,
+    loading,
+    setLoading,
+    downloading,
+    setDownloading,
+  } = freeSoundObjectProps;
 
   const loginWithFreesound = () => {
     setLoading(true);
@@ -70,9 +81,32 @@ export default function FreeSound({ setCurrentFile, setFileIsAudio }) {
                     },
                   })
                     .then((r) => r.json())
-                    .then((d) => {
+                    .then(async (d) => {
+                      let data = d;
+
+                      // Create an array of fetch promises
+                      const fetchPromises = d.results.map((result, index) =>
+                        fetch(
+                          `https://freesound.org/apiv2/sounds/${result.id}/`,
+                          {
+                            method: "GET",
+                            headers: {
+                              Authorization: `Bearer ${token}`,
+                            },
+                          }
+                        )
+                          .then((r) => r.json())
+                          .then((d2) => {
+                            data.results[index] = d2;
+                          })
+                      );
+
+                      // Wait for all fetches to complete
+                      await Promise.all(fetchPromises);
+
+                      // Set results and loading state once all fetches are done
+                      setResult(data);
                       setLoading(false);
-                      setResult(d);
                     });
                 }}
               >
@@ -122,13 +156,15 @@ export default function FreeSound({ setCurrentFile, setFileIsAudio }) {
               {/* <CommandInput placeholder="Filter..." /> */}
               <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
-
+                {/* <RadioGroup> */}
                 {result?.results.map((s, i) => {
                   return (
                     <CommandItem key={i}>
                       <div
                         className={
-                          selectedSound == s.id ? "font-bold" : "w-full"
+                          selectedSound == s.id
+                            ? "font-bold w-full flex flex-col gap-2 py-5 transition-all rounded-3xl"
+                            : "w-full flex flex-col gap-2 transition-all rounded-3xl"
                         }
                         onClick={() => {
                           if (!downloading) {
@@ -136,11 +172,20 @@ export default function FreeSound({ setCurrentFile, setFileIsAudio }) {
                           }
                         }}
                       >
-                        {s.name}
+                        <div>
+                          <p>Username: {s.username}</p>
+                          <p className="truncate">File name: {s.name}</p>
+                        </div>
+                        <audio
+                          src={s.previews["preview-lq-mp3"]}
+                          controls
+                          className="grow rounded-md invert"
+                        />
                       </div>
                     </CommandItem>
                   );
                 })}
+                {/* </RadioGroup> */}
               </CommandList>
             </Command>
           )}

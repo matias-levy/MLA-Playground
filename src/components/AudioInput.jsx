@@ -13,6 +13,7 @@ import { createSafeAudioNode } from "@/utils/utils";
 import { Loader2, CirclePlay, CircleStop } from "lucide-react";
 import Waveform from "@/components/Waveform";
 import FreeSound from "@/components/FreeSound";
+import useFreeSoundQuery from "@/lib/useFreeSoundQuery";
 
 import {
   Select,
@@ -46,6 +47,9 @@ export default function AudioInput({
   const [loop, setLoop] = useState(true);
   const [detune, setDetune] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
+
+  // Free Sound Relevant State
+  const freeSoundObjectProps = useFreeSoundQuery();
 
   // General State
   const [selectedTab, setSelectedTab] = useState("File");
@@ -402,6 +406,7 @@ export default function AudioInput({
         </TabsContent>
         <TabsContent value="FreeSound">
           <FreeSound
+            freeSoundObjectProps={freeSoundObjectProps}
             setCurrentFile={setCurrentFile}
             setFileIsAudio={setFileIsAudio}
           />

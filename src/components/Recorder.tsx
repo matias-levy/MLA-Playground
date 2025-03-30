@@ -90,11 +90,6 @@ export default function Recorder({
 
   useEffect(() => {
     setOutput(mediaStreamAudioDestinationNode);
-    // addNode(mediaStreamAudioDestinationNode, index);
-
-    // return () => {
-    //   removeNode(mediaStreamAudioDestinationNode);
-    // };
   }, []);
 
   return (
@@ -111,7 +106,7 @@ export default function Recorder({
         </Button>
       </div>
       <div className="flex flex-row justify-between items-center gap-2">
-        <audio ref={audioRef} controls className="grow rounded-md" />
+        <audio ref={audioRef} controls className="grow rounded-md invert" />
 
         <TooltipProvider>
           <Tooltip>
