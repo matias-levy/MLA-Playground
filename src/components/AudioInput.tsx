@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -24,6 +24,18 @@ import {
 } from "@/components/ui/select";
 import { Label } from "./ui/label";
 
+export interface AudioInputProps {
+  currentFile: Blob | null;
+  setCurrentFile: React.Dispatch<SetStateAction<Blob | null>>;
+  fileIsAudio: boolean;
+  setFileIsAudio: React.Dispatch<SetStateAction<boolean>>;
+  setInput: React.Dispatch<SetStateAction<AudioNode | null>>;
+  fileMode: string;
+  setFileMode: React.Dispatch<SetStateAction<string>>;
+  downloadedSoundId: number;
+  setDownloadedSoundId: React.Dispatch<SetStateAction<number>>;
+}
+
 export default function AudioInput({
   currentFile,
   setCurrentFile,
@@ -34,18 +46,21 @@ export default function AudioInput({
   setFileMode,
   downloadedSoundId,
   setDownloadedSoundId,
-}) {
+}: AudioInputProps) {
   // External Input Revelant State
-  const [stream, setStream] = useState(null);
-  const [devices, setDevices] = useState([]);
-  const [selectedDevice, setSelectedDevice] = useState(null);
-  const [micNode, setMicNodeNode] = useState(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDevice, setSelectedDevice] = useState<string>("");
+  const [micNode, setMicNodeNode] = useState<MediaStreamAudioSourceNode | null>(
+    null
+  );
 
   // File Relevant State
   const [loading, setLoading] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [audioBuffer, setAudioBuffer] = useState(null);
-  const [audioBufferNode, setAudioBufferNode] = useState(null);
+  const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
+  const [audioBufferNode, setAudioBufferNode] =
+    useState<AudioBufferSourceNode | null>(null);
   const [cues, setCues] = useState([0, 100]);
   const [loop, setLoop] = useState(true);
   const [detune, setDetune] = useState(0);
@@ -73,7 +88,7 @@ export default function AudioInput({
       });
   }
 
-  async function convert(file) {
+  async function convert(file: Blob | null) {
     if (file) {
       setLoading(true);
       const buff = await file.arrayBuffer();
@@ -112,7 +127,7 @@ export default function AudioInput({
 
   useEffect(() => {
     setInput(gainNode);
-    // addNode(gainNode, index);
+    // addModule(gainNode, index);
   }, []);
 
   useEffect(() => {
@@ -135,7 +150,9 @@ export default function AudioInput({
           audioBufferNode.disconnect();
           setPlaying(false);
         }
-        source.connect(gainNode);
+        if (gainNode) {
+          source.connect(gainNode);
+        }
       })
       .catch((err) => console.error("Microphone access denied:", err));
 
@@ -155,29 +172,35 @@ export default function AudioInput({
   }, [cues, playing, loop]);
 
   useEffect(() => {
-    gainNode.gain.setValueAtTime(volume, 0);
+    gainNode?.gain.setValueAtTime(volume, 0);
   }, [volume]);
 
-  const restartBufferWithNewLoopPoints = (newStart, newEnd, loop) => {
+  const restartBufferWithNewLoopPoints = (
+    newStart: number,
+    newEnd: number,
+    loop: boolean
+  ) => {
     if (audioBufferNode) {
       audioBufferNode.disconnect();
     }
 
-    const bufferNode = new AudioBufferSourceNode(ctx, {
-      buffer: audioBuffer,
-    });
+    if (audioBuffer && gainNode) {
+      const bufferNode = new AudioBufferSourceNode(ctx, {
+        buffer: audioBuffer,
+      });
 
-    bufferNode.loop = loop;
-    bufferNode.loopStart = (audioBuffer.duration * newStart) / 100;
-    bufferNode.loopEnd = (audioBuffer.duration * newEnd) / 100;
-    bufferNode.detune.setValueAtTime(detune, 0);
-    bufferNode.playbackRate.setValueAtTime(playbackRate, 0);
-    bufferNode.addEventListener("ended", () => {
-      setPlaying(false);
-    });
-    bufferNode.connect(gainNode);
-    bufferNode.start(0, bufferNode.loopStart);
-    setAudioBufferNode(bufferNode);
+      bufferNode.loop = loop;
+      bufferNode.loopStart = (audioBuffer.duration * newStart) / 100;
+      bufferNode.loopEnd = (audioBuffer.duration * newEnd) / 100;
+      bufferNode.detune.setValueAtTime(detune, 0);
+      bufferNode.playbackRate.setValueAtTime(playbackRate, 0);
+      bufferNode.addEventListener("ended", () => {
+        setPlaying(false);
+      });
+      bufferNode.connect(gainNode);
+      bufferNode.start(0, bufferNode.loopStart);
+      setAudioBufferNode(bufferNode);
+    }
   };
 
   return (
@@ -238,7 +261,7 @@ export default function AudioInput({
               <Input
                 type="file"
                 onChange={(e) => {
-                  const file = e.target.files[0];
+                  const file = e.target.files && e.target.files[0];
                   if (!file) return;
 
                   const isAudio = file.type.startsWith("audio/");
@@ -281,7 +304,15 @@ export default function AudioInput({
                 <Label htmlFor="r3">Raw 4-byte to Clamped Float </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="c1" checked={loop} onCheckedChange={setLoop} />
+                <Checkbox
+                  id="c1"
+                  checked={loop}
+                  onCheckedChange={(e) => {
+                    if (e !== "indeterminate") {
+                      setLoop(e);
+                    }
+                  }}
+                />
                 <Label htmlFor="c1">Loop</Label>
               </div>
             </RadioGroup>
@@ -355,27 +386,30 @@ export default function AudioInput({
                 className="grow"
                 disabled={playing || !currentFile || loading}
                 onClick={() => {
-                  ctx.resume();
-                  setPlaying(true);
-                  const bufferNode = new AudioBufferSourceNode(ctx, {
-                    buffer: audioBuffer,
-                  });
-                  setAudioBufferNode(bufferNode);
-                  if (micNode) {
-                    micNode.disconnect();
-                  }
-                  bufferNode.addEventListener("ended", () => {
-                    setPlaying(false);
-                  });
+                  if (audioBuffer && gainNode) {
+                    ctx.resume();
+                    setPlaying(true);
+                    const bufferNode = new AudioBufferSourceNode(ctx, {
+                      buffer: audioBuffer,
+                    });
+                    setAudioBufferNode(bufferNode);
+                    if (micNode) {
+                      micNode.disconnect();
+                    }
+                    bufferNode.addEventListener("ended", () => {
+                      setPlaying(false);
+                    });
 
-                  bufferNode.connect(gainNode);
-                  // bufferNode.playbackRate.value = 1;
-                  bufferNode.loop = loop;
-                  bufferNode.loopStart = (audioBuffer.duration * cues[0]) / 100;
-                  bufferNode.loopEnd = (audioBuffer.duration * cues[1]) / 100;
-                  bufferNode.detune.setValueAtTime(detune, 0);
-                  bufferNode.playbackRate.setValueAtTime(playbackRate, 0);
-                  bufferNode.start(0, (audioBuffer.duration * cues[0]) / 100);
+                    bufferNode.connect(gainNode);
+                    // bufferNode.playbackRate.value = 1;
+                    bufferNode.loop = loop;
+                    bufferNode.loopStart =
+                      (audioBuffer.duration * cues[0]) / 100;
+                    bufferNode.loopEnd = (audioBuffer.duration * cues[1]) / 100;
+                    bufferNode.detune.setValueAtTime(detune, 0);
+                    bufferNode.playbackRate.setValueAtTime(playbackRate, 0);
+                    bufferNode.start(0, (audioBuffer.duration * cues[0]) / 100);
+                  }
                 }}
               >
                 Start
@@ -386,7 +420,7 @@ export default function AudioInput({
                 disabled={!playing}
                 onClick={() => {
                   setPlaying(false);
-                  audioBufferNode.stop();
+                  audioBufferNode?.stop();
                   setAudioBufferNode(null);
                 }}
               >

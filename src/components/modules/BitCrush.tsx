@@ -11,8 +11,8 @@ import { X } from "lucide-react";
 export default function BitCrush({
   index,
   unregisterModule,
-  addNode,
-  removeNode,
+  addModule,
+  removeModule,
 }: AudioModuleProps) {
   const { audioContext: ctx } = useAudioContext();
   const [bits, setBits] = useState(31); // Start at "max" since we are reversing
@@ -26,13 +26,13 @@ export default function BitCrush({
       await ctx.audioWorklet.addModule("worklets/bit-crush-processor.js");
       const newNode = new AudioWorkletNode(ctx, "bit-crush-processor");
       workletNodeRef.current = newNode; // Update ref instead of state
-      addNode({ input: newNode, output: newNode }, index);
+      addModule({ input: newNode, output: newNode }, index);
     }
     loadAudioWorklet();
 
     return () => {
       if (workletNodeRef.current) {
-        removeNode({
+        removeModule({
           input: workletNodeRef.current,
           output: workletNodeRef.current,
         });

@@ -13,8 +13,8 @@ import Chain from "../Chain";
 export default function Splitter({
   index,
   unregisterModule,
-  addNode,
-  removeNode,
+  addModule,
+  removeModule,
 }: AudioModuleProps) {
   const { audioContext: ctx } = useAudioContext();
 
@@ -43,14 +43,16 @@ export default function Splitter({
 
   useEffect(() => {
     // Register module with the processing chain
-    generalIn?.connect(in1);
-    generalIn?.connect(in2);
-    out1?.connect(generalOut);
-    out2?.connect(generalOut);
-    addNode({ input: generalIn, output: generalOut }, index);
-    return () => {
-      removeNode({ input: generalIn, output: generalOut });
-    };
+    if (generalIn && in1 && in2 && out1 && out2 && generalOut) {
+      generalIn.connect(in1);
+      generalIn.connect(in2);
+      out1.connect(generalOut);
+      out2.connect(generalOut);
+      addModule({ input: generalIn, output: generalOut }, index);
+      return () => {
+        removeModule({ input: generalIn, output: generalOut });
+      };
+    }
   }, [index]);
 
   useEffect(() => {
@@ -85,7 +87,9 @@ export default function Splitter({
         }}
       />
       <div className="flex flex-row gap-4 items-stretch justify-between">
+        {/* @ts-ignore:next-line */}
         <Chain input={in1} output={out1} />
+        {/* @ts-ignore:next-line */}
         <Chain input={in2} output={out2} />
       </div>
     </div>

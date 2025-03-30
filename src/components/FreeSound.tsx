@@ -1,10 +1,12 @@
 "use client";
 
+import { Dispatch, SetStateAction } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
+import { FreeSoundObjectProps } from "@/lib/useFreeSoundQuery";
 
 import {
   Command,
@@ -13,6 +15,15 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
+export interface FreeSoundProps {
+  setCurrentFile: Dispatch<SetStateAction<Blob | null>>;
+  setFileIsAudio: Dispatch<SetStateAction<boolean>>;
+  freeSoundObjectProps: FreeSoundObjectProps;
+  setFileMode: Dispatch<SetStateAction<string>>;
+  downloadedSoundId: number;
+  setDownloadedSoundId: Dispatch<SetStateAction<number>>;
+}
+
 export default function FreeSound({
   setCurrentFile,
   setFileIsAudio,
@@ -20,7 +31,7 @@ export default function FreeSound({
   setFileMode,
   downloadedSoundId,
   setDownloadedSoundId,
-}) {
+}: FreeSoundProps) {
   const {
     selectedSound, //id of selectedSound
     setSelectedSound,
@@ -88,20 +99,18 @@ export default function FreeSound({
                       let data = d;
 
                       // Create an array of fetch promises
-                      const fetchPromises = d.results.map((result, index) =>
-                        fetch(
-                          `https://freesound.org/apiv2/sounds/${result.id}/`,
-                          {
+                      const fetchPromises = d.results.map(
+                        ({ id }: { id: number }, index: number) =>
+                          fetch(`https://freesound.org/apiv2/sounds/${id}/`, {
                             method: "GET",
                             headers: {
                               Authorization: `Bearer ${token}`,
                             },
-                          }
-                        )
-                          .then((r) => r.json())
-                          .then((d2) => {
-                            data.results[index] = d2;
                           })
+                            .then((r) => r.json())
+                            .then((d2) => {
+                              data.results[index] = d2;
+                            })
                       );
 
                       // Wait for all fetches to complete
@@ -129,29 +138,31 @@ export default function FreeSound({
                 selectedSound == downloadedSoundId
               }
               onClick={() => {
-                const token = sessionStorage.getItem("access_token");
-                setDownloading(true);
-                fetch(
-                  `https://freesound.org/apiv2/sounds/${selectedSound}/download`,
-                  {
-                    method: "GET",
-                    headers: {
-                      Authorization: `Bearer ${token}`,
-                    },
-                  }
-                )
-                  .then((r) => {
-                    return r.blob();
-                  })
-                  .then((b) => {
-                    const newBlob = new Blob([b], { type: "audio" });
-                    setDownloading(false);
-                    setCurrentFile(newBlob);
-                    setFileIsAudio(true);
-                    setFileMode("audio");
-                    setDownloadedSoundId(selectedSound);
-                    toast("File loaded succesfully");
-                  });
+                if (selectedSound) {
+                  const token = sessionStorage.getItem("access_token");
+                  setDownloading(true);
+                  fetch(
+                    `https://freesound.org/apiv2/sounds/${selectedSound}/download`,
+                    {
+                      method: "GET",
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  )
+                    .then((r) => {
+                      return r.blob();
+                    })
+                    .then((b) => {
+                      const newBlob = new Blob([b], { type: "audio" });
+                      setDownloading(false);
+                      setCurrentFile(newBlob);
+                      setFileIsAudio(true);
+                      setFileMode("audio");
+                      setDownloadedSoundId(selectedSound);
+                      toast("File loaded succesfully");
+                    });
+                }
               }}
             >
               {downloading ? (
@@ -166,7 +177,6 @@ export default function FreeSound({
               {/* <CommandInput placeholder="Filter..." /> */}
               <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
-                {/* <RadioGroup> */}
                 {result?.results.map((s, i) => {
                   return (
                     <CommandItem key={i}>
@@ -195,7 +205,6 @@ export default function FreeSound({
                     </CommandItem>
                   );
                 })}
-                {/* </RadioGroup> */}
               </CommandList>
             </Command>
           )}

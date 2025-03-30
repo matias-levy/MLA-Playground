@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, SetStateAction } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,16 @@ import { useAudioContext } from "@/components/AudioProvider";
 import { createSafeAudioNode } from "@/utils/utils";
 import { toast } from "sonner";
 
-let chunks = [];
+let chunks: Blob[] = [];
+
+export interface RecorderProps {
+  currentFile: Blob | null;
+  setCurrentFile: React.Dispatch<SetStateAction<Blob | null>>;
+  setFileIsAudio: React.Dispatch<SetStateAction<boolean>>;
+  setOutput: React.Dispatch<SetStateAction<AudioNode | null>>;
+  setFileMode: React.Dispatch<SetStateAction<string>>;
+  setDownloadedSoundId: React.Dispatch<SetStateAction<number>>;
+}
 
 export default function Recorder({
   currentFile,
@@ -23,43 +32,48 @@ export default function Recorder({
   setOutput,
   setFileMode,
   setDownloadedSoundId,
-}: {
-  currentFile: any;
-  setCurrentFile: Function;
-  setFileIsAudio: Function;
-  setOutput: Function;
-  setFileMode: Function;
-  setDownloadedSoundId: Function;
-}) {
-  const audioRef = useRef(null);
+}: RecorderProps) {
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [recording, setRecording] = useState(false);
-  const [recordingBlob, setRecordingBlob] = useState(null);
+  const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
   const { audioContext: ctx } = useAudioContext();
   const [mediaStreamAudioDestinationNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new MediaStreamAudioDestinationNode(ctx))
   );
-  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
+    null
+  );
+
+  useEffect(() => {
+    setOutput(mediaStreamAudioDestinationNode);
+  }, []);
 
   function start() {
-    setRecording(true);
-    const recorder = new MediaRecorder(mediaStreamAudioDestinationNode.stream);
-    setMediaRecorder(recorder);
-    recorder.start();
-    chunks = [];
-    recorder.ondataavailable = (evt) => {
-      // Push each chunk (blobs) in an array
-      chunks.push(evt.data);
-    };
-    recorder.onstop = (evt) => {
-      // Make blob out of our blobs, and open it.
-      const blob = new Blob(chunks, { type: "audio/wav; codecs=opus" });
-      setRecordingBlob(blob);
-      audioRef.current.src = URL.createObjectURL(blob);
-    };
+    if (mediaStreamAudioDestinationNode) {
+      setRecording(true);
+      const recorder = new MediaRecorder(
+        mediaStreamAudioDestinationNode.stream
+      );
+      setMediaRecorder(recorder);
+      recorder.start();
+      chunks = [];
+      recorder.ondataavailable = (evt) => {
+        // Push each chunk (blobs) in an array
+        chunks.push(evt.data);
+      };
+      recorder.onstop = () => {
+        // Make blob out of our blobs, and open it.
+        const blob = new Blob(chunks, { type: "audio/wav; codecs=opus" });
+        setRecordingBlob(blob);
+        if (audioRef.current) {
+          audioRef.current.src = URL.createObjectURL(blob);
+        }
+      };
+    }
   }
 
   function stop() {
-    mediaRecorder.stop();
+    mediaRecorder?.stop();
     setRecording(false);
   }
 
@@ -88,10 +102,6 @@ export default function Recorder({
     setDownloadedSoundId(-1);
     toast("File loaded succesfully");
   }
-
-  useEffect(() => {
-    setOutput(mediaStreamAudioDestinationNode);
-  }, []);
 
   return (
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">

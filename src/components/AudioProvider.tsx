@@ -9,11 +9,6 @@ const ctx =
 
 export interface AudioContextInterface {
   audioContext: AudioContext;
-  nodes: AudioNode[];
-  setInput: Function;
-  setOutput: Function;
-  addNode: Function;
-  removeNode: Function;
 }
 
 export interface AudioModule {
@@ -21,7 +16,8 @@ export interface AudioModule {
   output: AudioNode;
 }
 
-const AudioContextContext = createContext<AudioContextInterface | null>(null);
+// @ts-ignore:next-line
+const AudioContextContext = createContext<AudioContextInterface>(null);
 
 export default function AudioProvider({
   children,
@@ -31,6 +27,7 @@ export default function AudioProvider({
   return (
     <AudioContextContext.Provider
       value={{
+        // @ts-ignore:next-line
         audioContext: ctx,
       }}
     >

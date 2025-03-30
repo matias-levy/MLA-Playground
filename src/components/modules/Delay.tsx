@@ -12,8 +12,8 @@ import { AudioModuleProps } from "@/components/Chain";
 export default function Delay({
   index,
   unregisterModule,
-  addNode,
-  removeNode,
+  addModule,
+  removeModule,
 }: AudioModuleProps) {
   const { audioContext: ctx } = useAudioContext();
 
@@ -48,24 +48,31 @@ export default function Delay({
   );
 
   useEffect(() => {
-    // Connect feedback loop
-    inputNode?.connect(delayNode);
-    feedbackGain?.connect(delayNode);
-    delayNode?.connect(feedbackGain);
+    if (
+      inputNode &&
+      delayNode &&
+      feedbackGain &&
+      wetGain &&
+      dryGain &&
+      outputNode
+    ) {
+      // Connect feedback loop
+      inputNode.connect(delayNode);
+      feedbackGain.connect(delayNode);
+      delayNode.connect(feedbackGain);
 
-    // Connect wet (delayed) signal to mixGain
-    delayNode?.connect(wetGain);
-    // Dry signal passes through dryGain and merges at mixGain
-    inputNode?.connect(dryGain);
-    wetGain?.connect(outputNode);
-    dryGain?.connect(outputNode);
-
-    // Register module with the main processing chain
-    addNode({ input: inputNode, output: outputNode }, index);
-
-    return () => {
-      removeNode({ input: inputNode, output: outputNode });
-    };
+      // Connect wet (delayed) signal to mixGain
+      delayNode.connect(wetGain);
+      // Dry signal passes through dryGain and merges at mixGain
+      inputNode.connect(dryGain);
+      wetGain.connect(outputNode);
+      dryGain.connect(outputNode);
+      // Register module with the main processing chain
+      addModule({ input: inputNode, output: outputNode }, index);
+      return () => {
+        removeModule({ input: inputNode, output: outputNode });
+      };
+    }
   }, [index]);
 
   useEffect(() => {

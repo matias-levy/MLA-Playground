@@ -8,13 +8,13 @@ import Recorder from "@/components/Recorder";
 import Chain from "./Chain";
 
 function Stack() {
-  const [currentFile, setCurrentFile] = useState(null);
+  const [currentFile, setCurrentFile] = useState<Blob | null>(null);
   const [fileIsAudio, setFileIsAudio] = useState(true);
   const [fileMode, setFileMode] = useState("audio");
   const [downloadedSoundId, setDownloadedSoundId] = useState(-1);
 
-  const [input, setInput] = useState(null);
-  const [output, setOutput] = useState(null);
+  const [input, setInput] = useState<AudioNode | null>(null);
+  const [output, setOutput] = useState<AudioNode | null>(null);
 
   return (
     <div className="flex flex-col gap-4 row-start-2 items-center sm:items-start w-2xl">

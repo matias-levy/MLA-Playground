@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 
 export default function useAudioChain({ ctx }: { ctx: AudioContext }) {
   const [modules, setModules] = useState<AudioModule[]>([]);
-  const [input, setInput] = useState<AudioNode>();
-  const [output, setOutput] = useState<AudioNode>();
+  const [input, setInput] = useState<AudioNode | null>(null);
+  const [output, setOutput] = useState<AudioNode | null>(null);
 
-  const addNode = (module: AudioModule, index: number) => {
+  const addModule = (module: AudioModule, index: number) => {
     setModules((prevModules) => {
       const newModules = [...prevModules]; // Create a new array (avoids mutation)
       newModules[index] = module;
@@ -14,7 +14,7 @@ export default function useAudioChain({ ctx }: { ctx: AudioContext }) {
     });
   };
 
-  const removeNode = (module: AudioModule) => {
+  const removeModule = (module: AudioModule) => {
     module.output.disconnect();
     setModules((prevModules) =>
       prevModules.filter(
@@ -66,5 +66,5 @@ export default function useAudioChain({ ctx }: { ctx: AudioContext }) {
     }
   }, [modules, input, output, ctx]);
 
-  return { modules, setInput, setOutput, addNode, removeNode };
+  return { modules, setInput, setOutput, addModule, removeModule };
 }

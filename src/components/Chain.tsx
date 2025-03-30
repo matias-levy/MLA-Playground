@@ -12,6 +12,8 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
+  DragStartEvent,
+  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -27,11 +29,16 @@ import {
 } from "@dnd-kit/modifiers";
 
 import useAudioChain from "@/lib/useAudioChain";
-import { useAudioContext } from "@/components/AudioProvider";
+import { useAudioContext, AudioModule } from "@/components/AudioProvider";
 
 import { GripHorizontal } from "lucide-react";
 
-function SortableItem(props) {
+export interface SortableItemProps {
+  id: string;
+  children: React.ReactNode;
+}
+
+function SortableItem(props: SortableItemProps) {
   const {
     attributes,
     listeners,
@@ -69,9 +76,9 @@ function SortableItem(props) {
 
 export interface AudioModuleProps {
   index: number;
-  unregisterModule: Function;
-  addNode: Function;
-  removeNode: Function;
+  unregisterModule: (index: number) => void;
+  addModule: (module: AudioModule, index: number) => void;
+  removeModule: (module: AudioModule) => void;
 }
 
 export interface AudioModuleStateType {
@@ -87,18 +94,18 @@ function Chain({
   output,
 }: {
   shouldAllowSplitter?: boolean;
-  input: AudioNode;
-  output: AudioNode;
+  input: AudioNode | null;
+  output: AudioNode | null;
 }) {
   const { audioContext: ctx } = useAudioContext();
-  const { setInput, addNode, removeNode, setOutput } = useAudioChain({ ctx });
-
+  const { setInput, addModule, removeModule, setOutput } = useAudioChain({
+    ctx,
+  });
   const [modules, setModules] = useState<AudioModuleStateType[]>([]);
-
   const [dragging, setDragging] = useState(false);
-
-  const [activeId, setActiveId] = useState(null);
-  const [activeModule, setActiveModule] = useState(null);
+  const [activeModule, setActiveModule] = useState<
+    AudioModuleStateType | null | undefined
+  >(null);
 
   useEffect(() => {
     setInput(input);
@@ -123,22 +130,19 @@ function Chain({
     setModules((prevModules) => prevModules.filter((_, i) => i !== index));
   }
 
-  function handleDragStart(event) {
+  function handleDragStart(event: DragStartEvent) {
     if (!event.active) return;
-    setActiveId(event.active.id);
-
     // Find the module being dragged
     const module = modules.find((m) => m.id === event.active.id);
     setActiveModule(module);
     setDragging(true);
   }
 
-  function handleDragEnd(event) {
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     setDragging(false);
 
     if (!active || !over || active.id === over.id) {
-      setActiveId(null);
       return;
     }
 
@@ -150,8 +154,6 @@ function Chain({
 
       return arrayMove(items, oldIndex, newIndex);
     });
-
-    setActiveId(null);
   }
 
   return (
@@ -180,8 +182,8 @@ function Chain({
                   <Component
                     index={i}
                     unregisterModule={unregisterModule}
-                    addNode={addNode}
-                    removeNode={removeNode}
+                    addModule={addModule}
+                    removeModule={removeModule}
                   />
                 </SortableItem>
               );
@@ -197,17 +199,14 @@ function Chain({
               <activeModule.Component
                 index={-1}
                 unregisterModule={() => {}}
-                addNode={() => {}}
-                removeNode={() => {}}
+                addModule={() => {}}
+                removeModule={() => {}}
               />
             </div>
           ) : null}
         </DragOverlay>
       </DndContext>
-
-      {/* {modules.length == 0 && ( */}
       <hr className="h-px w-full bg-gray-200 border-0 dark:bg-gray-700 rounded-2xl" />
-      {/* )} */}
       <AddModule
         registerModule={registerModule}
         shouldAllowSplitter={shouldAllowSplitter}

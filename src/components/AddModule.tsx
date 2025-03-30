@@ -29,12 +29,6 @@ const availableModulesNames: String[] = [
   "Splitter",
 ];
 
-const availableModulesWithoutSplitter: AudioModuleComponent[] = [
-  Distortion,
-  Delay,
-  BitCrush,
-];
-
 export default function AddModule({
   registerModule,
   shouldAllowSplitter,

@@ -25,8 +25,8 @@ function makeDistortionCurve(amount: number) {
 export default function Distortion({
   index,
   unregisterModule,
-  addNode,
-  removeNode,
+  addModule,
+  removeModule,
 }: AudioModuleProps) {
   const { audioContext: ctx } = useAudioContext();
   const [distortion, setDistortion] = useState(100);
@@ -35,15 +35,19 @@ export default function Distortion({
   );
 
   useEffect(() => {
-    addNode({ input: waveshaperNode, output: waveshaperNode }, index);
-    return () => {
-      removeNode({ input: waveshaperNode, output: waveshaperNode });
-    };
+    if (waveshaperNode) {
+      addModule({ input: waveshaperNode, output: waveshaperNode }, index);
+      return () => {
+        removeModule({ input: waveshaperNode, output: waveshaperNode });
+      };
+    }
   }, [index]);
 
   useEffect(() => {
-    const curve = makeDistortionCurve(distortion);
-    waveshaperNode.curve = curve;
+    if (waveshaperNode) {
+      const curve = makeDistortionCurve(distortion);
+      waveshaperNode.curve = curve;
+    }
   }, [distortion]);
 
   return (
