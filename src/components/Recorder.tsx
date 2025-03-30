@@ -22,12 +22,14 @@ export default function Recorder({
   setFileIsAudio,
   setOutput,
   setFileMode,
+  setDownloadedSoundId,
 }: {
   currentFile: any;
   setCurrentFile: Function;
   setFileIsAudio: Function;
   setOutput: Function;
   setFileMode: Function;
+  setDownloadedSoundId: Function;
 }) {
   const audioRef = useRef(null);
   const [recording, setRecording] = useState(false);
@@ -83,6 +85,7 @@ export default function Recorder({
     setCurrentFile(recordingBlob);
     setFileIsAudio(true);
     setFileMode("audio");
+    setDownloadedSoundId(-1);
     toast("File loaded succesfully");
   }
 

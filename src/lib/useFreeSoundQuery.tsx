@@ -1,5 +1,4 @@
-import { AudioModule } from "@/components/AudioProvider";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function useFreeSoundQuery() {
   const [selectedSound, setSelectedSound] = useState(null);

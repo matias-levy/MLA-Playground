@@ -11,6 +11,7 @@ function Stack() {
   const [currentFile, setCurrentFile] = useState(null);
   const [fileIsAudio, setFileIsAudio] = useState(true);
   const [fileMode, setFileMode] = useState("audio");
+  const [downloadedSoundId, setDownloadedSoundId] = useState(-1);
 
   const [input, setInput] = useState(null);
   const [output, setOutput] = useState(null);
@@ -25,6 +26,8 @@ function Stack() {
         fileMode={fileMode}
         setFileMode={setFileMode}
         setInput={setInput}
+        downloadedSoundId={downloadedSoundId}
+        setDownloadedSoundId={setDownloadedSoundId}
       />
       <Chain shouldAllowSplitter input={input} output={output} />
       <Recorder
@@ -33,6 +36,7 @@ function Stack() {
         setFileIsAudio={setFileIsAudio}
         setOutput={setOutput}
         setFileMode={setFileMode}
+        setDownloadedSoundId={setDownloadedSoundId}
       />
     </div>
   );

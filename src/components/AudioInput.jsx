@@ -32,6 +32,8 @@ export default function AudioInput({
   setInput,
   fileMode,
   setFileMode,
+  downloadedSoundId,
+  setDownloadedSoundId,
 }) {
   // External Input Revelant State
   const [stream, setStream] = useState(null);
@@ -249,6 +251,7 @@ export default function AudioInput({
                   });
 
                   // Set the file last, so fileMode updates first
+                  setDownloadedSoundId(-1);
                   setCurrentFile(file);
                 }}
               />
@@ -414,6 +417,8 @@ export default function AudioInput({
             setCurrentFile={setCurrentFile}
             setFileIsAudio={setFileIsAudio}
             setFileMode={setFileMode}
+            downloadedSoundId={downloadedSoundId}
+            setDownloadedSoundId={setDownloadedSoundId}
           />
         </TabsContent>
       </Tabs>

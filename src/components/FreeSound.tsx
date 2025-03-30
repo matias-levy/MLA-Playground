@@ -18,9 +18,11 @@ export default function FreeSound({
   setFileIsAudio,
   freeSoundObjectProps,
   setFileMode,
+  downloadedSoundId,
+  setDownloadedSoundId,
 }) {
   const {
-    selectedSound,
+    selectedSound, //id of selectedSound
     setSelectedSound,
     result,
     setResult,
@@ -120,7 +122,12 @@ export default function FreeSound({
             </form>
 
             <Button
-              disabled={!selectedSound || loading || downloading}
+              disabled={
+                !selectedSound ||
+                loading ||
+                downloading ||
+                selectedSound == downloadedSoundId
+              }
               onClick={() => {
                 const token = sessionStorage.getItem("access_token");
                 setDownloading(true);
@@ -142,6 +149,7 @@ export default function FreeSound({
                     setCurrentFile(newBlob);
                     setFileIsAudio(true);
                     setFileMode("audio");
+                    setDownloadedSoundId(selectedSound);
                     toast("File loaded succesfully");
                   });
               }}
