@@ -30,6 +30,8 @@ export default function AudioInput({
   fileIsAudio,
   setFileIsAudio,
   setInput,
+  fileMode,
+  setFileMode,
 }) {
   // External Input Revelant State
   const [stream, setStream] = useState(null);
@@ -38,7 +40,6 @@ export default function AudioInput({
   const [micNode, setMicNodeNode] = useState(null);
 
   // File Relevant State
-  const [fileMode, setFileMode] = useState("audio");
   const [loading, setLoading] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [audioBuffer, setAudioBuffer] = useState(null);
@@ -80,7 +81,6 @@ export default function AudioInput({
             setAudioBuffer(audio);
             setLoading(false);
           });
-
           break;
 
         case "1byte": {
@@ -236,16 +236,20 @@ export default function AudioInput({
               <Input
                 type="file"
                 onChange={(e) => {
-                  const isAudio = e.target.files[0].type.startsWith("audio/");
+                  const file = e.target.files[0];
+                  if (!file) return;
+
+                  const isAudio = file.type.startsWith("audio/");
                   setFileIsAudio(isAudio);
-                  if (!isAudio) {
-                    if (fileMode == "audio") {
-                      setFileMode("1byte");
-                    }
-                  } else {
-                    setFileMode("audio");
-                  }
-                  setCurrentFile(e.target.files[0]);
+
+                  // Determine the correct mode before setting the file
+                  setFileMode((prevMode) => {
+                    if (!isAudio && prevMode === "audio") return "1byte";
+                    return isAudio ? "audio" : prevMode;
+                  });
+
+                  // Set the file last, so fileMode updates first
+                  setCurrentFile(file);
                 }}
               />
               {loading && <Loader2 className="animate-spin text-gray-400" />}
@@ -409,6 +413,7 @@ export default function AudioInput({
             freeSoundObjectProps={freeSoundObjectProps}
             setCurrentFile={setCurrentFile}
             setFileIsAudio={setFileIsAudio}
+            setFileMode={setFileMode}
           />
         </TabsContent>
       </Tabs>

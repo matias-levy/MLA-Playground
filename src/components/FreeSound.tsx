@@ -17,6 +17,7 @@ export default function FreeSound({
   setCurrentFile,
   setFileIsAudio,
   freeSoundObjectProps,
+  setFileMode,
 }) {
   const {
     selectedSound,
@@ -140,6 +141,7 @@ export default function FreeSound({
                     setDownloading(false);
                     setCurrentFile(newBlob);
                     setFileIsAudio(true);
+                    setFileMode("audio");
                     toast("File loaded succesfully");
                   });
               }}

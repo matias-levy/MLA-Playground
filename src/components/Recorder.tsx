@@ -12,17 +12,22 @@ import {
 import { CircleStop, CirclePlay, Download, ArrowUpFromDot } from "lucide-react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { createSafeAudioNode } from "@/utils/utils";
+import { toast } from "sonner";
 
 let chunks = [];
 
 export default function Recorder({
+  currentFile,
   setCurrentFile,
   setFileIsAudio,
   setOutput,
+  setFileMode,
 }: {
+  currentFile: any;
   setCurrentFile: Function;
   setFileIsAudio: Function;
   setOutput: Function;
+  setFileMode: Function;
 }) {
   const audioRef = useRef(null);
   const [recording, setRecording] = useState(false);
@@ -75,17 +80,10 @@ export default function Recorder({
 
   function feedbackRecording() {
     if (!recordingBlob) return;
-
-    const date = new Date();
-    const formattedDate = date.toISOString().replace(/:/g, "-").split(".")[0]; // Ensures a valid filename
-    const filename = `recording-${formattedDate}.wav`;
-
-    const file = new File([recordingBlob], filename, {
-      type: "audio/wav",
-    });
-
-    setCurrentFile(file);
+    setCurrentFile(recordingBlob);
     setFileIsAudio(true);
+    setFileMode("audio");
+    toast("File loaded succesfully");
   }
 
   useEffect(() => {
@@ -124,7 +122,10 @@ export default function Recorder({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button disabled={!recordingBlob} onClick={feedbackRecording}>
+              <Button
+                disabled={!recordingBlob || currentFile == recordingBlob}
+                onClick={feedbackRecording}
+              >
                 <ArrowUpFromDot />
               </Button>
             </TooltipTrigger>
