@@ -10,7 +10,8 @@ import {
 import Distortion from "@/components/modules/Distortion";
 import Delay from "@/components/modules/Delay";
 import BitCrush from "@/components/modules/BitCrush";
-import Tremolo from "./modules/Tremolo";
+import Tremolo from "@/components/modules/Tremolo";
+import Utility from "@/components/modules/Utility";
 import Splitter from "@/components/modules/Splitter";
 import { AudioModuleComponent } from "@/components/Chain";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ const availableModules: AudioModuleComponent[] = [
   Delay,
   BitCrush,
   Tremolo,
+  Utility,
   Splitter,
 ];
 
@@ -29,6 +31,7 @@ const availableModulesNames: String[] = [
   "Delay / Time Modulation",
   "Bit Crush",
   "Tremolo",
+  "Utility",
   "Splitter",
 ];
 
