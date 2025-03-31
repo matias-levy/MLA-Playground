@@ -14,6 +14,7 @@ import Tremolo from "@/components/modules/Tremolo";
 import Utility from "@/components/modules/Utility";
 import AutoPan from "@/components/modules/AutoPan";
 import Compressor from "@/components/modules/Compressor";
+import Filter from "@/components/modules/Filter";
 import Splitter from "@/components/modules/Splitter";
 import { AudioModuleComponent } from "@/components/Chain";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const availableModules: AudioModuleComponent[] = [
   Utility,
   AutoPan,
   Compressor,
+  Filter,
   Splitter,
 ];
 
@@ -38,6 +40,7 @@ const availableModulesNames: String[] = [
   "Utility",
   "Auto Pan",
   "Compressor",
+  "Filter",
   "Splitter",
 ];
 

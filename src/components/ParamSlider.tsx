@@ -1,4 +1,3 @@
-import { SetStateAction } from "react";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 
@@ -11,6 +10,7 @@ export interface ParamSliderProps {
   max: number;
   step: number;
   rep: string;
+  disabled?: boolean;
 }
 
 export default function ParamSlider({
@@ -22,6 +22,7 @@ export default function ParamSlider({
   max,
   step,
   rep,
+  disabled,
 }: ParamSliderProps) {
   return (
     <div className="flex flex-col gap-5 px-1">
@@ -30,6 +31,7 @@ export default function ParamSlider({
         <Label>{rep}</Label>
       </div>
       <Slider
+        disabled={disabled}
         min={min}
         max={max}
         step={step}
