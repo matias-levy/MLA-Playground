@@ -82,7 +82,7 @@ export default function Home() {
         <AudioProvider>
           <Stack />
         </AudioProvider>
-        <footer className="flex flex-col items-center justify-between w-full mt-32">
+        <footer className="flex flex-col items-center justify-between w-full mt-32 text-center">
           <p className="mb-3">
             This Playground is a free and{" "}
             <a

@@ -9,6 +9,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragOverlay,
@@ -65,7 +66,7 @@ function SortableItem(props: SortableItemProps) {
       <div
         ref={setActivatorNodeRef}
         {...listeners}
-        className="absolute left-1/2 transform -translate-x-1/2 mt-5"
+        className="absolute left-1/2 transform -translate-x-1/2 mt-5 touch-none"
       >
         <GripHorizontal className="text-gray-400" />
       </div>
@@ -116,7 +117,8 @@ function Chain({
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
+    useSensor(TouchSensor)
   );
 
   function registerModule(Module: AudioModuleComponent) {
@@ -193,7 +195,7 @@ function Chain({
         <DragOverlay>
           {activeModule ? (
             <div className="w-full bg-white relative rounded-3xl opacity-50">
-              <div className="absolute left-1/2 transform -translate-x-1/2 mt-6">
+              <div className="absolute left-1/2 transform -translate-x-1/2 mt-6 touch-none">
                 <GripHorizontal className="text-gray-400" />
               </div>
               <activeModule.Component
