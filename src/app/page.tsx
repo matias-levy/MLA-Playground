@@ -84,8 +84,16 @@ export default function Home() {
         </AudioProvider>
         <footer className="flex flex-col items-center justify-between w-full mt-32">
           <p className="mb-3">
-            This Playground is a free project but if you like it and found it
-            useful consider donating to it's creator!
+            This Playground is a free and{" "}
+            <a
+              target="_blank"
+              href="https://github.com/matias-levy/MLA-Playground"
+              className="text-blue-600 hover:text-blue-500 transition-all"
+            >
+              open source
+            </a>{" "}
+            project but if you like it and found it useful consider donating to
+            it's creator!
           </p>
           <Button asChild className="bg-blue-600 hover:bg-blue-500">
             <a target="_blank" href="https://paypal.me/mlalabs">
