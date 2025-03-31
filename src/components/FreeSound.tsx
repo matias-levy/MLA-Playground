@@ -162,7 +162,7 @@ export default function FreeSound({
                       setFileIsAudio(true);
                       setFileMode("audio");
                       setDownloadedSoundId(selectedSound);
-                      toast("File loaded succesfully");
+                      toast("File loaded successfully");
                     });
                 }
               }}

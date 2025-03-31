@@ -100,7 +100,7 @@ export default function Recorder({
     setFileIsAudio(true);
     setFileMode("audio");
     setDownloadedSoundId(-1);
-    toast("File loaded succesfully");
+    toast("File loaded successfully");
   }
 
   return (

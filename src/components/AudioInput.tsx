@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "./ui/label";
+import { formatTime } from "@/lib/utils";
 
 export interface AudioInputProps {
   currentFile: Blob | null;
@@ -128,7 +129,6 @@ export default function AudioInput({
 
   useEffect(() => {
     setInput(gainNode);
-    // addModule(gainNode, index);
   }, []);
 
   useEffect(() => {
@@ -277,42 +277,51 @@ export default function AudioInput({
               />
               {loading && <Loader2 className="animate-spin text-gray-400" />}
             </div>
-            <RadioGroup
-              defaultValue="audio"
-              value={fileMode}
-              onValueChange={setFileMode}
-              className="flex flex-wrap justify-start gap-x-6 gap-y-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="audio" id="r1" disabled={!fileIsAudio} />
-                <Label
-                  htmlFor="r1"
-                  className={!fileIsAudio ? "text-gray-400" : ""}
-                >
-                  Audio
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="1byte" id="r2" />
-                <Label htmlFor="r2">Raw 1-byte to Float</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="4byte" id="r3" />
-                <Label htmlFor="r3">Raw 4-byte to Clamped Float</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="c1"
-                  checked={loop}
-                  onCheckedChange={(e) => {
-                    if (e !== "indeterminate") {
-                      setLoop(e);
-                    }
-                  }}
-                />
-                <Label htmlFor="c1">Loop</Label>
-              </div>
-            </RadioGroup>
+            <div className="flex flex-wrap justify-between">
+              <RadioGroup
+                defaultValue="audio"
+                value={fileMode}
+                onValueChange={setFileMode}
+                className="flex flex-wrap justify-start gap-x-6 gap-y-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value="audio"
+                    id="r1"
+                    disabled={!fileIsAudio}
+                  />
+                  <Label
+                    htmlFor="r1"
+                    className={!fileIsAudio ? "text-gray-400" : ""}
+                  >
+                    Audio
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="1byte" id="r2" />
+                  <Label htmlFor="r2">Raw 1-byte to Float</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="4byte" id="r3" />
+                  <Label htmlFor="r3">Raw 4-byte to Clamped Float</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="c1"
+                    checked={loop}
+                    onCheckedChange={(e) => {
+                      if (e !== "indeterminate") {
+                        setLoop(e);
+                      }
+                    }}
+                  />
+                  <Label htmlFor="c1">Loop</Label>
+                </div>
+              </RadioGroup>
+              <Label className="self-end">
+                {audioBuffer && formatTime(audioBuffer?.duration)}
+              </Label>
+            </div>
             {audioBuffer && (
               <>
                 <Waveform
@@ -321,7 +330,15 @@ export default function AudioInput({
                   start={cues[0]}
                   end={cues[1]}
                 />
-                <Label className="mt-6">Loop Start and End</Label>
+                <div className="mt-6 flex flex-row justify-between">
+                  <Label>Loop Start and End</Label>
+                  <Label>
+                    {audioBuffer &&
+                      formatTime((audioBuffer.duration * cues[0]) / 100) +
+                        " - " +
+                        formatTime((audioBuffer.duration * cues[1]) / 100)}
+                  </Label>
+                </div>
                 <Slider
                   min={0}
                   max={100}
