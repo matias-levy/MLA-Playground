@@ -15,6 +15,7 @@ import Utility from "@/components/modules/Utility";
 import AutoPan from "@/components/modules/AutoPan";
 import Compressor from "@/components/modules/Compressor";
 import Filter from "@/components/modules/Filter";
+import Convolver from "@/components/modules/Convolver";
 import Splitter from "@/components/modules/Splitter";
 import { AudioModuleComponent } from "@/components/Chain";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ const availableModules: AudioModuleComponent[] = [
   AutoPan,
   Compressor,
   Filter,
+  Convolver,
   Splitter,
 ];
 
@@ -41,6 +43,7 @@ const availableModulesNames: String[] = [
   "Auto Pan",
   "Compressor",
   "Filter",
+  "Reverb / Convolver",
   "Splitter",
 ];
 
