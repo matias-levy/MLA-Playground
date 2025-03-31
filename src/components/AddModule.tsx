@@ -12,6 +12,7 @@ import Delay from "@/components/modules/Delay";
 import BitCrush from "@/components/modules/BitCrush";
 import Tremolo from "@/components/modules/Tremolo";
 import Utility from "@/components/modules/Utility";
+import AutoPan from "@/components/modules/AutoPan";
 import Splitter from "@/components/modules/Splitter";
 import { AudioModuleComponent } from "@/components/Chain";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ const availableModules: AudioModuleComponent[] = [
   BitCrush,
   Tremolo,
   Utility,
+  AutoPan,
   Splitter,
 ];
 
@@ -32,6 +34,7 @@ const availableModulesNames: String[] = [
   "Bit Crush",
   "Tremolo",
   "Utility",
+  "Auto Pan",
   "Splitter",
 ];
 

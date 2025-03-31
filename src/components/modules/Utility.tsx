@@ -46,7 +46,7 @@ export default function Utility({
 
   return (
     <ModuleUI index={index} name="Utility" unregisterModule={unregisterModule}>
-      {/* Delay Time */}
+      {/* Gain */}
       <ParamSlider
         name="Gain"
         min={0}
@@ -58,7 +58,7 @@ export default function Utility({
         rep={(gain * 100).toFixed(0) + " %"}
       />
 
-      {/* Feedback */}
+      {/* Pan */}
       <ParamSlider
         name="Pan"
         min={-1}
