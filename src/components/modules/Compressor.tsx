@@ -61,7 +61,11 @@ export default function Compressor({
   }, [threshold, knee, ratio, attack, release, makeup]);
 
   return (
-    <ModuleUI index={index} name="Utility" unregisterModule={unregisterModule}>
+    <ModuleUI
+      index={index}
+      name="Compressor"
+      unregisterModule={unregisterModule}
+    >
       {/* Threshold */}
       <ParamSlider
         name="Threshold"
