@@ -111,7 +111,11 @@ export default function Delay({
   }, [time, feedback, mix, lfoRate, lfoDepth, waveform]);
 
   return (
-    <ModuleUI index={index} name="Delay" unregisterModule={unregisterModule}>
+    <ModuleUI
+      index={index}
+      name="Delay / Time Modulation"
+      unregisterModule={unregisterModule}
+    >
       {/* Delay Time */}
       <ParamSlider
         name="Time"

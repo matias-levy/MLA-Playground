@@ -26,7 +26,7 @@ const availableModules: AudioModuleComponent[] = [
 
 const availableModulesNames: String[] = [
   "Distortion",
-  "Delay",
+  "Delay / Time Modulation",
   "Bit Crush",
   "Tremolo",
   "Splitter",
