@@ -103,7 +103,7 @@ export default function AutoPan({
       {/* Depth */}
       <ParamSlider
         name="Depth"
-        min={0}
+        min={-1}
         max={1}
         value={depth}
         defaultValue={0.5}
