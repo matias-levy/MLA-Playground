@@ -5,7 +5,6 @@ For usage of the Freesound API you should include a .env file with the following
 ```
 NEXT_PUBLIC_FREESOUND_CLIENT_ID=[client id of the Freesound registered API]
 FREESOUND_CLIENT_SECRET=[Freesound API secret]
-FREESOUND_REDIRECT_URI=[callback URL to the route /api/auth/callback]
 NEXT_PUBLIC_AUTH_REDIRECT=[root domain]
 ```
 
