@@ -157,7 +157,7 @@ function Chain({
   }
 
   return (
-    <div className="flex flex-col gap-4 row-start-2 items-center sm:items-start w-2xl">
+    <div className="flex flex-col gap-4 row-start-2 items-center w-full">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

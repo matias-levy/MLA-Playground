@@ -117,7 +117,11 @@ export default function Recorder({
         </Button>
       </div>
       <div className="flex flex-row justify-between items-center gap-2">
-        <audio ref={audioRef} controls className="grow rounded-md invert" />
+        <audio
+          ref={audioRef}
+          controls
+          className="grow rounded-md invert min-w-0"
+        />
 
         <TooltipProvider>
           <Tooltip>

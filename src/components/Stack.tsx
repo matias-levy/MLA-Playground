@@ -17,7 +17,7 @@ function Stack() {
   const [output, setOutput] = useState<AudioNode | null>(null);
 
   return (
-    <div className="flex flex-col gap-4 row-start-2 items-center sm:items-start w-2xl">
+    <div className="flex flex-col gap-4 row-start-2 w-full">
       <AudioInput
         currentFile={currentFile}
         setCurrentFile={setCurrentFile}

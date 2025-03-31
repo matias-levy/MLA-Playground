@@ -75,7 +75,7 @@ export default function Splitter({
           setCrossfade(0.5);
         }}
       />
-      <div className="flex flex-row gap-4 items-stretch justify-between">
+      <div className="flex flex-row gap-4 items-stretch justify-between w-full">
         {/* @ts-ignore:next-line */}
         <Chain input={in1} output={out1} />
         {/* @ts-ignore:next-line */}

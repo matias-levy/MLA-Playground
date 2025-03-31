@@ -22,8 +22,8 @@ function FreeSoundAuthParams() {
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col row-start-2 items-center sm:items-start">
+    <div className="flex flex-col items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="container mx-auto flex flex-col items-start w-full max-w-4xl">
         <h1 className="font-bold text-2xl mb-4">
           <b>MLA Labs'</b>{" "}
           <u className="underline-offset-8 decoration-2">no-nonsense</u> audio

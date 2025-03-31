@@ -284,7 +284,7 @@ export default function AudioInput({
               defaultValue="audio"
               value={fileMode}
               onValueChange={setFileMode}
-              className="flex flex-row justify-start gap-6"
+              className="flex flex-wrap justify-start gap-x-6 gap-y-4"
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="audio" id="r1" disabled={!fileIsAudio} />
