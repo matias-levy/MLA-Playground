@@ -43,6 +43,8 @@ export default function FreeSound({
     setLoading,
     downloading,
     setDownloading,
+    fetchingMore,
+    setFetchingMore,
   } = freeSoundObjectProps;
 
   const loginWithFreesound = () => {
@@ -205,6 +207,70 @@ export default function FreeSound({
                     </CommandItem>
                   );
                 })}
+                {result.next && (
+                  <div className="flex justify-center mt-4">
+                    <Button
+                      disabled={fetchingMore}
+                      onClick={() => {
+                        if (result.next) {
+                          setFetchingMore(true);
+                          setLoading(true);
+                          const token = sessionStorage.getItem("access_token");
+                          fetch(result.next, {
+                            method: "GET",
+                            headers: {
+                              Authorization: `Bearer ${token}`,
+                            },
+                          })
+                            .then((r) => r.json())
+                            .then(async (d) => {
+                              let data = d;
+
+                              // Create an array of fetch promises
+                              const fetchPromises = d.results.map(
+                                ({ id }: { id: number }, index: number) =>
+                                  fetch(
+                                    `https://freesound.org/apiv2/sounds/${id}/`,
+                                    {
+                                      method: "GET",
+                                      headers: {
+                                        Authorization: `Bearer ${token}`,
+                                      },
+                                    }
+                                  )
+                                    .then((r) => r.json())
+                                    .then((d2) => {
+                                      data.results[index] = d2;
+                                    })
+                              );
+
+                              // Wait for all fetches to complete
+                              await Promise.all(fetchPromises);
+
+                              // Set results and loading state once all fetches are done
+                              setResult((prevResult) => {
+                                const newResults = [
+                                  ...(prevResult?.results ?? []),
+                                  ...data.results,
+                                ];
+                                const nextURL = data.next;
+                                return { next: nextURL, results: newResults };
+                              });
+
+                              setLoading(false);
+                              setFetchingMore(false);
+                            });
+                        }
+                      }}
+                    >
+                      {loading ? (
+                        <Loader2 className="animate-spin text-gray-400" />
+                      ) : (
+                        "Load More"
+                      )}
+                    </Button>
+                  </div>
+                )}
               </CommandList>
             </Command>
           )}

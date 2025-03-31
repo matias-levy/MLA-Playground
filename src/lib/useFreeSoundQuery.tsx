@@ -8,6 +8,7 @@ export interface FreeSoundResult {
 }
 
 export interface FreeSoundResults {
+  next: string | null;
   results: FreeSoundResult[];
 }
 
@@ -22,6 +23,8 @@ export interface FreeSoundObjectProps {
   setLoading: React.Dispatch<SetStateAction<boolean>>;
   downloading: boolean;
   setDownloading: React.Dispatch<SetStateAction<boolean>>;
+  fetchingMore: boolean;
+  setFetchingMore: React.Dispatch<SetStateAction<boolean>>;
 }
 
 export default function useFreeSoundQuery(): FreeSoundObjectProps {
@@ -29,6 +32,7 @@ export default function useFreeSoundQuery(): FreeSoundObjectProps {
   const [result, setResult] = useState<FreeSoundResults | null>(null);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetchingMore, setFetchingMore] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
   return {
@@ -42,5 +46,7 @@ export default function useFreeSoundQuery(): FreeSoundObjectProps {
     setLoading,
     downloading,
     setDownloading,
+    fetchingMore,
+    setFetchingMore,
   };
 }

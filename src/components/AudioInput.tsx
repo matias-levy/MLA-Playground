@@ -301,7 +301,7 @@ export default function AudioInput({
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="4byte" id="r3" />
-                <Label htmlFor="r3">Raw 4-byte to Clamped Float </Label>
+                <Label htmlFor="r3">Raw 4-byte to Clamped Float</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -324,7 +324,7 @@ export default function AudioInput({
                   start={cues[0]}
                   end={cues[1]}
                 />
-                <Label>Loop Start and End</Label>
+                <Label className="mt-6">Loop Start and End</Label>
                 <Slider
                   min={0}
                   max={100}
