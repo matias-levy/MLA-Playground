@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
 import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 import Chain from "../Chain";
 import ModuleUI from "@/components/ModuleUI";
+import ParamSlider from "@/components/ParamSlider";
 
 export default function Splitter({
   index,
@@ -61,19 +60,20 @@ export default function Splitter({
 
   return (
     <ModuleUI index={index} name="Splitter" unregisterModule={unregisterModule}>
-      <Label>Crossfade</Label>
-      <Slider
+      <ParamSlider
+        name="Crossfade"
         min={0}
         max={1}
-        value={[crossfade]}
-        defaultValue={[0.5]}
+        value={crossfade}
+        defaultValue={0.5}
         step={0.01}
-        onValueChange={(e) => {
-          setCrossfade(e[0]);
-        }}
-        onDoubleClick={() => {
-          setCrossfade(0.5);
-        }}
+        setValue={setCrossfade}
+        rep={
+          (100 - crossfade * 100).toFixed(0) +
+          "% A / " +
+          (crossfade * 100).toFixed(0) +
+          "% B"
+        }
       />
       <div className="flex flex-row gap-4 items-stretch justify-between w-full">
         {/* @ts-ignore:next-line */}

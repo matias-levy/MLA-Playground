@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
-import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ModuleUI from "@/components/ModuleUI";
+import ParamSlider from "@/components/ParamSlider";
 
 export default function Tremolo({
   index,
@@ -71,27 +71,27 @@ export default function Tremolo({
   return (
     <ModuleUI index={index} name="Tremolo" unregisterModule={unregisterModule}>
       {/* Frequency */}
-      <Label>Frequency</Label>
-      <Slider
-        min={0.1}
-        max={20}
-        value={[frequency]}
-        defaultValue={[5]}
+      <ParamSlider
+        name="Frequency"
+        defaultValue={5}
         step={0.1}
-        onValueChange={(e) => setFrequency(e[0])}
-        onDoubleClick={() => setFrequency(5)}
+        min={0.1}
+        max={60}
+        value={frequency}
+        setValue={setFrequency}
+        rep={frequency.toFixed(1) + " Hz"}
       />
 
       {/* Depth */}
-      <Label>Depth</Label>
-      <Slider
+      <ParamSlider
+        name="Depth"
         min={0}
         max={1}
-        value={[depth]}
-        defaultValue={[0.5]}
+        value={depth}
+        defaultValue={0.5}
         step={0.01}
-        onValueChange={(e) => setDepth(e[0])}
-        onDoubleClick={() => setDepth(0.5)}
+        setValue={setDepth}
+        rep={depth.toFixed(2)}
       />
 
       {/* Waveform Selection */}

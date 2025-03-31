@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
 import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 
 import ModuleUI from "@/components/ModuleUI";
+import ParamSlider from "@/components/ParamSlider";
 
 export default function Delay({
   index,
@@ -85,51 +84,44 @@ export default function Delay({
   return (
     <ModuleUI index={index} name="Delay" unregisterModule={unregisterModule}>
       {/* Delay Time */}
-      <Label>Delay Time</Label>
-      <Slider
+      <ParamSlider
+        name="Time"
         min={0}
         max={2}
-        value={[time]}
-        defaultValue={[0.5]}
+        value={time}
+        defaultValue={0.5}
         step={0.001}
-        onValueChange={(e) => {
-          setTime(e[0]);
-        }}
-        onDoubleClick={() => {
-          setTime(0.5);
-        }}
+        setValue={setTime}
+        rep={(time * 1000).toFixed(0) + " ms"}
       />
 
       {/* Feedback */}
-      <Label>Feedback</Label>
-      <Slider
+      <ParamSlider
+        name="Feedback"
         min={0}
         max={1.2}
-        value={[feedback]}
-        defaultValue={[0.3]}
+        value={feedback}
+        defaultValue={0.3}
         step={0.01}
-        onValueChange={(e) => {
-          setFeedback(e[0]);
-        }}
-        onDoubleClick={() => {
-          setFeedback(0.3);
-        }}
+        setValue={setFeedback}
+        rep={(feedback * 100).toFixed(0) + "%"}
       />
 
       {/* Mix */}
-      <Label>Mix</Label>
-      <Slider
+      <ParamSlider
+        name="Mix"
         min={0}
         max={1}
-        value={[mix]}
-        defaultValue={[0.5]}
+        value={mix}
+        defaultValue={0.5}
         step={0.01}
-        onValueChange={(e) => {
-          setMix(e[0]);
-        }}
-        onDoubleClick={() => {
-          setMix(0.5);
-        }}
+        setValue={setMix}
+        rep={
+          (100 - mix * 100).toFixed(0) +
+          "% dry / " +
+          (mix * 100).toFixed(0) +
+          "% wet"
+        }
       />
     </ModuleUI>
   );

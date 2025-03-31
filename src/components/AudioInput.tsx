@@ -14,6 +14,7 @@ import { Loader2, CirclePlay, CircleStop } from "lucide-react";
 import Waveform from "@/components/Waveform";
 import FreeSound from "@/components/FreeSound";
 import useFreeSoundQuery from "@/lib/useFreeSoundQuery";
+import ParamSlider from "@/components/ParamSlider";
 
 import {
   Select,
@@ -239,19 +240,15 @@ export default function AudioInput({
                 </SelectContent>
               </Select>
             </div>
-            <Label>Volume</Label>
-            <Slider
+            <ParamSlider
+              name="Volume"
               min={0}
               max={3}
+              value={volume}
+              defaultValue={1}
               step={0.001}
-              value={[volume]}
-              defaultValue={[1]}
-              onValueChange={(e) => {
-                setVolume(e[0]);
-              }}
-              onDoubleClick={() => {
-                setVolume(1);
-              }}
+              setValue={setVolume}
+              rep={(volume * 100).toFixed(0) + " %"}
             />
           </div>
         </TabsContent>
@@ -338,45 +335,36 @@ export default function AudioInput({
                     setCues([0, 100]);
                   }}
                 />
-                <Label>Detune</Label>
-                <Slider
+                <ParamSlider
+                  name="Detune"
                   min={-1200}
                   max={1200}
+                  value={detune}
+                  defaultValue={0}
                   step={0.001}
-                  value={[detune]}
-                  defaultValue={[0]}
-                  onValueChange={(e) => {
-                    setDetune(e[0]);
+                  setValue={(e: number) => {
+                    setDetune(e);
                     if (audioBufferNode) {
-                      audioBufferNode.detune.setValueAtTime(e[0], 0);
+                      audioBufferNode.detune.setValueAtTime(e, 0);
                     }
                   }}
-                  onDoubleClick={() => {
-                    setDetune(0);
-                    if (audioBufferNode) {
-                      audioBufferNode.detune.setValueAtTime(0, 0);
-                    }
-                  }}
+                  rep={detune.toFixed(0) + " cents"}
                 />
-                <Label>Playback Speed</Label>
-                <Slider
+
+                <ParamSlider
+                  name="Playback Rate"
                   min={0.01}
                   max={4}
+                  value={playbackRate}
+                  defaultValue={1}
                   step={0.001}
-                  defaultValue={[1]}
-                  value={[playbackRate]}
-                  onValueChange={(e) => {
-                    setPlaybackRate(e[0]);
+                  setValue={(e: number) => {
+                    setPlaybackRate(e);
                     if (audioBufferNode) {
-                      audioBufferNode.playbackRate.setValueAtTime(e[0], 0);
+                      audioBufferNode.playbackRate.setValueAtTime(e, 0);
                     }
                   }}
-                  onDoubleClick={() => {
-                    setPlaybackRate(1);
-                    if (audioBufferNode) {
-                      audioBufferNode.playbackRate.setValueAtTime(1, 0);
-                    }
-                  }}
+                  rep={(playbackRate * 100).toFixed(0) + "%"}
                 />
               </>
             )}
@@ -428,20 +416,15 @@ export default function AudioInput({
                 <CircleStop />
               </Button>
             </div>
-
-            <Label>Volume</Label>
-            <Slider
+            <ParamSlider
+              name="Volume"
               min={0}
               max={3}
-              value={[volume]}
+              value={volume}
+              defaultValue={1}
               step={0.001}
-              defaultValue={[1]}
-              onValueChange={(e) => {
-                setVolume(e[0]);
-              }}
-              onDoubleClick={() => {
-                setVolume(1);
-              }}
+              setValue={setVolume}
+              rep={(volume * 100).toFixed(0) + " %"}
             />
           </div>
         </TabsContent>

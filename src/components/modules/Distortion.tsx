@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
 import { createSafeAudioNode } from "@/utils/utils";
 import { useAudioContext } from "@/components/AudioProvider";
 import { AudioModuleProps } from "@/components/Chain";
 
 import ModuleUI from "@/components/ModuleUI";
+import ParamSlider from "@/components/ParamSlider";
 
 function makeDistortionCurve(amount: number) {
   const k = typeof amount === "number" ? amount : 50;
@@ -52,23 +51,19 @@ export default function Distortion({
 
   return (
     <ModuleUI
-      name="Waveshaper"
+      name="Distortion"
       index={index}
       unregisterModule={unregisterModule}
     >
-      <Label>Amount</Label>
-      <Slider
+      <ParamSlider
+        name="Amount"
         min={1}
         max={400}
-        defaultValue={[100]}
+        defaultValue={100}
         step={0.001}
-        value={[distortion]}
-        onValueChange={(e) => {
-          setDistortion(e[0]);
-        }}
-        onDoubleClick={() => {
-          setDistortion(100);
-        }}
+        value={distortion}
+        setValue={setDistortion}
+        rep={`${((distortion / 400) * 100).toFixed(0)}%`}
       />
     </ModuleUI>
   );
