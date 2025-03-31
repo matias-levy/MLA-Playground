@@ -10,6 +10,14 @@ import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import { Checkbox } from "@/components/ui/checkbox";
 
+const handleTimeChange = (value: number) => {
+  // Apply exponential scaling for better low-end resolution
+  return Math.pow(
+    10,
+    value * (Math.log10(20000) - Math.log10(10)) + Math.log10(10)
+  );
+};
+
 export default function Filter({
   index,
   unregisterModule,
@@ -19,12 +27,15 @@ export default function Filter({
   const { audioContext: ctx } = useAudioContext();
 
   // UI Params
-  const [frequency, setFrequency] = useState(350);
+  const [frequency, setFrequency] = useState(0.2); //0 to 1
+
+  const frequencyInHz = handleTimeChange(frequency);
+
   const [q, setQ] = useState(0);
   const [gain, setGain] = useState(0);
   const [lfoFrequency, setLfoFrequency] = useState(0.5);
   const [filterType, setFilterType] = useState("lowpass");
-  const [depth, setDepth] = useState(0.5);
+  const [depth, setDepth] = useState(0);
   const [waveform, setWaveform] = useState("sine");
   const lfoStarted = useRef(false);
 
@@ -87,15 +98,15 @@ export default function Filter({
   }, [index]);
 
   useEffect(() => {
-    filterNode?.frequency.setValueAtTime(frequency, ctx.currentTime);
+    filterNode?.frequency.setValueAtTime(frequencyInHz, ctx.currentTime);
     filterNode?.Q.setValueAtTime(q, ctx.currentTime);
     filterNode?.gain.setValueAtTime(gain, ctx.currentTime);
-    filterNode2?.frequency.setValueAtTime(frequency, ctx.currentTime);
+    filterNode2?.frequency.setValueAtTime(frequencyInHz, ctx.currentTime);
     filterNode2?.Q.setValueAtTime(q, ctx.currentTime);
     filterNode2?.gain.setValueAtTime(gain, ctx.currentTime);
     lfo?.frequency.setValueAtTime(lfoFrequency, ctx.currentTime);
     lfoGain?.gain.setValueAtTime(depth, ctx.currentTime);
-  }, [frequency, q, gain, lfoFrequency, depth]);
+  }, [frequencyInHz, q, gain, lfoFrequency, depth]);
 
   useEffect(() => {
     if (lfo && filterNode && filterNode2 && outputNode) {
@@ -119,13 +130,13 @@ export default function Filter({
       {/* Frequency */}
       <ParamSlider
         name="Frequency"
-        defaultValue={350}
-        step={0.1}
+        defaultValue={0.2}
+        step={0.000001}
         min={0}
-        max={20000}
+        max={1}
         value={frequency}
         setValue={setFrequency}
-        rep={frequency.toFixed(1) + " Hz"}
+        rep={frequencyInHz.toFixed(1) + " Hz"}
       />
 
       {/* Q */}
@@ -203,10 +214,10 @@ export default function Filter({
       {/* LFO Depth */}
       <ParamSlider
         name="LFO Depth"
-        min={0}
+        min={-1}
         max={1}
         value={depth}
-        defaultValue={0.5}
+        defaultValue={0}
         step={0.01}
         setValue={setDepth}
         rep={depth.toFixed(2)}
