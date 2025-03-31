@@ -10,6 +10,10 @@ import ParamSlider from "@/components/ParamSlider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
+const handleTimeChange = (value: number) => {
+  return Math.pow(value, 2.5) * 2.5;
+};
+
 export default function Delay({
   index,
   unregisterModule,
@@ -20,10 +24,11 @@ export default function Delay({
 
   // UI Params
   const [time, setTime] = useState(0.5);
+  const timeInS = handleTimeChange(time);
   const [feedback, setFeedback] = useState(0.3);
   const [mix, setMix] = useState(0.5);
   const [lfoRate, setLfoRate] = useState(0.2);
-  const [lfoDepth, setLfoDepth] = useState(0.002);
+  const [lfoDepth, setLfoDepth] = useState(0);
   const [waveform, setWaveform] = useState("sine");
   const lfoStarted = useRef(false);
 
@@ -99,7 +104,7 @@ export default function Delay({
   }, [index]);
 
   useEffect(() => {
-    delayNode?.delayTime.setValueAtTime(time, ctx.currentTime);
+    delayNode?.delayTime.setValueAtTime(timeInS, ctx.currentTime);
     feedbackGain?.gain.setValueAtTime(feedback, ctx.currentTime);
     dryGain?.gain.setValueAtTime(1 - mix, ctx.currentTime);
     wetGain?.gain.setValueAtTime(mix, ctx.currentTime);
@@ -108,7 +113,7 @@ export default function Delay({
     if (lfo) {
       lfo.type = waveform as OscillatorType;
     }
-  }, [time, feedback, mix, lfoRate, lfoDepth, waveform]);
+  }, [timeInS, feedback, mix, lfoRate, lfoDepth, waveform]);
 
   return (
     <ModuleUI
@@ -120,12 +125,12 @@ export default function Delay({
       <ParamSlider
         name="Time"
         min={0}
-        max={2}
+        max={1}
         value={time}
         defaultValue={0.5}
         step={0.001}
         setValue={setTime}
-        rep={(time * 1000).toFixed(0) + " ms"}
+        rep={(timeInS * 1000).toFixed(0) + " ms"}
       />
 
       {/* Feedback */}
@@ -158,7 +163,7 @@ export default function Delay({
         min={0}
         max={0.01}
         value={lfoDepth}
-        defaultValue={0.002}
+        defaultValue={0}
         step={0.0001}
         setValue={setLfoDepth}
         rep={(lfoDepth * 1000).toFixed(1) + " ms"}
