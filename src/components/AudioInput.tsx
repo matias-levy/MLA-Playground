@@ -72,7 +72,7 @@ export default function AudioInput({
   const freeSoundObjectProps = useFreeSoundQuery();
 
   // General State
-  const [selectedTab, setSelectedTab] = useState("File");
+  const [selectedTab, setSelectedTab] = useState("External");
   const { audioContext: ctx } = useAudioContext();
   const [gainNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx))
