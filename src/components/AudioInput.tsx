@@ -205,7 +205,7 @@ export default function AudioInput({
   };
 
   return (
-    <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl">
+    <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl bg-white">
       <Label>Input Module</Label>
       <Tabs
         defaultValue="External"
