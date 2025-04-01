@@ -40,12 +40,13 @@ export default function Compressor({
     if (gainNode && compressorNode) {
       compressorNode.connect(gainNode);
 
-      setInterval(() => {
+      const interval = setInterval(() => {
         setCurrentReduction(compressorNode.reduction);
       }, 100);
 
       addModule({ input: compressorNode, output: gainNode }, index);
       return () => {
+        clearInterval(interval);
         removeModule({ input: compressorNode, output: gainNode });
       };
     }
