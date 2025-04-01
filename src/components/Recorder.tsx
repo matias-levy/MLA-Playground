@@ -13,6 +13,7 @@ import { CircleStop, CirclePlay, Download, ArrowUpFromDot } from "lucide-react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { createSafeAudioNode } from "@/utils/utils";
 import { toast } from "sonner";
+import { formatTime } from "@/lib/utils";
 
 let chunks: Blob[] = [];
 
@@ -44,6 +45,9 @@ export default function Recorder({
     null
   );
 
+  const [intervalID, setIntervalID] = useState<NodeJS.Timeout | null>(null);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+
   useEffect(() => {
     setOutput(mediaStreamAudioDestinationNode);
   }, []);
@@ -51,6 +55,11 @@ export default function Recorder({
   function start() {
     if (mediaStreamAudioDestinationNode) {
       setRecording(true);
+      setRecordingDuration(0);
+      const inter = setInterval(() => {
+        setRecordingDuration((prev) => prev + 1);
+      }, 1000);
+      setIntervalID(inter);
       const recorder = new MediaRecorder(
         mediaStreamAudioDestinationNode.stream
       );
@@ -73,6 +82,10 @@ export default function Recorder({
   }
 
   function stop() {
+    if (intervalID) {
+      clearInterval(intervalID);
+      setIntervalID(null);
+    }
     mediaRecorder?.stop();
     setRecording(false);
   }
@@ -122,7 +135,9 @@ export default function Recorder({
           controls
           className="grow rounded-md invert min-w-0"
         />
-
+        <Label className="w-14 text-center block">
+          {formatTime(recordingDuration, false)}
+        </Label>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
