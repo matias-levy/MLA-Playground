@@ -44,11 +44,14 @@ export default function Convolver({
   const { audioContext: ctx } = useAudioContext();
 
   // UI Params
+  const [stretch, setStretch] = useState(1);
   const [mix, setMix] = useState(0.5);
   const [IRSource, setIRSource] = useState("internal");
   const [selectedInternalIR, setSelectedInternalIR] = useState("Hall 1");
   const [internalIRBlob, setInternalIRBlob] = useState<Blob | null>(null);
   const [uploadedIRBlob, setUploadedIRBlob] = useState<Blob | null>(null);
+  const [loadedAudioBuffer, setLoadedAudioBuffer] =
+    useState<AudioBuffer | null>(null);
 
   // Create nodes
   const [convolverNode] = useState(() =>
@@ -105,6 +108,24 @@ export default function Convolver({
   }, [mix]);
 
   useEffect(() => {
+    if (loadedAudioBuffer && convolverNode) {
+      const length = loadedAudioBuffer.length / stretch;
+      const offlineCtx = new OfflineAudioContext(2, length, ctx.sampleRate);
+
+      const bufferNode = new AudioBufferSourceNode(offlineCtx, {
+        buffer: loadedAudioBuffer,
+      });
+
+      bufferNode.connect(offlineCtx.destination);
+      bufferNode.playbackRate.value = stretch;
+      bufferNode.start();
+      offlineCtx.startRendering().then((a) => {
+        convolverNode.buffer = a;
+      });
+    }
+  }, [stretch, loadedAudioBuffer]);
+
+  useEffect(() => {
     let isCancelled = false;
 
     async function loadIntoConvolver() {
@@ -120,6 +141,7 @@ export default function Convolver({
       try {
         const arrayBuffer = await blobToLoad.arrayBuffer();
         const decodedBuffer = await ctx.decodeAudioData(arrayBuffer);
+        setLoadedAudioBuffer(decodedBuffer);
 
         if (!isCancelled) {
           convolverNode.buffer = decodedBuffer;
@@ -193,6 +215,18 @@ export default function Convolver({
           />
         </div>
       </RadioGroup>
+
+      {/* Stretch */}
+      <ParamSlider
+        name="Stretch IR"
+        min={0.5}
+        max={4}
+        value={stretch}
+        defaultValue={1}
+        step={0.01}
+        setValue={setStretch}
+        rep={"x " + stretch.toFixed(2)}
+      />
 
       {/* Mix */}
       <ParamSlider
