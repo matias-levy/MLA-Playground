@@ -17,7 +17,8 @@ import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Slider } from "@/components/ui/slider";
 
 interface IR {
   name: string;
@@ -35,6 +36,10 @@ const IRs: IR[] = [
   { name: "Large Plate", url: "/IR/Large Plate.flac" },
 ];
 
+const handleTimeChange = (value: number) => {
+  return Math.pow(value, 2.5) * 2.5;
+};
+
 export default function Convolver({
   index,
   unregisterModule,
@@ -44,7 +49,11 @@ export default function Convolver({
   const { audioContext: ctx } = useAudioContext();
 
   // UI Params
+  const [time, setTime] = useState(0.5);
+  const timeInS = handleTimeChange(time);
+  const [feedback, setFeedback] = useState(0);
   const [stretch, setStretch] = useState(1);
+  const [stretchCommited, setStretchCommited] = useState(1);
   const [mix, setMix] = useState(0.5);
   const [IRSource, setIRSource] = useState("internal");
   const [selectedInternalIR, setSelectedInternalIR] = useState("Hall 1");
@@ -59,6 +68,14 @@ export default function Convolver({
       ctx,
       (ctx) => new ConvolverNode(ctx, { disableNormalization: false })
     )
+  );
+
+  const [delayNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new DelayNode(ctx, { delayTime: 0.5 }))
+  );
+
+  const [feedbackGain] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 0.3 }))
   );
 
   const [inputNode] = useState(() =>
@@ -78,9 +95,20 @@ export default function Convolver({
   );
 
   useEffect(() => {
-    if (wetGain && dryGain && outputNode && inputNode && convolverNode) {
+    if (
+      wetGain &&
+      dryGain &&
+      outputNode &&
+      inputNode &&
+      convolverNode &&
+      delayNode &&
+      feedbackGain
+    ) {
       inputNode.connect(convolverNode);
       inputNode.connect(dryGain);
+      convolverNode.connect(delayNode);
+      delayNode.connect(feedbackGain);
+      feedbackGain.connect(convolverNode);
       convolverNode.connect(wetGain);
       dryGain.connect(outputNode);
       wetGain.connect(outputNode);
@@ -103,13 +131,15 @@ export default function Convolver({
   }, [index]);
 
   useEffect(() => {
+    delayNode?.delayTime.setValueAtTime(timeInS, ctx.currentTime);
+    feedbackGain?.gain.setValueAtTime(-feedback, ctx.currentTime);
     dryGain?.gain.setValueAtTime(1 - mix, ctx.currentTime);
     wetGain?.gain.setValueAtTime(mix, ctx.currentTime);
-  }, [mix]);
+  }, [mix, time, feedback]);
 
   useEffect(() => {
     if (loadedAudioBuffer && convolverNode) {
-      const length = loadedAudioBuffer.length / stretch;
+      const length = loadedAudioBuffer.length / stretchCommited;
       const offlineCtx = new OfflineAudioContext(2, length, ctx.sampleRate);
 
       const bufferNode = new AudioBufferSourceNode(offlineCtx, {
@@ -117,13 +147,13 @@ export default function Convolver({
       });
 
       bufferNode.connect(offlineCtx.destination);
-      bufferNode.playbackRate.value = stretch;
+      bufferNode.playbackRate.value = stretchCommited;
       bufferNode.start();
       offlineCtx.startRendering().then((a) => {
         convolverNode.buffer = a;
       });
     }
-  }, [stretch, loadedAudioBuffer]);
+  }, [stretchCommited, loadedAudioBuffer]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -169,7 +199,7 @@ export default function Convolver({
         defaultValue="audio"
         value={IRSource}
         onValueChange={setIRSource}
-        className="flex justify-start gap-x-6 gap-y-4"
+        className="flex justify-start gap-x-6 gap-y-4 flex-wrap"
       >
         <div className="flex flex-row items-center justify-center space-x-2 grow">
           <RadioGroupItem value="internal" id="r1" />
@@ -217,15 +247,48 @@ export default function Convolver({
       </RadioGroup>
 
       {/* Stretch */}
+      <div className="flex flex-col gap-5 px-1">
+        <div className="flex flex-row justify-between">
+          <Label>Stretch IR</Label>
+          <Label>{"x " + stretch.toFixed(2)}</Label>
+        </div>
+        <Slider
+          min={0.5}
+          max={4}
+          step={0.01}
+          value={[stretch]}
+          defaultValue={[1]}
+          onValueChange={(e) => setStretch(e[0])}
+          onValueCommit={(e) => {
+            setStretch(e[0]);
+            setStretchCommited(e[0]);
+          }}
+          onDoubleClick={() => setStretch(1)}
+        />
+      </div>
+
+      {/* Feedback Delay Time */}
       <ParamSlider
-        name="Stretch IR"
-        min={0.5}
-        max={4}
-        value={stretch}
-        defaultValue={1}
+        name="Feedback Delay Time"
+        min={0}
+        max={1}
+        value={time}
+        defaultValue={0.5}
+        step={0.001}
+        setValue={setTime}
+        rep={(timeInS * 1000).toFixed(0) + " ms"}
+      />
+
+      {/* Feedback Delay Amount */}
+      <ParamSlider
+        name="Feedback Delay Amount (Careful with this)"
+        min={0}
+        max={0.8}
+        value={feedback}
+        defaultValue={0}
         step={0.01}
-        setValue={setStretch}
-        rep={"x " + stretch.toFixed(2)}
+        setValue={setFeedback}
+        rep={(feedback * 100).toFixed(0) + "%"}
       />
 
       {/* Mix */}
