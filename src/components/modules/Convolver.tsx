@@ -53,6 +53,7 @@ export default function Convolver({
   const timeInS = handleTimeChange(time);
   const [feedback, setFeedback] = useState(0);
   const [stretch, setStretch] = useState(1);
+  const [processingStretch, setProcessingStretch] = useState(false);
   const [stretchCommited, setStretchCommited] = useState(1);
   const [mix, setMix] = useState(0.5);
   const [IRSource, setIRSource] = useState("internal");
@@ -139,6 +140,7 @@ export default function Convolver({
 
   useEffect(() => {
     if (loadedAudioBuffer && convolverNode) {
+      setProcessingStretch(true);
       const length = loadedAudioBuffer.length / stretchCommited;
       const offlineCtx = new OfflineAudioContext(2, length, ctx.sampleRate);
 
@@ -151,6 +153,7 @@ export default function Convolver({
       bufferNode.start();
       offlineCtx.startRendering().then((a) => {
         convolverNode.buffer = a;
+        setProcessingStretch(false);
       });
     }
   }, [stretchCommited, loadedAudioBuffer]);
@@ -253,7 +256,8 @@ export default function Convolver({
           <Label>{"x " + stretch.toFixed(2)}</Label>
         </div>
         <Slider
-          min={0.5}
+          disabled={processingStretch}
+          min={0.1}
           max={4}
           step={0.01}
           value={[stretch]}
