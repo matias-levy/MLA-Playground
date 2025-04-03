@@ -7,6 +7,7 @@ import { AudioModuleProps } from "@/components/Chain";
 
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
+import useBypass from "@/lib/useBypass";
 
 export default function Utility({
   index,
@@ -21,6 +22,14 @@ export default function Utility({
   const [pan, setPan] = useState(0);
 
   // Create nodes
+  const [inputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
+  const [outputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
   const [gainNode] = useState(() =>
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
@@ -29,12 +38,23 @@ export default function Utility({
     createSafeAudioNode(ctx, (ctx) => new StereoPannerNode(ctx, { pan: 0 }))
   );
 
+  // Bypass Hook
+
+  const { bypass, toggleBypass } = useBypass({
+    input: inputNode,
+    output: outputNode,
+    inputConnectsTo: [gainNode],
+    connectedToOutput: [panNode],
+  });
+
   useEffect(() => {
-    if (gainNode && panNode) {
+    if (inputNode && outputNode && gainNode && panNode) {
+      inputNode.connect(gainNode);
       gainNode.connect(panNode);
-      addModule({ input: gainNode, output: panNode }, index);
+      panNode.connect(outputNode);
+      addModule({ input: inputNode, output: outputNode }, index);
       return () => {
-        removeModule({ input: gainNode, output: panNode });
+        removeModule({ input: inputNode, output: outputNode });
       };
     }
   }, [index]);
@@ -45,7 +65,13 @@ export default function Utility({
   }, [gain, pan]);
 
   return (
-    <ModuleUI index={index} name="Utility" unregisterModule={unregisterModule}>
+    <ModuleUI
+      index={index}
+      name="Utility"
+      unregisterModule={unregisterModule}
+      bypass={bypass}
+      toggleBypass={toggleBypass}
+    >
       {/* Gain */}
       <ParamSlider
         name="Gain"

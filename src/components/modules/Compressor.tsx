@@ -7,6 +7,7 @@ import { AudioModuleProps } from "@/components/Chain";
 
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
+import useBypass from "@/lib/useBypass";
 
 export default function Compressor({
   index,
@@ -28,6 +29,14 @@ export default function Compressor({
 
   // Create nodes
 
+  const [inputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
+  const [outputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
   const [compressorNode] = useState(() =>
     createSafeAudioNode(ctx, (ctx) => new DynamicsCompressorNode(ctx))
   );
@@ -36,18 +45,29 @@ export default function Compressor({
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
 
+  // Bypass Hook
+
+  const { bypass, toggleBypass } = useBypass({
+    input: inputNode,
+    output: outputNode,
+    inputConnectsTo: [compressorNode],
+    connectedToOutput: [gainNode],
+  });
+
   useEffect(() => {
-    if (gainNode && compressorNode) {
+    if (gainNode && compressorNode && inputNode && outputNode) {
+      inputNode.connect(compressorNode);
       compressorNode.connect(gainNode);
+      gainNode.connect(outputNode);
 
       const interval = setInterval(() => {
         setCurrentReduction(compressorNode.reduction);
       }, 100);
 
-      addModule({ input: compressorNode, output: gainNode }, index);
+      addModule({ input: inputNode, output: outputNode }, index);
       return () => {
         clearInterval(interval);
-        removeModule({ input: compressorNode, output: gainNode });
+        removeModule({ input: inputNode, output: outputNode });
       };
     }
   }, [index]);
@@ -66,6 +86,8 @@ export default function Compressor({
       index={index}
       name="Compressor"
       unregisterModule={unregisterModule}
+      bypass={bypass}
+      toggleBypass={toggleBypass}
     >
       {/* Threshold */}
       <ParamSlider

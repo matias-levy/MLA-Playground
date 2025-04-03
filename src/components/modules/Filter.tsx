@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import { Checkbox } from "@/components/ui/checkbox";
+import useBypass from "@/lib/useBypass";
 
 const handleTimeChange = (value: number) => {
   // Apply exponential scaling for better low-end resolution
@@ -65,26 +66,47 @@ export default function Filter({
     createSafeAudioNode(ctx, (ctx) => new BiquadFilterNode(ctx))
   );
 
+  const [bufferOutputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
+  const [inputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
   const [outputNode] = useState(() =>
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
 
+  // Bypass Hook
+
+  const { bypass, toggleBypass } = useBypass({
+    input: inputNode,
+    output: outputNode,
+    inputConnectsTo: [filterNode],
+    connectedToOutput: [bufferOutputNode],
+  });
+
   useEffect(() => {
     if (
+      inputNode &&
+      outputNode &&
       lfo &&
       preLFOGain &&
       lfoGain &&
       filterNode &&
       filterNode2 &&
-      outputNode
+      bufferOutputNode
     ) {
+      inputNode.connect(filterNode);
       lfo.connect(preLFOGain);
       preLFOGain.connect(lfoGain);
       lfoGain.connect(filterNode.detune);
       lfoGain.connect(filterNode2.detune);
-      filterNode.connect(outputNode);
+      filterNode.connect(bufferOutputNode);
+      bufferOutputNode.connect(outputNode);
 
-      addModule({ input: filterNode, output: outputNode }, index);
+      addModule({ input: inputNode, output: outputNode }, index);
 
       if (!lfoStarted.current) {
         lfo.start();
@@ -92,7 +114,7 @@ export default function Filter({
       }
 
       return () => {
-        removeModule({ input: filterNode, output: outputNode });
+        removeModule({ input: inputNode, output: outputNode });
       };
     }
   }, [index]);
@@ -109,7 +131,7 @@ export default function Filter({
   }, [frequencyInHz, q, gain, lfoFrequency, depth]);
 
   useEffect(() => {
-    if (lfo && filterNode && filterNode2 && outputNode) {
+    if (lfo && filterNode && filterNode2 && bufferOutputNode) {
       lfo.type = waveform as OscillatorType;
       filterNode.type = filterType as BiquadFilterType;
       filterNode2.type = filterType as BiquadFilterType;
@@ -117,16 +139,22 @@ export default function Filter({
       if (is24db) {
         filterNode.disconnect();
         filterNode.connect(filterNode2);
-        filterNode2.connect(outputNode);
+        filterNode2.connect(bufferOutputNode);
       } else {
         filterNode2.disconnect();
-        filterNode.connect(outputNode);
+        filterNode.connect(bufferOutputNode);
       }
     }
   }, [waveform, filterType, is24db]);
 
   return (
-    <ModuleUI index={index} name="Filter" unregisterModule={unregisterModule}>
+    <ModuleUI
+      index={index}
+      name="Filter"
+      unregisterModule={unregisterModule}
+      bypass={bypass}
+      toggleBypass={toggleBypass}
+    >
       {/* Frequency */}
       <ParamSlider
         name="Frequency"

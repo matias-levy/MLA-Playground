@@ -9,6 +9,7 @@ import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import useBypass from "@/lib/useBypass";
 
 const handleTimeChange = (value: number) => {
   return Math.pow(value, 2.5) * 2.5;
@@ -68,6 +69,15 @@ export default function Delay({
     () => createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 0.002 })) // Small modulation depth
   );
 
+  // Bypass Hook
+
+  const { bypass, toggleBypass } = useBypass({
+    input: inputNode,
+    output: outputNode,
+    inputConnectsTo: [delayNode, dryGain],
+    connectedToOutput: [dryGain, wetGain],
+  });
+
   useEffect(() => {
     if (
       inputNode &&
@@ -120,6 +130,8 @@ export default function Delay({
       index={index}
       name="Delay / Time Modulation"
       unregisterModule={unregisterModule}
+      bypass={bypass}
+      toggleBypass={toggleBypass}
     >
       {/* Delay Time */}
       <ParamSlider

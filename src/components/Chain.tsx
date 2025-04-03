@@ -66,7 +66,7 @@ function SortableItem(props: SortableItemProps) {
       <div
         ref={setActivatorNodeRef}
         {...listeners}
-        className="absolute left-1/2 transform -translate-x-1/2 mt-5 touch-none"
+        className="absolute left-1/2 transform -translate-x-1/2 mt-5 touch-none z-50"
       >
         <GripHorizontal className="text-gray-400" />
       </div>

@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
+import useBypass from "@/lib/useBypass";
 
 interface IR {
   name: string;
@@ -94,6 +95,15 @@ export default function Convolver({
   const [dryGain] = useState(() =>
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
+
+  // Bypass Hook
+
+  const { bypass, toggleBypass } = useBypass({
+    input: inputNode,
+    output: outputNode,
+    inputConnectsTo: [convolverNode, dryGain],
+    connectedToOutput: [dryGain, wetGain],
+  });
 
   useEffect(() => {
     if (
@@ -196,6 +206,8 @@ export default function Convolver({
       index={index}
       name="Reverb / Convolver"
       unregisterModule={unregisterModule}
+      bypass={bypass}
+      toggleBypass={toggleBypass}
     >
       <Label>Impulse Response</Label>
       <RadioGroup

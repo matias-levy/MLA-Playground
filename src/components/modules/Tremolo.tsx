@@ -8,6 +8,7 @@ import { AudioModuleProps } from "@/components/Chain";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
+import useBypass from "@/lib/useBypass";
 
 export default function Tremolo({
   index,
@@ -24,6 +25,14 @@ export default function Tremolo({
   const lfoStarted = useRef(false);
 
   // Create nodes
+  const [inputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
+  const [outputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
   const [lfo] = useState(() =>
     createSafeAudioNode(
       ctx,
@@ -39,12 +48,23 @@ export default function Tremolo({
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
 
+  // Bypass Hook
+
+  const { bypass, toggleBypass } = useBypass({
+    input: inputNode,
+    output: outputNode,
+    inputConnectsTo: [tremoloGain],
+    connectedToOutput: [tremoloGain],
+  });
+
   useEffect(() => {
-    if (lfo && lfoGain && tremoloGain) {
+    if (inputNode && outputNode && lfo && lfoGain && tremoloGain) {
+      inputNode.connect(tremoloGain);
       lfo.connect(lfoGain);
       lfoGain.connect(tremoloGain.gain);
+      tremoloGain.connect(outputNode);
 
-      addModule({ input: tremoloGain, output: tremoloGain }, index);
+      addModule({ input: inputNode, output: outputNode }, index);
 
       if (!lfoStarted.current) {
         lfo.start();
@@ -52,7 +72,7 @@ export default function Tremolo({
       }
 
       return () => {
-        removeModule({ input: tremoloGain, output: tremoloGain });
+        removeModule({ input: inputNode, output: outputNode });
       };
     }
   }, [index]);
@@ -69,7 +89,13 @@ export default function Tremolo({
   }, [waveform]);
 
   return (
-    <ModuleUI index={index} name="Tremolo" unregisterModule={unregisterModule}>
+    <ModuleUI
+      index={index}
+      name="Tremolo"
+      unregisterModule={unregisterModule}
+      bypass={bypass}
+      toggleBypass={toggleBypass}
+    >
       {/* Frequency */}
       <ParamSlider
         name="Frequency"

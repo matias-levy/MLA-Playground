@@ -75,7 +75,6 @@ export default function Recorder({
         mediaStreamAudioDestinationNode.stream,
         { mimeType: "audio/wav" }
       );
-      console.log(recorder);
       setMediaRecorder(recorder);
       recorder.start();
       chunks = [];

@@ -7,6 +7,7 @@ import { AudioModuleProps } from "@/components/Chain";
 
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
+import useBypass from "@/lib/useBypass";
 
 function makeDistortionCurve(amount: number) {
   const k = typeof amount === "number" ? amount : 50;
@@ -29,15 +30,35 @@ export default function Distortion({
 }: AudioModuleProps) {
   const { audioContext: ctx } = useAudioContext();
   const [distortion, setDistortion] = useState(100);
+
+  const [inputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
+  const [outputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
   const [waveshaperNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new WaveShaperNode(ctx))
   );
 
+  // Bypass Hook
+
+  const { bypass, toggleBypass } = useBypass({
+    input: inputNode,
+    output: outputNode,
+    inputConnectsTo: [waveshaperNode],
+    connectedToOutput: [waveshaperNode],
+  });
+
   useEffect(() => {
-    if (waveshaperNode) {
-      addModule({ input: waveshaperNode, output: waveshaperNode }, index);
+    if (inputNode && outputNode && waveshaperNode) {
+      inputNode.connect(waveshaperNode);
+      waveshaperNode.connect(outputNode);
+      addModule({ input: inputNode, output: outputNode }, index);
       return () => {
-        removeModule({ input: waveshaperNode, output: waveshaperNode });
+        removeModule({ input: inputNode, output: outputNode });
       };
     }
   }, [index]);
@@ -54,6 +75,8 @@ export default function Distortion({
       name="Distortion"
       index={index}
       unregisterModule={unregisterModule}
+      bypass={bypass}
+      toggleBypass={toggleBypass}
     >
       <ParamSlider
         name="Amount"

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
+import useBypass from "@/lib/useBypass";
 import { Label } from "@/components/ui/label";
 import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
@@ -32,6 +33,14 @@ export default function AutoPan({
     )
   );
 
+  const [inputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
+  const [outputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
   const [lfoGain] = useState(() =>
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 0.5 }))
   );
@@ -44,13 +53,24 @@ export default function AutoPan({
     createSafeAudioNode(ctx, (ctx) => new StereoPannerNode(ctx, { pan: 0 }))
   );
 
+  // Bypass Hook
+
+  const { bypass, toggleBypass } = useBypass({
+    input: inputNode,
+    output: outputNode,
+    inputConnectsTo: [inputPanNode],
+    connectedToOutput: [panNode],
+  });
+
   useEffect(() => {
-    if (lfo && lfoGain && panNode && inputPanNode) {
+    if (lfo && lfoGain && panNode && inputPanNode && inputNode && outputNode) {
+      inputNode.connect(inputPanNode);
       inputPanNode.connect(panNode);
       lfo.connect(lfoGain);
       lfoGain.connect(panNode.pan);
+      panNode.connect(outputNode);
 
-      addModule({ input: inputPanNode, output: panNode }, index);
+      addModule({ input: inputNode, output: outputNode }, index);
 
       if (!lfoStarted.current) {
         lfo.start();
@@ -58,7 +78,7 @@ export default function AutoPan({
       }
 
       return () => {
-        removeModule({ input: inputPanNode, output: panNode });
+        removeModule({ input: inputNode, output: outputNode });
       };
     }
   }, [index]);
@@ -76,7 +96,13 @@ export default function AutoPan({
   }, [waveform]);
 
   return (
-    <ModuleUI index={index} name="Auto Pan" unregisterModule={unregisterModule}>
+    <ModuleUI
+      index={index}
+      name="Auto Pan"
+      unregisterModule={unregisterModule}
+      bypass={bypass}
+      toggleBypass={toggleBypass}
+    >
       {/* Offset */}
       <ParamSlider
         name="Offset"

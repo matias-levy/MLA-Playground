@@ -7,6 +7,7 @@ import { AudioModuleProps } from "@/components/Chain";
 import Chain from "../Chain";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
+import useBypass from "@/lib/useBypass";
 
 export default function Splitter({
   index,
@@ -20,10 +21,10 @@ export default function Splitter({
 
   // Create nodes
   const [generalIn] = useState(() =>
-    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 0.5 }))
   );
   const [generalOut] = useState(() =>
-    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 0.5 }))
   );
 
   const [in1] = useState(() =>
@@ -38,6 +39,15 @@ export default function Splitter({
   const [out2] = useState(() =>
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
+
+  // Bypass Hook
+
+  const { bypass, toggleBypass } = useBypass({
+    input: generalIn,
+    output: generalOut,
+    inputConnectsTo: [in1, in2],
+    connectedToOutput: [out1, out2],
+  });
 
   useEffect(() => {
     // Register module with the processing chain
@@ -59,7 +69,13 @@ export default function Splitter({
   }, [crossfade]);
 
   return (
-    <ModuleUI index={index} name="Splitter" unregisterModule={unregisterModule}>
+    <ModuleUI
+      index={index}
+      name="Splitter"
+      unregisterModule={unregisterModule}
+      bypass={bypass}
+      toggleBypass={toggleBypass}
+    >
       <ParamSlider
         name="Crossfade"
         min={0}

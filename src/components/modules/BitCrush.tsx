@@ -5,6 +5,8 @@ import { useAudioContext } from "@/components/AudioProvider";
 import { AudioModuleProps } from "@/components/Chain";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
+import { createSafeAudioNode } from "@/utils/utils";
+import useBypass from "@/lib/useBypass";
 
 export default function BitCrush({
   index,
@@ -16,23 +18,44 @@ export default function BitCrush({
   const [bits, setBits] = useState(31); // Start at "max" since we are reversing
   const [sampleRate, setSampleRate] = useState(0);
 
+  const [inputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
+  const [outputNode] = useState(() =>
+    createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
+  );
+
   const workletNodeRef = useRef<AudioWorkletNode | null>(null);
+
+  // Bypass Hook
+
+  const { bypass, toggleBypass } = useBypass({
+    input: inputNode,
+    output: outputNode,
+    inputConnectsTo: [workletNodeRef.current],
+    connectedToOutput: [workletNodeRef.current],
+  });
 
   useEffect(() => {
     // Load the AudioWorklet
     async function loadAudioWorklet() {
-      await ctx.audioWorklet.addModule("worklets/bit-crush-processor.js");
-      const newNode = new AudioWorkletNode(ctx, "bit-crush-processor");
-      workletNodeRef.current = newNode; // Update ref instead of state
-      addModule({ input: newNode, output: newNode }, index);
+      if (inputNode && outputNode) {
+        await ctx.audioWorklet.addModule("worklets/bit-crush-processor.js");
+        const newNode = new AudioWorkletNode(ctx, "bit-crush-processor");
+        workletNodeRef.current = newNode; // Update ref instead of state
+        inputNode.connect(workletNodeRef.current);
+        workletNodeRef.current.connect(outputNode);
+        addModule({ input: inputNode, output: outputNode }, index);
+      }
     }
     loadAudioWorklet();
 
     return () => {
-      if (workletNodeRef.current) {
+      if (inputNode && outputNode) {
         removeModule({
-          input: workletNodeRef.current,
-          output: workletNodeRef.current,
+          input: inputNode,
+          output: outputNode,
         });
       }
     };
@@ -51,6 +74,8 @@ export default function BitCrush({
       index={index}
       name="Bit Crush"
       unregisterModule={unregisterModule}
+      bypass={bypass}
+      toggleBypass={toggleBypass}
     >
       <ParamSlider
         name="Sample Rate Reduction"
