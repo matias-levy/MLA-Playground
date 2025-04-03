@@ -4,9 +4,11 @@ import { useState } from "react";
 
 import dynamic from "next/dynamic";
 import AudioInput from "@/components/AudioInput";
+import RecorderSkeleton from "./RecorderSkeleton";
 
 const Recorder = dynamic(() => import("@/components/Recorder"), {
   ssr: false,
+  loading: () => <RecorderSkeleton />,
 });
 
 import Chain from "./Chain";
