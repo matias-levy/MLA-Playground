@@ -17,6 +17,7 @@ import Compressor from "@/components/modules/Compressor";
 import Filter from "@/components/modules/Filter";
 import Convolver from "@/components/modules/Convolver";
 import Splitter from "@/components/modules/Splitter";
+import Group from "@/components/modules/Group";
 import { AudioModuleComponent } from "@/components/Chain";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -31,6 +32,7 @@ const availableModules: AudioModuleComponent[] = [
   Compressor,
   Filter,
   Convolver,
+  Group,
   Splitter,
 ];
 
@@ -44,6 +46,7 @@ const availableModulesNames: String[] = [
   "Compressor",
   "Filter",
   "Reverb / Convolver",
+  "Group",
   "Splitter",
 ];
 
