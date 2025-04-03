@@ -2,8 +2,12 @@
 
 import { useState } from "react";
 
+import dynamic from "next/dynamic";
 import AudioInput from "@/components/AudioInput";
-import Recorder from "@/components/Recorder";
+
+const Recorder = dynamic(() => import("@/components/Recorder"), {
+  ssr: false,
+});
 
 import Chain from "./Chain";
 

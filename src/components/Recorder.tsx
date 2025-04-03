@@ -14,6 +14,13 @@ import { useAudioContext } from "@/components/AudioProvider";
 import { createSafeAudioNode } from "@/utils/utils";
 import { toast } from "sonner";
 import { formatTime } from "@/lib/utils";
+import {
+  MediaRecorder as WavMediaRecorder,
+  IMediaRecorder,
+  register,
+} from "extendable-media-recorder";
+
+import { connect } from "extendable-media-recorder-wav-encoder";
 
 let chunks: Blob[] = [];
 
@@ -41,7 +48,7 @@ export default function Recorder({
   const [mediaStreamAudioDestinationNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new MediaStreamAudioDestinationNode(ctx))
   );
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
+  const [mediaRecorder, setMediaRecorder] = useState<IMediaRecorder | null>(
     null
   );
 
@@ -49,6 +56,10 @@ export default function Recorder({
   const [recordingDuration, setRecordingDuration] = useState(0);
 
   useEffect(() => {
+    async function reg() {
+      await register(await connect()).catch((e) => console.log(e));
+    }
+    reg();
     setOutput(mediaStreamAudioDestinationNode);
   }, []);
 
@@ -60,9 +71,11 @@ export default function Recorder({
         setRecordingDuration((prev) => prev + 1);
       }, 1000);
       setIntervalID(inter);
-      const recorder = new MediaRecorder(
-        mediaStreamAudioDestinationNode.stream
+      const recorder = new WavMediaRecorder(
+        mediaStreamAudioDestinationNode.stream,
+        { mimeType: "audio/wav" }
       );
+      console.log(recorder);
       setMediaRecorder(recorder);
       recorder.start();
       chunks = [];
@@ -72,7 +85,7 @@ export default function Recorder({
       };
       recorder.onstop = () => {
         // Make blob out of our blobs, and open it.
-        const blob = new Blob(chunks, { type: "audio/wav; codecs=opus" });
+        const blob = new Blob(chunks, { type: "audio/wav" });
         setRecordingBlob(blob);
         if (audioRef.current) {
           audioRef.current.src = URL.createObjectURL(blob);
@@ -91,7 +104,13 @@ export default function Recorder({
   }
 
   function downloadRecording() {
-    if (!recordingBlob) return;
+    if (!recordingBlob || !(recordingBlob instanceof Blob)) {
+      console.error("Invalid recordingBlob");
+      return;
+    }
+
+    // Ensure the Blob has the correct MIME type
+    const wavBlob = new Blob([recordingBlob], { type: "audio/wav" });
 
     const date = new Date();
     const formattedDate = date.toISOString().replace(/:/g, "-").split(".")[0]; // Ensures a valid filename
