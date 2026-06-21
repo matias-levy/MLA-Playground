@@ -8,9 +8,11 @@ import { AudioModuleProps } from "@/components/Chain";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
+import useSerialiazable from "@/lib/useSerialiazable";
 
 export default function Utility({
   index,
+  ref,
   unregisterModule,
   addModule,
   removeModule,
@@ -40,7 +42,7 @@ export default function Utility({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass } = useBypass({
+  const { bypass, toggleBypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [gainNode],
@@ -63,6 +65,23 @@ export default function Utility({
     gainNode?.gain.setValueAtTime(gain, ctx.currentTime);
     panNode?.pan.setValueAtTime(pan, ctx.currentTime);
   }, [gain, pan]);
+
+  useSerialiazable({
+    ref,
+    serialize: () => {
+      return {
+        module: "Utility",
+        bypass: Boolean(bypass),
+        gain,
+        pan,
+      };
+    },
+    deserialize: (data: any) => {
+      setBypass(data.bypass);
+      setGain(data.gain);
+      setPan(data.pan);
+    },
+  });
 
   return (
     <ModuleUI

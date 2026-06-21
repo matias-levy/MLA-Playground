@@ -9,9 +9,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
+import useSerialiazable from "@/lib/useSerialiazable";
 
 export default function Tremolo({
   index,
+  ref,
   unregisterModule,
   addModule,
   removeModule,
@@ -50,7 +52,7 @@ export default function Tremolo({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass } = useBypass({
+  const { bypass, toggleBypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [tremoloGain],
@@ -87,6 +89,25 @@ export default function Tremolo({
       lfo.type = waveform;
     }
   }, [waveform]);
+
+  useSerialiazable({
+    ref,
+    serialize: () => {
+      return {
+        module: "Tremolo",
+        bypass: Boolean(bypass),
+        frequency,
+        depth,
+        waveform,
+      };
+    },
+    deserialize: (data: any) => {
+      setBypass(data.bypass);
+      setFrequency(data.frequency);
+      setDepth(data.depth);
+      setWaveform(data.waveform);
+    },
+  });
 
   return (
     <ModuleUI

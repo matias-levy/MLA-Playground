@@ -165,14 +165,14 @@ function Chain({
   }
 
   function serialize() {
-    const serializedModules = Array.from(modulesRef.current.entries()).map(
-      ([id, ref]) => {
-        return {
-          id,
-          ...ref.serialize(),
-        };
-      }
-    );
+    const serializedModules = modules.map(({ id }) => {
+      const ref = modulesRef.current.get(id);
+      return {
+        id,
+        ...ref.serialize(),
+      };
+    });
+    console.log(serializedModules);
     setSerializedString(JSON.stringify(serializedModules));
   }
 

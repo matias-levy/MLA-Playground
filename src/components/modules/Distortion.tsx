@@ -26,7 +26,6 @@ function makeDistortionCurve(amount: number) {
 export default function Distortion({
   index,
   ref,
-  moduleId,
   unregisterModule,
   addModule,
   removeModule,
@@ -66,6 +65,13 @@ export default function Distortion({
     }
   }, [index]);
 
+  useEffect(() => {
+    if (waveshaperNode) {
+      const curve = makeDistortionCurve(distortion);
+      waveshaperNode.curve = curve;
+    }
+  }, [distortion]);
+
   useSerialiazable({
     ref,
     serialize: () => {
@@ -80,13 +86,6 @@ export default function Distortion({
       setDistortion(data.distortion);
     },
   });
-
-  useEffect(() => {
-    if (waveshaperNode) {
-      const curve = makeDistortionCurve(distortion);
-      waveshaperNode.curve = curve;
-    }
-  }, [distortion]);
 
   return (
     <ModuleUI
