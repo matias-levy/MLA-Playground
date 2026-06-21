@@ -32,9 +32,9 @@ import {
 
 import useAudioChain from "@/lib/useAudioChain";
 import { useAudioContext, AudioModule } from "@/components/AudioProvider";
+import useSerialiazable from "@/lib/useSerialiazable";
 
 import { GripHorizontal } from "lucide-react";
-import { Button } from "./ui/button";
 
 export interface SortableItemProps {
   id: string;
@@ -97,17 +97,18 @@ function Chain({
   shouldAllowSplitter,
   input,
   output,
+  ref,
 }: {
   shouldAllowSplitter?: boolean;
   input: AudioNode | null;
   output: AudioNode | null;
+  ref: React.RefObject<any>;
 }) {
   const { audioContext: ctx } = useAudioContext();
   const { setInput, addModule, removeModule, setOutput } = useAudioChain({
     ctx,
   });
   const [modules, setModules] = useState<AudioModuleStateType[]>([]);
-  const [serializedString, setSerializedString] = useState<string>("");
   const modulesRef = useRef(new Map());
   const [dragging, setDragging] = useState(false);
   const [activeModule, setActiveModule] = useState<
@@ -164,40 +165,43 @@ function Chain({
     });
   }
 
-  async function serialize() {
-    const serializedModules = await Promise.all(
-      modules.map(async ({ id }) => {
-        const ref = modulesRef.current.get(id);
-        const serialized = await ref.serialize();
-        return {
-          id,
-          ...serialized,
-        };
-      })
-    );
-    console.log(serializedModules);
-    setSerializedString(JSON.stringify(serializedModules));
-  }
-
-  function deserialize() {
-    const deserializedModules = JSON.parse(serializedString);
-    flushSync(() => {
-      setModules(
-        deserializedModules.map((module: { id: string; module: string }) => ({
-          id: module.id,
-          Component: availableModules[module.module],
-        }))
+  useSerialiazable({
+    ref,
+    serialize: async () => {
+      const serializedModules = await Promise.all(
+        modules.map(async ({ id }) => {
+          const ref = modulesRef.current.get(id);
+          const serialized = await ref.serialize();
+          return {
+            id,
+            ...serialized,
+          };
+        })
       );
-    });
-    deserializedModules.forEach((module: { id: string }) => {
-      modulesRef.current.get(module.id)?.deserialize(module);
-    });
-  }
+      return JSON.stringify(serializedModules);
+    },
+    deserialize: (data: any) => {
+      const deserializedModules = JSON.parse(data);
+      flushSync(() => {
+        setModules(
+          deserializedModules.map((module: { id: string; module: string }) => ({
+            id: module.id,
+            Component: availableModules[module.module],
+          }))
+        );
+      });
+      deserializedModules.forEach((module: { id: string }) => {
+        modulesRef.current.get(module.id)?.deserialize(module);
+      });
+    },
+  });
+
+  async function serialize() {}
+
+  function deserialize() {}
 
   return (
     <div className="flex flex-col gap-4 row-start-2 items-center w-full">
-      <Button onClick={serialize}>Serialize</Button>
-      <Button onClick={deserialize}>Deserialize</Button>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

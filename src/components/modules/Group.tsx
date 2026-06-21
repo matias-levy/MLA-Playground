@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 import Chain from "../Chain";
 import ModuleUI from "@/components/ModuleUI";
 import useBypass from "@/lib/useBypass";
+import useSerialiazable from "@/lib/useSerialiazable";
 
 export default function Group({
   index,
+  ref,
   unregisterModule,
   addModule,
   removeModule,
@@ -31,9 +33,11 @@ export default function Group({
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
 
+  const chainRef = useRef<any>(null);
+
   // Bypass Hook
 
-  const { bypass, toggleBypass } = useBypass({
+  const { bypass, toggleBypass, setBypass } = useBypass({
     input: generalIn,
     output: generalOut,
     inputConnectsTo: [in1],
@@ -52,6 +56,24 @@ export default function Group({
     }
   }, [index]);
 
+  useSerialiazable({
+    ref,
+    serialize: async () => {
+      const serialized = await chainRef.current.serialize();
+      return {
+        module: "Group",
+        bypass: Boolean(bypass),
+        chain: serialized,
+      };
+    },
+    deserialize: (data: any) => {
+      setBypass(data.bypass);
+      if (chainRef.current) {
+        chainRef.current.deserialize(data.chain);
+      }
+    },
+  });
+
   return (
     <ModuleUI
       index={index}
@@ -62,7 +84,7 @@ export default function Group({
     >
       <div className="flex flex-row gap-4 items-stretch justify-between w-full">
         {/* @ts-ignore:next-line */}
-        <Chain input={in1} output={out1} />
+        <Chain input={in1} output={out1} ref={chainRef} />
       </div>
     </ModuleUI>
   );
