@@ -164,14 +164,17 @@ function Chain({
     });
   }
 
-  function serialize() {
-    const serializedModules = modules.map(({ id }) => {
-      const ref = modulesRef.current.get(id);
-      return {
-        id,
-        ...ref.serialize(),
-      };
-    });
+  async function serialize() {
+    const serializedModules = await Promise.all(
+      modules.map(async ({ id }) => {
+        const ref = modulesRef.current.get(id);
+        const serialized = await ref.serialize();
+        return {
+          id,
+          ...serialized,
+        };
+      })
+    );
     console.log(serializedModules);
     setSerializedString(JSON.stringify(serializedModules));
   }
