@@ -46,9 +46,9 @@ export default function AddModule({
   shouldAllowSplitter?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const modules = Object.entries(availableModules).filter(
-    ([name]) => shouldAllowSplitter || name !== "Splitter"
-  );
+  const modules = Object.entries(availableModules)
+    .filter(([name]) => shouldAllowSplitter || name !== "Splitter")
+    .sort((a, b) => a[0].localeCompare(b[0]));
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="relative group w-full flex flex-col items-center gap-5 border-1 text-gray-400 border-gray-200 p-6 rounded-3xl shadow-xl hover:text-gray-800 transition-all duration-300 hover:pb-11 bg-white z-10">
