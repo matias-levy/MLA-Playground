@@ -71,5 +71,5 @@ export default function useBypass({
     }
   }, [bypass, RNBODevice]);
 
-  return { bypass, toggleBypass };
+  return { bypass, toggleBypass, setBypass };
 }
