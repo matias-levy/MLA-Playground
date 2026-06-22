@@ -66,7 +66,7 @@ export default function AddModule({
     : availableModules.slice(0, -1);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="relative group w-full flex flex-col items-center gap-5 border-1 text-muted-foreground border-border p-6 rounded-3xl shadow-xl hover:text-foreground transition-all duration-300 hover:pb-11 bg-card dark:border-card z-10">
+      <DialogTrigger className="relative group w-full flex flex-col items-center gap-5 border-1 text-muted-foreground border-border p-6 rounded-3xl shadow-xl hover:text-foreground transition-all duration-300 hover:pb-11 bg-card dark:border-card z-10 hover:cursor-pointer">
         <Plus />
 
         <h3 className="group-hover:scale-y-100 scale-y-0 group-hover:opacity-100 opacity-0 transition-all absolute top-12 origin-top">
@@ -81,6 +81,7 @@ export default function AddModule({
           {modulesArray.map((Module, i) => (
             <Button
               key={i}
+              variant="secondary"
               onClick={() => {
                 registerModule(Module);
                 setOpen(false);
