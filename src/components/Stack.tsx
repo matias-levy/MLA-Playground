@@ -45,14 +45,19 @@ function Stack() {
       audioInput: internal[0],
       chain: internal[1],
     };
-    console.log(serialized);
     const stringified = JSON.stringify(serialized, null, 2);
     // download the stringified as a file
     const blob = new Blob([stringified], { type: "application/octet-stream" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `playground-${Date.now()}.playgroundproject`;
+    const date = new Date();
+    const formattedDate = date
+      .toISOString()
+      .replace(/:/g, "-")
+      .split(".")
+      .join("");
+    a.download = `${formattedDate}.playgroundproject`;
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
