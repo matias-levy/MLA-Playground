@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 
 const getWaveformData = (audioBuffer) => {
   const channelData = audioBuffer.getChannelData(0); // Get the first channel
@@ -14,6 +15,7 @@ const Waveform = ({ audioBuffer, loop, start, end }) => {
   const canvasRef = useRef(null);
   const canvasPlayheadRef = useRef(null);
   const [waveformData, setWaveformData] = useState([]);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (audioBuffer) {
@@ -46,11 +48,11 @@ const Waveform = ({ audioBuffer, loop, start, end }) => {
         ctx.lineTo(i, y);
       }
 
-      ctx.strokeStyle = "black"; // Set color for waveform
+      ctx.strokeStyle = theme === "dark" ? "white" : "black"; // Set color for waveform
       ctx.lineWidth = 2;
       ctx.stroke();
     }
-  }, [waveformData, audioBuffer]);
+  }, [waveformData, audioBuffer, theme]);
 
   useEffect(() => {
     const canvas = canvasPlayheadRef.current;
