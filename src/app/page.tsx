@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Info } from "lucide-react";
+import { ModeToggle } from "./theme-provider";
 
 function FreeSoundAuthParams() {
   const searchParams = useSearchParams();
@@ -33,7 +34,7 @@ function FreeSoundAuthParams() {
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-gray-100">
+    <div className="flex flex-col items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-background text-foreground">
       <main className="container mx-auto flex flex-col items-start w-full max-w-4xl">
         <div className="flex flex-row justify-between w-full">
           <h1 className="font-bold text-2xl mb-4">
@@ -41,7 +42,9 @@ export default function Home() {
             <u className="underline-offset-8 decoration-2">no-nonsense</u> audio
             playground
           </h1>
-          <Dialog>
+          <div className="flex items-center gap-1">
+            <ModeToggle />
+            <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" className="rounded-full">
                 <Info />
@@ -77,7 +80,8 @@ export default function Home() {
                 </p>
               </div>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
         <AudioProvider>
           <Stack />

@@ -28,11 +28,12 @@ export default function ModuleUI({
 }: ModuleUIProps) {
   return (
     <Accordion
+      id="eso"
       type="single"
       collapsible
       className={cn(
-        "w-full flex flex-col items-stretch border-1 px-6 py-2 rounded-3xl shadow-xl transition-all",
-        bypass && "opacity-50 transition-all"
+        "w-full flex flex-col items-stretch border-1 px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card",
+        bypass && "opacity-50 transition-all dark:bg-muted"
       )}
       defaultValue="item-1"
     >

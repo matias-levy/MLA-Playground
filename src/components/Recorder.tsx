@@ -135,7 +135,7 @@ export default function Recorder({
   }
 
   return (
-    <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl bg-white">
+    <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl bg-card dark:border-card">
       <Label>Recorder</Label>
       <div className="flex flex-row gap-2 justify-between items-stretch">
         <Button className="grow" onClick={start} disabled={recording}>

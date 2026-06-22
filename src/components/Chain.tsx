@@ -58,7 +58,7 @@ function SortableItem(props: SortableItemProps) {
 
   return (
     <div
-      className="w-full bg-white relative rounded-3xl"
+      className="w-full relative rounded-3xl"
       ref={setNodeRef}
       style={style}
       {...attributes}
@@ -170,7 +170,7 @@ function Chain({
         <div
           className={
             dragging
-              ? "bg-gray-200 w-full py-5 rounded-3xl transition-all flex flex-col gap-4"
+              ? "bg-gray-200 w-full py-5 rounded-3xl transition-all flex flex-col gap-4 dark:bg-muted"
               : "w-full rounded-3xl transition-all flex flex-col gap-4"
           }
         >
@@ -208,7 +208,7 @@ function Chain({
           ) : null}
         </DragOverlay>
       </DndContext>
-      <hr className="h-px w-full bg-gray-200 border-0 dark:bg-gray-700 rounded-2xl" />
+      <hr className="h-px w-full bg-border border-0 dark:bg-card rounded-2xl" />
       <AddModule
         registerModule={registerModule}
         shouldAllowSplitter={shouldAllowSplitter}
