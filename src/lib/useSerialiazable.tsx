@@ -1,8 +1,6 @@
 import { useImperativeHandle } from "react";
 
-export async function serializeBlob(
-  blob: Blob | null
-): Promise<string | null> {
+export async function serializeBlob(blob: Blob | null): Promise<string | null> {
   if (!blob) return null;
 
   const buffer = await blob.arrayBuffer();
@@ -31,6 +29,15 @@ export function deserializeBlob(data: string | null | undefined): Blob | null {
   return new Blob([bytes]);
 }
 
+export interface SerializedStack {
+  version: number;
+  createdAt: number;
+  currentFile: string | null;
+  fileIsAudio: boolean;
+  fileMode: string;
+  audioInput: any;
+  chain: any;
+}
 export interface SerialiazableProps {
   ref: React.RefObject<any>;
   serialize: () => any;

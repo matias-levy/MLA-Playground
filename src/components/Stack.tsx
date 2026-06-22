@@ -5,6 +5,11 @@ import { Button } from "./ui/button";
 import dynamic from "next/dynamic";
 import AudioInput from "@/components/AudioInput";
 import RecorderSkeleton from "./RecorderSkeleton";
+import {
+  serializeBlob,
+  deserializeBlob,
+  SerializedStack,
+} from "@/lib/useSerialiazable";
 
 const Recorder = dynamic(() => import("@/components/Recorder"), {
   ssr: false,
@@ -12,33 +17,93 @@ const Recorder = dynamic(() => import("@/components/Recorder"), {
 });
 
 import Chain from "./Chain";
+import { FolderOpen, Save } from "lucide-react";
 
 function Stack() {
   const [currentFile, setCurrentFile] = useState<Blob | null>(null);
   const [fileIsAudio, setFileIsAudio] = useState(true);
   const [fileMode, setFileMode] = useState("audio");
   const [downloadedSoundId, setDownloadedSoundId] = useState(-1);
-  const [serializedString, setSerializedString] = useState<string | null>(null);
   const chainRef = useRef<any>(null);
+  const audioInputRef = useRef<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [input, setInput] = useState<AudioNode | null>(null);
   const [output, setOutput] = useState<AudioNode | null>(null);
 
   const serialize = async () => {
-    const serialized = await chainRef.current.serialize();
-    setSerializedString(serialized);
+    const internal = await Promise.all([
+      audioInputRef.current.serialize(),
+      chainRef.current.serialize(),
+    ]);
+    const serialized: SerializedStack = {
+      version: 1,
+      createdAt: Date.now(),
+      currentFile: currentFile ? await serializeBlob(currentFile) : null,
+      fileIsAudio: fileIsAudio,
+      fileMode: fileMode,
+      audioInput: internal[0],
+      chain: internal[1],
+    };
+    console.log(serialized);
+    const stringified = JSON.stringify(serialized, null, 2);
+    // download the stringified as a file
+    const blob = new Blob([stringified], { type: "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `playground-${Date.now()}.playgroundproject`;
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   };
 
-  const deserialize = () => {
-    if (!serializedString) return;
-    chainRef.current.deserialize(serializedString);
+  const deserializeFromFile = async (file: File) => {
+    try {
+      const deserialized: SerializedStack = JSON.parse(await file.text());
+      setCurrentFile(
+        deserialized.currentFile
+          ? deserializeBlob(deserialized.currentFile)
+          : null
+      );
+      setFileIsAudio(deserialized.fileIsAudio);
+      setFileMode(deserialized.fileMode);
+      audioInputRef.current.deserialize(deserialized.audioInput);
+      chainRef.current.deserialize(deserialized.chain);
+    } catch (error) {
+      console.error("Error deserializing project:", error);
+    }
   };
 
   return (
     <div className="flex flex-col gap-4 row-start-2 w-full">
-      <Button onClick={serialize}>Serialize</Button>
-      <Button onClick={deserialize}>Deserialize</Button>
+      <div className="flex flex-row gap-2 justify-end">
+        <Button
+          variant="outline"
+          className="rounded-full"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <FolderOpen />
+        </Button>
+        <Button variant="outline" className="rounded-full" onClick={serialize}>
+          <Save />
+        </Button>
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".playgroundproject"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          deserializeFromFile(file);
+          e.target.value = "";
+        }}
+      />
       <AudioInput
+        ref={audioInputRef}
         currentFile={currentFile}
         setCurrentFile={setCurrentFile}
         fileIsAudio={fileIsAudio}

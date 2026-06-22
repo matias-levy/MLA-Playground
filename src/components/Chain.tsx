@@ -178,10 +178,10 @@ function Chain({
           };
         })
       );
-      return JSON.stringify(serializedModules);
+      return serializedModules;
     },
     deserialize: (data: any) => {
-      const deserializedModules = JSON.parse(data);
+      const deserializedModules = data;
       flushSync(() => {
         setModules(
           deserializedModules.map((module: { id: string; module: string }) => ({
