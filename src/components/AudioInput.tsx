@@ -218,11 +218,6 @@ export default function AudioInput({
         loop,
         detune,
         playbackRate,
-        sampleRate: ctx.sampleRate,
-        audioBufferData: audioBuffer
-          ? await serializeBlob(new Blob([audioBuffer.getChannelData(0)]))
-          : null,
-        audioBufferLength: audioBuffer ? audioBuffer.length : 0,
       };
     },
     deserialize: (data: any) => {
@@ -232,14 +227,6 @@ export default function AudioInput({
       setLoop(data.loop);
       setDetune(data.detune);
       setPlaybackRate(data.playbackRate);
-      setAudioBuffer(
-        data.audioBuffer
-          ? new AudioBuffer({
-              length: data.audioBufferLength,
-              sampleRate: data.sampleRate,
-            })
-          : null
-      );
       setPlaying(false);
       audioBufferNode?.stop();
     },
