@@ -68,7 +68,7 @@ function SortableItem(props: SortableItemProps) {
         {...listeners}
         className="absolute left-1/2 transform -translate-x-1/2 mt-5 touch-none z-50"
       >
-        <GripHorizontal className="text-gray-400" />
+        <GripHorizontal className="text-muted-foreground hover:text-foreground transition-all duration-300 hover:cursor-pointer" />
       </div>
       {props.children}
     </div>
