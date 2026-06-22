@@ -1,4 +1,7 @@
-export function convertUint8ToFloat32(uint8Array: Uint8Array, byte1: boolean) {
+export function convertUint8ToFloat32(
+  uint8Array: Uint8Array,
+  byte1: boolean
+): Float32Array<ArrayBuffer> {
   if (byte1) {
     const buffer = new ArrayBuffer(Math.floor(uint8Array.length / 4) * 4);
     const float32Array = new Float32Array(buffer);
@@ -13,13 +16,9 @@ export function convertUint8ToFloat32(uint8Array: Uint8Array, byte1: boolean) {
       );
     }
 
-    // Create a new ArrayBuffer that shares the same binary data
-    const buffer = uint8Array.buffer.slice(
-      0,
-      Math.floor(uint8Array.length / 4) * 4
-    );
-
-    // Create a Float32Array that views the same memory
+    const byteLength = Math.floor(uint8Array.length / 4) * 4;
+    const buffer = new ArrayBuffer(byteLength);
+    new Uint8Array(buffer).set(uint8Array.subarray(0, byteLength));
     const float32Array = new Float32Array(buffer);
 
     // Clamp values between -1 and 1
