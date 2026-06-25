@@ -20,6 +20,11 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import useBypass from "@/lib/useBypass";
+import useSerialiazable, {
+  serializeBlob,
+  deserializeBlob,
+  safeNumber,
+} from "@/lib/useSerialiazable";
 
 interface IR {
   name: string;
@@ -43,6 +48,7 @@ const handleTimeChange = (value: number) => {
 
 export default function Convolver({
   index,
+  ref,
   unregisterModule,
   addModule,
   removeModule,
@@ -58,7 +64,7 @@ export default function Convolver({
   const [stretchCommited, setStretchCommited] = useState(1);
   const [mix, setMix] = useState(0.5);
   const [IRSource, setIRSource] = useState("internal");
-  const [selectedInternalIR, setSelectedInternalIR] = useState("Hall 1");
+  const [selectedInternalIR, setSelectedInternalIR] = useState(IRs[0].name);
   const [internalIRBlob, setInternalIRBlob] = useState<Blob | null>(null);
   const [uploadedIRBlob, setUploadedIRBlob] = useState<Blob | null>(null);
   const [loadedAudioBuffer, setLoadedAudioBuffer] =
@@ -98,7 +104,7 @@ export default function Convolver({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass } = useBypass({
+  const { bypass, toggleBypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [convolverNode, dryGain],
@@ -124,22 +130,34 @@ export default function Convolver({
       dryGain.connect(outputNode);
       wetGain.connect(outputNode);
 
-      async function loadFirstIR() {
-        setSelectedInternalIR(IRs[0].name);
-        const url = IRs[0].url;
-        const response = await fetch(url); //Blob
-        const b = await response.blob();
-        setInternalIRBlob(b);
-      }
-
-      loadFirstIR();
-
       addModule({ input: inputNode, output: outputNode }, index);
       return () => {
         removeModule({ input: inputNode, output: outputNode });
       };
     }
   }, [index]);
+
+  useEffect(() => {
+    if (IRSource !== "internal") return;
+    let isCancelled = false;
+    async function loadInternalIR() {
+      const url = IRs.find((ir) => ir.name === selectedInternalIR)?.url;
+      if (!url) return;
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        if (!isCancelled) setInternalIRBlob(blob);
+      } catch (error) {
+        console.error("Error loading impulse response:", error);
+      }
+    }
+
+    loadInternalIR();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedInternalIR, IRSource]);
 
   useEffect(() => {
     delayNode?.delayTime.setValueAtTime(timeInS, ctx.currentTime);
@@ -201,6 +219,41 @@ export default function Convolver({
     };
   }, [IRSource, internalIRBlob, uploadedIRBlob, convolverNode, ctx]);
 
+  useSerialiazable({
+    ref,
+    serialize: async () => {
+      return {
+        module: "Reverb / Convolver",
+        bypass: Boolean(bypass),
+        time: safeNumber(time),
+        feedback: safeNumber(feedback),
+        stretch: safeNumber(stretch),
+        stretchCommited: safeNumber(stretchCommited),
+        mix: safeNumber(mix),
+        IRSource: String(IRSource),
+        selectedInternalIR: String(selectedInternalIR),
+        uploadedIRBlob: uploadedIRBlob
+          ? await serializeBlob(uploadedIRBlob)
+          : null,
+      };
+    },
+    deserialize: (data: any) => {
+      setBypass(Boolean(data.bypass));
+      setTime(safeNumber(data.time));
+      setFeedback(safeNumber(data.feedback));
+      setStretch(safeNumber(data.stretch));
+      setStretchCommited(safeNumber(data.stretchCommited));
+      setMix(safeNumber(data.mix));
+      setIRSource(String(data.IRSource));
+      setSelectedInternalIR(String(data.selectedInternalIR));
+      setUploadedIRBlob(
+        data.uploadedIRBlob
+          ? deserializeBlob(String(data.uploadedIRBlob))
+          : null
+      );
+    },
+  });
+
   return (
     <ModuleUI
       index={index}
@@ -220,16 +273,7 @@ export default function Convolver({
           <RadioGroupItem value="internal" id="r1" />
           <Label htmlFor="r1">Internal IR</Label>
           <Select
-            onValueChange={async (v) => {
-              setSelectedInternalIR(v);
-
-              const url = IRs.find((ir) => ir.name === v)?.url;
-              if (url) {
-                const response = await fetch(url); //Blob
-                const b = await response.blob();
-                setInternalIRBlob(b);
-              }
-            }}
+            onValueChange={setSelectedInternalIR}
             value={selectedInternalIR}
           >
             <SelectTrigger className="w-full">

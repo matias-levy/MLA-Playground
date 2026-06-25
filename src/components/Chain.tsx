@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { flushSync } from "react-dom";
 
-import AddModule from "@/components/AddModule";
+import AddModule, { availableModules } from "@/components/AddModule";
 
 import {
   DndContext,
@@ -31,6 +32,7 @@ import {
 
 import useAudioChain from "@/lib/useAudioChain";
 import { useAudioContext, AudioModule } from "@/components/AudioProvider";
+import useSerialiazable from "@/lib/useSerialiazable";
 
 import { GripHorizontal } from "lucide-react";
 
@@ -76,7 +78,9 @@ function SortableItem(props: SortableItemProps) {
 }
 
 export interface AudioModuleProps {
+  ref: any;
   index: number;
+  moduleId: string;
   unregisterModule: (index: number) => void;
   addModule: (module: AudioModule, index: number) => void;
   removeModule: (module: AudioModule) => void;
@@ -93,16 +97,19 @@ function Chain({
   shouldAllowSplitter,
   input,
   output,
+  ref,
 }: {
   shouldAllowSplitter?: boolean;
   input: AudioNode | null;
   output: AudioNode | null;
+  ref: React.RefObject<any>;
 }) {
   const { audioContext: ctx } = useAudioContext();
   const { setInput, addModule, removeModule, setOutput } = useAudioChain({
     ctx,
   });
   const [modules, setModules] = useState<AudioModuleStateType[]>([]);
+  const modulesRef = useRef(new Map());
   const [dragging, setDragging] = useState(false);
   const [activeModule, setActiveModule] = useState<
     AudioModuleStateType | null | undefined
@@ -158,6 +165,37 @@ function Chain({
     });
   }
 
+  useSerialiazable({
+    ref,
+    serialize: async () => {
+      const serializedModules = await Promise.all(
+        modules.map(async ({ id }) => {
+          const ref = modulesRef.current.get(id);
+          const serialized = await ref.serialize();
+          return {
+            id,
+            ...serialized,
+          };
+        })
+      );
+      return serializedModules;
+    },
+    deserialize: (data: any) => {
+      const deserializedModules = data;
+      flushSync(() => {
+        setModules(
+          deserializedModules.map((module: { id: string; module: string }) => ({
+            id: module.id,
+            Component: availableModules[module.module],
+          }))
+        );
+      });
+      deserializedModules.forEach((module: { id: string }) => {
+        modulesRef.current.get(module.id)?.deserialize(module);
+      });
+    },
+  });
+
   return (
     <div className="flex flex-col gap-4 row-start-2 items-center w-full">
       <DndContext
@@ -182,6 +220,14 @@ function Chain({
               return (
                 <SortableItem key={id} id={id}>
                   <Component
+                    moduleId={id}
+                    ref={(node: any) => {
+                      if (node) {
+                        modulesRef.current.set(id, node);
+                      } else {
+                        modulesRef.current.delete(id);
+                      }
+                    }}
                     index={i}
                     unregisterModule={unregisterModule}
                     addModule={addModule}
@@ -199,6 +245,8 @@ function Chain({
                 <GripHorizontal className="text-gray-400" />
               </div>
               <activeModule.Component
+                moduleId={activeModule.id}
+                ref={null}
                 index={-1}
                 unregisterModule={() => {}}
                 addModule={() => {}}

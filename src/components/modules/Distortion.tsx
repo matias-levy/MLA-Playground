@@ -8,6 +8,7 @@ import { AudioModuleProps } from "@/components/Chain";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 function makeDistortionCurve(amount: number) {
   const k = typeof amount === "number" ? amount : 50;
@@ -24,6 +25,7 @@ function makeDistortionCurve(amount: number) {
 
 export default function Distortion({
   index,
+  ref,
   unregisterModule,
   addModule,
   removeModule,
@@ -45,7 +47,7 @@ export default function Distortion({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass } = useBypass({
+  const { bypass, toggleBypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [waveshaperNode],
@@ -69,6 +71,21 @@ export default function Distortion({
       waveshaperNode.curve = curve;
     }
   }, [distortion]);
+
+  useSerialiazable({
+    ref,
+    serialize: () => {
+      return {
+        module: "Distortion",
+        bypass: Boolean(bypass),
+        distortion: safeNumber(distortion),
+      };
+    },
+    deserialize: (data: any) => {
+      setBypass(Boolean(data.bypass));
+      setDistortion(safeNumber(data.distortion));
+    },
+  });
 
   return (
     <ModuleUI

@@ -15,6 +15,7 @@ import Waveform from "@/components/Waveform";
 import FreeSound from "@/components/FreeSound";
 import useFreeSoundQuery from "@/lib/useFreeSoundQuery";
 import ParamSlider from "@/components/ParamSlider";
+import useSerialiazable, { serializeBlob } from "@/lib/useSerialiazable";
 
 import {
   Select,
@@ -36,6 +37,7 @@ export interface AudioInputProps {
   setFileMode: React.Dispatch<SetStateAction<string>>;
   downloadedSoundId: number;
   setDownloadedSoundId: React.Dispatch<SetStateAction<number>>;
+  ref: React.RefObject<any>;
 }
 
 export default function AudioInput({
@@ -48,6 +50,7 @@ export default function AudioInput({
   setFileMode,
   downloadedSoundId,
   setDownloadedSoundId,
+  ref,
 }: AudioInputProps) {
   // External Input Revelant State
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -96,6 +99,7 @@ export default function AudioInput({
       const buff = await file.arrayBuffer();
       switch (fileMode) {
         case "audio":
+          console.log(buff);
           ctx.decodeAudioData(buff).then((audio) => {
             setAudioBuffer(audio);
             setLoading(false);
@@ -203,6 +207,30 @@ export default function AudioInput({
       setAudioBufferNode(bufferNode);
     }
   };
+
+  useSerialiazable({
+    ref,
+    serialize: async () => {
+      return {
+        selectedTab,
+        volume,
+        cues,
+        loop,
+        detune,
+        playbackRate,
+      };
+    },
+    deserialize: (data: any) => {
+      setVolume(data.volume);
+      setSelectedTab(data.selectedTab);
+      setCues(data.cues);
+      setLoop(data.loop);
+      setDetune(data.detune);
+      setPlaybackRate(data.playbackRate);
+      setPlaying(false);
+      audioBufferNode?.stop();
+    },
+  });
 
   return (
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl bg-card dark:border-card">

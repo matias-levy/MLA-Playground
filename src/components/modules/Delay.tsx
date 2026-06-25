@@ -10,6 +10,7 @@ import ParamSlider from "@/components/ParamSlider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import useBypass from "@/lib/useBypass";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 const handleTimeChange = (value: number) => {
   return Math.pow(value, 2.5) * 2.5;
@@ -17,6 +18,7 @@ const handleTimeChange = (value: number) => {
 
 export default function Delay({
   index,
+  ref,
   unregisterModule,
   addModule,
   removeModule,
@@ -71,7 +73,7 @@ export default function Delay({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass } = useBypass({
+  const { bypass, toggleBypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [delayNode, dryGain],
@@ -124,6 +126,31 @@ export default function Delay({
       lfo.type = waveform as OscillatorType;
     }
   }, [timeInS, feedback, mix, lfoRate, lfoDepth, waveform]);
+
+  useSerialiazable({
+    ref,
+    serialize: () => {
+      return {
+        module: "Delay / Time Modulation",
+        bypass: Boolean(bypass),
+        time: safeNumber(time),
+        feedback: safeNumber(feedback),
+        mix: safeNumber(mix),
+        lfoRate: safeNumber(lfoRate),
+        lfoDepth: safeNumber(lfoDepth),
+        waveform: String(waveform),
+      };
+    },
+    deserialize: (data: any) => {
+      setBypass(Boolean(data.bypass));
+      setTime(safeNumber(data.time));
+      setFeedback(safeNumber(data.feedback));
+      setMix(safeNumber(data.mix));
+      setLfoRate(safeNumber(data.lfoRate));
+      setLfoDepth(safeNumber(data.lfoDepth));
+      setWaveform(String(data.waveform));
+    },
+  });
 
   return (
     <ModuleUI

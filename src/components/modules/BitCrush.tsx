@@ -7,9 +7,11 @@ import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import { createSafeAudioNode } from "@/utils/utils";
 import useBypass from "@/lib/useBypass";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function BitCrush({
   index,
+  ref,
   unregisterModule,
   addModule,
   removeModule,
@@ -30,7 +32,7 @@ export default function BitCrush({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass } = useBypass({
+  const { bypass, toggleBypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [workletNodeRef.current],
@@ -68,6 +70,23 @@ export default function BitCrush({
 
     workletNodeRef.current?.parameters.get("bits")?.setValueAtTime(bits, 0);
   }, [bits, sampleRate]);
+
+  useSerialiazable({
+    ref,
+    serialize: () => {
+      return {
+        module: "Bit Crush",
+        bypass: Boolean(bypass),
+        sampleRate: safeNumber(sampleRate),
+        bits: safeNumber(bits),
+      };
+    },
+    deserialize: (data: any) => {
+      setBypass(Boolean(data.bypass));
+      setSampleRate(safeNumber(data.sampleRate));
+      setBits(safeNumber(data.bits));
+    },
+  });
 
   return (
     <ModuleUI

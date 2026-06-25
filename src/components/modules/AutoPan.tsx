@@ -9,9 +9,11 @@ import { AudioModuleProps } from "@/components/Chain";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function AutoPan({
   index,
+  ref,
   unregisterModule,
   addModule,
   removeModule,
@@ -55,7 +57,7 @@ export default function AutoPan({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass } = useBypass({
+  const { bypass, toggleBypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [inputPanNode],
@@ -94,6 +96,27 @@ export default function AutoPan({
       lfo.type = waveform;
     }
   }, [waveform]);
+
+  useSerialiazable({
+    ref,
+    serialize: () => {
+      return {
+        module: "Auto Pan",
+        bypass: Boolean(bypass),
+        frequency: safeNumber(frequency),
+        depth: safeNumber(depth),
+        waveform: String(waveform),
+        offset: safeNumber(offset),
+      };
+    },
+    deserialize: (data: any) => {
+      setBypass(Boolean(data.bypass));
+      setFrequency(safeNumber(data.frequency));
+      setDepth(safeNumber(data.depth));
+      setWaveform(String(data.waveform) as OscillatorType);
+      setOffset(safeNumber(data.offset));
+    },
+  });
 
   return (
     <ModuleUI

@@ -23,35 +23,20 @@ import { AudioModuleComponent } from "@/components/Chain";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-const availableModules: AudioModuleComponent[] = [
+export const availableModules: Record<string, AudioModuleComponent> = {
   Distortion,
-  Delay,
-  BitCrush,
+  "Delay / Time Modulation": Delay,
+  "Bit Crush": BitCrush,
   Tremolo,
   Utility,
-  AutoPan,
+  "Auto Pan": AutoPan,
   Compressor,
   Filter,
-  Convolver,
+  "Reverb / Convolver": Convolver,
   RNBO,
   Group,
   Splitter,
-];
-
-const availableModulesNames: String[] = [
-  "Distortion",
-  "Delay / Time Modulation",
-  "Bit Crush",
-  "Tremolo",
-  "Utility",
-  "Auto Pan",
-  "Compressor",
-  "Filter",
-  "Reverb / Convolver",
-  "RNBO",
-  "Group",
-  "Splitter",
-];
+};
 
 export default function AddModule({
   registerModule,
@@ -61,9 +46,9 @@ export default function AddModule({
   shouldAllowSplitter?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const modulesArray = shouldAllowSplitter
-    ? availableModules
-    : availableModules.slice(0, -1);
+  const modules = Object.entries(availableModules)
+    .filter(([name]) => shouldAllowSplitter || name !== "Splitter")
+    .sort((a, b) => a[0].localeCompare(b[0]));
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="relative group w-full flex flex-col items-center gap-5 border-1 text-muted-foreground border-border p-6 rounded-3xl shadow-xl hover:text-foreground transition-all duration-300 hover:pb-11 bg-card dark:border-card z-10 hover:cursor-pointer">
@@ -78,16 +63,16 @@ export default function AddModule({
           <DialogTitle>Add module</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-2">
-          {modulesArray.map((Module, i) => (
+          {modules.map(([name, component]) => (
             <Button
-              key={i}
+              key={name}
               variant="secondary"
               onClick={() => {
-                registerModule(Module);
+                registerModule(component);
                 setOpen(false);
               }}
             >
-              {availableModulesNames[i]}
+              {name}
             </Button>
           ))}
         </div>

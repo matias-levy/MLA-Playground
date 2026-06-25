@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
@@ -8,9 +8,11 @@ import Chain from "../Chain";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function Splitter({
   index,
+  ref,
   unregisterModule,
   addModule,
   removeModule,
@@ -40,9 +42,12 @@ export default function Splitter({
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
 
+  const chain1Ref = useRef<any>(null);
+  const chain2Ref = useRef<any>(null);
+
   // Bypass Hook
 
-  const { bypass, toggleBypass } = useBypass({
+  const { bypass, toggleBypass, setBypass } = useBypass({
     input: generalIn,
     output: generalOut,
     inputConnectsTo: [in1, in2],
@@ -67,6 +72,31 @@ export default function Splitter({
     in1?.gain.setValueAtTime(1 - crossfade, ctx.currentTime);
     in2?.gain.setValueAtTime(crossfade, ctx.currentTime);
   }, [crossfade]);
+
+  useSerialiazable({
+    ref,
+    serialize: async () => {
+      const serialized1 = await chain1Ref.current.serialize();
+      const serialized2 = await chain2Ref.current.serialize();
+      return {
+        module: "Splitter",
+        bypass: Boolean(bypass),
+        crossfade: safeNumber(crossfade),
+        chain1: serialized1,
+        chain2: serialized2,
+      };
+    },
+    deserialize: (data: any) => {
+      setBypass(Boolean(data.bypass));
+      setCrossfade(safeNumber(data.crossfade));
+      if (chain1Ref.current) {
+        chain1Ref.current.deserialize(data.chain1);
+      }
+      if (chain2Ref.current) {
+        chain2Ref.current.deserialize(data.chain2);
+      }
+    },
+  });
 
   return (
     <ModuleUI
@@ -93,9 +123,9 @@ export default function Splitter({
       />
       <div className="flex flex-row gap-4 items-stretch justify-between w-full">
         {/* @ts-ignore:next-line */}
-        <Chain input={in1} output={out1} />
+        <Chain input={in1} output={out1} ref={chain1Ref} />
         {/* @ts-ignore:next-line */}
-        <Chain input={in2} output={out2} />
+        <Chain input={in2} output={out2} ref={chain2Ref} />
       </div>
     </ModuleUI>
   );

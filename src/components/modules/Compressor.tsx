@@ -8,9 +8,11 @@ import { AudioModuleProps } from "@/components/Chain";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function Compressor({
   index,
+  ref,
   unregisterModule,
   addModule,
   removeModule,
@@ -47,7 +49,7 @@ export default function Compressor({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass } = useBypass({
+  const { bypass, toggleBypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [compressorNode],
@@ -80,6 +82,31 @@ export default function Compressor({
     compressorNode?.release.setValueAtTime(release, ctx.currentTime);
     gainNode?.gain.setValueAtTime(makeup, ctx.currentTime);
   }, [threshold, knee, ratio, attack, release, makeup]);
+
+  useSerialiazable({
+    ref,
+    serialize: () => {
+      return {
+        module: "Compressor",
+        bypass: Boolean(bypass),
+        threshold: safeNumber(threshold),
+        knee: safeNumber(knee),
+        ratio: safeNumber(ratio),
+        attack: safeNumber(attack),
+        release: safeNumber(release),
+        makeup: safeNumber(makeup),
+      };
+    },
+    deserialize: (data: any) => {
+      setBypass(Boolean(data.bypass));
+      setThreshold(safeNumber(data.threshold));
+      setKnee(safeNumber(data.knee));
+      setRatio(safeNumber(data.ratio));
+      setAttack(safeNumber(data.attack));
+      setRelease(safeNumber(data.release));
+      setMakeup(safeNumber(data.makeup));
+    },
+  });
 
   return (
     <ModuleUI
