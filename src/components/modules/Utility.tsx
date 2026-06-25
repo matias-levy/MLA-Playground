@@ -9,6 +9,7 @@ import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
+import { dbToLinear, linearToDb } from "@/utils/conversion";
 
 export default function Utility({
   index,
@@ -20,7 +21,7 @@ export default function Utility({
   const { audioContext: ctx } = useAudioContext();
 
   // UI Params
-  const [gain, setGain] = useState(1);
+  const [gain, setGain] = useState(1); //linear gain
   const [pan, setPan] = useState(0);
 
   // Create nodes
@@ -95,12 +96,13 @@ export default function Utility({
       <ParamSlider
         name="Gain"
         min={0}
-        max={3}
+        max={dbToLinear(24)}
         value={gain}
         defaultValue={1}
         step={0.001}
         setValue={setGain}
-        rep={(gain * 100).toFixed(0) + " %"}
+        rep={linearToDb(gain).toFixed(1) + " dB"}
+        logScale
       />
 
       {/* Pan */}

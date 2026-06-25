@@ -9,6 +9,7 @@ import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
+import { dbToLinear, linearToDb } from "@/utils/conversion";
 
 export default function Compressor({
   index,
@@ -25,7 +26,7 @@ export default function Compressor({
   const [ratio, setRatio] = useState(12);
   const [attack, setAttack] = useState(0.003);
   const [release, setRelease] = useState(0.25);
-  const [makeup, setMakeup] = useState(1);
+  const [makeup, setMakeup] = useState(1); //linear gain
 
   const [currentReduction, setCurrentReduction] = useState(1);
 
@@ -180,12 +181,13 @@ export default function Compressor({
       <ParamSlider
         name="Output Gain"
         min={0}
-        max={3}
+        max={dbToLinear(24)}
         value={makeup}
         defaultValue={1}
-        step={0.01}
+        step={0.001}
         setValue={setMakeup}
-        rep={makeup.toFixed(2)}
+        rep={linearToDb(makeup).toFixed(1) + " dB"}
+        logScale
       />
     </ModuleUI>
   );
