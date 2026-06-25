@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
-import useSerialiazable from "@/lib/useSerialiazable";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function Tremolo({
   index,
@@ -96,16 +96,16 @@ export default function Tremolo({
       return {
         module: "Tremolo",
         bypass: Boolean(bypass),
-        frequency,
-        depth,
-        waveform,
+        frequency: safeNumber(frequency),
+        depth: safeNumber(depth),
+        waveform: String(waveform),
       };
     },
     deserialize: (data: any) => {
-      setBypass(data.bypass);
-      setFrequency(data.frequency);
-      setDepth(data.depth);
-      setWaveform(data.waveform);
+      setBypass(Boolean(data.bypass));
+      setFrequency(safeNumber(data.frequency));
+      setDepth(safeNumber(data.depth));
+      setWaveform(String(data.waveform) as OscillatorType);
     },
   });
 

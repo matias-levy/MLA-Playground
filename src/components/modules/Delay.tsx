@@ -10,7 +10,7 @@ import ParamSlider from "@/components/ParamSlider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import useBypass from "@/lib/useBypass";
-import useSerialiazable from "@/lib/useSerialiazable";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 const handleTimeChange = (value: number) => {
   return Math.pow(value, 2.5) * 2.5;
@@ -133,22 +133,22 @@ export default function Delay({
       return {
         module: "Delay / Time Modulation",
         bypass: Boolean(bypass),
-        time,
-        feedback,
-        mix,
-        lfoRate,
-        lfoDepth,
-        waveform,
+        time: safeNumber(time),
+        feedback: safeNumber(feedback),
+        mix: safeNumber(mix),
+        lfoRate: safeNumber(lfoRate),
+        lfoDepth: safeNumber(lfoDepth),
+        waveform: String(waveform),
       };
     },
     deserialize: (data: any) => {
-      setBypass(data.bypass);
-      setTime(data.time);
-      setFeedback(data.feedback);
-      setMix(data.mix);
-      setLfoRate(data.lfoRate);
-      setLfoDepth(data.lfoDepth);
-      setWaveform(data.waveform);
+      setBypass(Boolean(data.bypass));
+      setTime(safeNumber(data.time));
+      setFeedback(safeNumber(data.feedback));
+      setMix(safeNumber(data.mix));
+      setLfoRate(safeNumber(data.lfoRate));
+      setLfoDepth(safeNumber(data.lfoDepth));
+      setWaveform(String(data.waveform));
     },
   });
 

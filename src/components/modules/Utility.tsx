@@ -8,7 +8,7 @@ import { AudioModuleProps } from "@/components/Chain";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
-import useSerialiazable from "@/lib/useSerialiazable";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function Utility({
   index,
@@ -72,14 +72,14 @@ export default function Utility({
       return {
         module: "Utility",
         bypass: Boolean(bypass),
-        gain,
-        pan,
+        gain: safeNumber(gain),
+        pan: safeNumber(pan),
       };
     },
     deserialize: (data: any) => {
-      setBypass(data.bypass);
-      setGain(data.gain);
-      setPan(data.pan);
+      setBypass(Boolean(data.bypass));
+      setGain(safeNumber(data.gain));
+      setPan(safeNumber(data.pan));
     },
   });
 

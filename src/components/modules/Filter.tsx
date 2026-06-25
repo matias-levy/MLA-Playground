@@ -10,7 +10,7 @@ import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import { Checkbox } from "@/components/ui/checkbox";
 import useBypass from "@/lib/useBypass";
-import useSerialiazable from "@/lib/useSerialiazable";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 const handleTimeChange = (value: number) => {
   // Apply exponential scaling for better low-end resolution
@@ -155,26 +155,26 @@ export default function Filter({
       return {
         module: "Filter",
         bypass: Boolean(bypass),
-        frequency,
-        q,
-        gain,
-        lfoFrequency,
-        depth,
-        waveform,
-        filterType,
-        is24db,
+        frequency: safeNumber(frequency),
+        q: safeNumber(q),
+        gain: safeNumber(gain),
+        lfoFrequency: safeNumber(lfoFrequency),
+        depth: safeNumber(depth),
+        waveform: String(waveform),
+        filterType: String(filterType),
+        is24db: Boolean(is24db),
       };
     },
     deserialize: (data: any) => {
-      setBypass(data.bypass);
-      setFrequency(data.frequency);
-      setQ(data.q);
-      setGain(data.gain);
-      setLfoFrequency(data.lfoFrequency);
-      setDepth(data.depth);
-      setWaveform(data.waveform);
-      setFilterType(data.filterType);
-      setIs24db(data.is24db);
+      setBypass(Boolean(data.bypass));
+      setFrequency(safeNumber(data.frequency));
+      setQ(safeNumber(data.q));
+      setGain(safeNumber(data.gain));
+      setLfoFrequency(safeNumber(data.lfoFrequency));
+      setDepth(safeNumber(data.depth));
+      setWaveform(String(data.waveform));
+      setFilterType(String(data.filterType));
+      setIs24db(Boolean(data.is24db));
     },
   });
   return (

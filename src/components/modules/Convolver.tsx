@@ -23,6 +23,7 @@ import useBypass from "@/lib/useBypass";
 import useSerialiazable, {
   serializeBlob,
   deserializeBlob,
+  safeNumber,
 } from "@/lib/useSerialiazable";
 
 interface IR {
@@ -224,29 +225,31 @@ export default function Convolver({
       return {
         module: "Reverb / Convolver",
         bypass: Boolean(bypass),
-        time,
-        feedback,
-        stretch,
-        stretchCommited,
-        mix,
-        IRSource,
-        selectedInternalIR,
+        time: safeNumber(time),
+        feedback: safeNumber(feedback),
+        stretch: safeNumber(stretch),
+        stretchCommited: safeNumber(stretchCommited),
+        mix: safeNumber(mix),
+        IRSource: String(IRSource),
+        selectedInternalIR: String(selectedInternalIR),
         uploadedIRBlob: uploadedIRBlob
           ? await serializeBlob(uploadedIRBlob)
           : null,
       };
     },
     deserialize: (data: any) => {
-      setBypass(data.bypass);
-      setTime(data.time);
-      setFeedback(data.feedback);
-      setStretch(data.stretch);
-      setStretchCommited(data.stretchCommited);
-      setMix(data.mix);
-      setIRSource(data.IRSource);
-      setSelectedInternalIR(data.selectedInternalIR);
+      setBypass(Boolean(data.bypass));
+      setTime(safeNumber(data.time));
+      setFeedback(safeNumber(data.feedback));
+      setStretch(safeNumber(data.stretch));
+      setStretchCommited(safeNumber(data.stretchCommited));
+      setMix(safeNumber(data.mix));
+      setIRSource(String(data.IRSource));
+      setSelectedInternalIR(String(data.selectedInternalIR));
       setUploadedIRBlob(
-        data.uploadedIRBlob ? deserializeBlob(data.uploadedIRBlob) : null
+        data.uploadedIRBlob
+          ? deserializeBlob(String(data.uploadedIRBlob))
+          : null
       );
     },
   });

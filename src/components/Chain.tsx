@@ -196,10 +196,6 @@ function Chain({
     },
   });
 
-  async function serialize() {}
-
-  function deserialize() {}
-
   return (
     <div className="flex flex-col gap-4 row-start-2 items-center w-full">
       <DndContext

@@ -8,7 +8,7 @@ import { AudioModuleProps } from "@/components/Chain";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
-import useSerialiazable from "@/lib/useSerialiazable";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 function makeDistortionCurve(amount: number) {
   const k = typeof amount === "number" ? amount : 50;
@@ -78,12 +78,12 @@ export default function Distortion({
       return {
         module: "Distortion",
         bypass: Boolean(bypass),
-        distortion,
+        distortion: safeNumber(distortion),
       };
     },
     deserialize: (data: any) => {
-      setBypass(data.bypass);
-      setDistortion(data.distortion);
+      setBypass(Boolean(data.bypass));
+      setDistortion(safeNumber(data.distortion));
     },
   });
 

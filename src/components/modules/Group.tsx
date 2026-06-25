@@ -67,7 +67,7 @@ export default function Group({
       };
     },
     deserialize: (data: any) => {
-      setBypass(data.bypass);
+      setBypass(Boolean(data.bypass));
       if (chainRef.current) {
         chainRef.current.deserialize(data.chain);
       }

@@ -8,7 +8,7 @@ import Chain from "../Chain";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
-import useSerialiazable from "@/lib/useSerialiazable";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function Splitter({
   index,
@@ -81,14 +81,14 @@ export default function Splitter({
       return {
         module: "Splitter",
         bypass: Boolean(bypass),
-        crossfade: crossfade,
+        crossfade: safeNumber(crossfade),
         chain1: serialized1,
         chain2: serialized2,
       };
     },
     deserialize: (data: any) => {
-      setBypass(data.bypass);
-      setCrossfade(data.crossfade);
+      setBypass(Boolean(data.bypass));
+      setCrossfade(safeNumber(data.crossfade));
       if (chain1Ref.current) {
         chain1Ref.current.deserialize(data.chain1);
       }

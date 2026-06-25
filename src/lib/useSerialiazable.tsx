@@ -29,6 +29,14 @@ export function deserializeBlob(data: string | null | undefined): Blob | null {
   return new Blob([bytes]);
 }
 
+export function safeNumber(input: any): number {
+  const number = Number(input);
+  if (Number.isNaN(number)) {
+    throw new Error(`Invalid number: ${input}`);
+  }
+  return number;
+}
+
 export interface SerializedStack {
   version: number;
   createdAt: number;

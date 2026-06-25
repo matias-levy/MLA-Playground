@@ -7,7 +7,7 @@ import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import { createSafeAudioNode } from "@/utils/utils";
 import useBypass from "@/lib/useBypass";
-import useSerialiazable from "@/lib/useSerialiazable";
+import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function BitCrush({
   index,
@@ -77,14 +77,14 @@ export default function BitCrush({
       return {
         module: "Bit Crush",
         bypass: Boolean(bypass),
-        sampleRate,
-        bits,
+        sampleRate: safeNumber(sampleRate),
+        bits: safeNumber(bits),
       };
     },
     deserialize: (data: any) => {
-      setBypass(data.bypass);
-      setSampleRate(data.sampleRate);
-      setBits(data.bits);
+      setBypass(Boolean(data.bypass));
+      setSampleRate(safeNumber(data.sampleRate));
+      setBits(safeNumber(data.bits));
     },
   });
 

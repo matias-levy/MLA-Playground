@@ -32,7 +32,7 @@ function Stack() {
   const [input, setInput] = useState<AudioNode | null>(null);
   const [output, setOutput] = useState<AudioNode | null>(null);
 
-  const serialize = async () => {
+  const saveProjectFile = async () => {
     const internal = await Promise.all([
       audioInputRef.current.serialize(),
       chainRef.current.serialize(),
@@ -64,7 +64,7 @@ function Stack() {
     URL.revokeObjectURL(url);
   };
 
-  const deserializeFromFile = async (file: File) => {
+  const openProjectFile = async (file: File) => {
     try {
       const deserialized: SerializedStack = JSON.parse(await file.text());
       setCurrentFile(
@@ -78,11 +78,12 @@ function Stack() {
       chainRef.current.deserialize(deserialized.chain);
     } catch (error) {
       console.error("Error loading project:", error);
-      toast.error("Error loading project file", {
+      toast.error("There was an error loading the project file", {
+        description: error instanceof Error ? error.message : "Unknown error",
         position: "top-right",
-        style: {
-          color: "white",
-          backgroundColor: "var(--destructive)",
+        classNames: {
+          toast: "!bg-destructive !text-white",
+          description: "!text-white",
         },
       });
     }
@@ -98,7 +99,11 @@ function Stack() {
         >
           <FolderOpen />
         </Button>
-        <Button variant="outline" className="rounded-full" onClick={serialize}>
+        <Button
+          variant="outline"
+          className="rounded-full"
+          onClick={saveProjectFile}
+        >
           <Save />
         </Button>
       </div>
@@ -111,7 +116,7 @@ function Stack() {
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (!file) return;
-          deserializeFromFile(file);
+          openProjectFile(file);
           e.target.value = "";
         }}
       />
