@@ -18,6 +18,7 @@ const Recorder = dynamic(() => import("@/components/Recorder"), {
 
 import Chain from "./Chain";
 import { FolderOpen, Save } from "lucide-react";
+import { toast } from "sonner";
 
 function Stack() {
   const [currentFile, setCurrentFile] = useState<Blob | null>(null);
@@ -76,7 +77,14 @@ function Stack() {
       audioInputRef.current.deserialize(deserialized.audioInput);
       chainRef.current.deserialize(deserialized.chain);
     } catch (error) {
-      console.error("Error deserializing project:", error);
+      console.error("Error loading project:", error);
+      toast.error("Error loading project file", {
+        position: "top-right",
+        style: {
+          color: "white",
+          backgroundColor: "var(--destructive)",
+        },
+      });
     }
   };
 
