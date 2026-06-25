@@ -24,6 +24,21 @@ import { connect } from "extendable-media-recorder-wav-encoder";
 
 let chunks: Blob[] = [];
 
+let wavEncoderRegistration: Promise<void> | null = null;
+
+function registerWavEncoder() {
+  if (!wavEncoderRegistration) {
+    wavEncoderRegistration = (async () => {
+      try {
+        await register(await connect());
+      } catch {
+        // Already registered (React Strict Mode, HMR, or remount)
+      }
+    })();
+  }
+  return wavEncoderRegistration;
+}
+
 export interface RecorderProps {
   currentFile: Blob | null;
   setCurrentFile: React.Dispatch<SetStateAction<Blob | null>>;
@@ -56,10 +71,7 @@ export default function Recorder({
   const [recordingDuration, setRecordingDuration] = useState(0);
 
   useEffect(() => {
-    async function reg() {
-      await register(await connect()).catch((e) => console.log(e));
-    }
-    reg();
+    registerWavEncoder();
     setOutput(mediaStreamAudioDestinationNode);
   }, []);
 
