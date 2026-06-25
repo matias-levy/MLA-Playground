@@ -8,14 +8,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { convertUint8ToFloat32 } from "@/utils/conversion";
+import {
+  convertUint8ToFloat32,
+  dbToLinear,
+  linearToDb,
+} from "@/utils/conversion";
 import { createSafeAudioNode } from "@/utils/utils";
 import { Loader2, CirclePlay, CircleStop } from "lucide-react";
 import Waveform from "@/components/Waveform";
 import FreeSound from "@/components/FreeSound";
 import useFreeSoundQuery from "@/lib/useFreeSoundQuery";
 import ParamSlider from "@/components/ParamSlider";
-import useSerialiazable, { serializeBlob } from "@/lib/useSerialiazable";
+import useSerialiazable from "@/lib/useSerialiazable";
 
 import {
   Select,
@@ -80,7 +84,7 @@ export default function AudioInput({
   const [gainNode] = useState(
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx))
   );
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(1); //linear volume
 
   async function scanDevices() {
     return await navigator.mediaDevices
@@ -271,12 +275,13 @@ export default function AudioInput({
             <ParamSlider
               name="Volume"
               min={0}
-              max={3}
+              max={dbToLinear(24)}
               value={volume}
               defaultValue={1}
               step={0.001}
               setValue={setVolume}
-              rep={(volume * 100).toFixed(0) + " %"}
+              rep={linearToDb(volume).toFixed(1) + " dB"}
+              logScale
             />
           </div>
         </TabsContent>
@@ -464,12 +469,13 @@ export default function AudioInput({
             <ParamSlider
               name="Volume"
               min={0}
-              max={3}
+              max={dbToLinear(24)}
               value={volume}
               defaultValue={1}
               step={0.001}
               setValue={setVolume}
-              rep={(volume * 100).toFixed(0) + " %"}
+              rep={linearToDb(volume).toFixed(1) + " dB"}
+              logScale
             />
           </div>
         </TabsContent>
