@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
@@ -14,9 +14,16 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useBypass from "@/lib/useBypass";
 import { Loader2 } from "lucide-react";
+import useSerialiazable, {
+  deserializeBlob,
+  safeNumber,
+  serializeBlob,
+} from "@/lib/useSerialiazable";
+import { dbToLinear, linearToDb } from "@/utils/conversion";
 
 export default function RNBO({
   index,
+  ref,
   unregisterModule,
   addModule,
   removeModule,
@@ -46,7 +53,7 @@ export default function RNBO({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass } = useBypass({
+  const { bypass, toggleBypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [],
@@ -64,49 +71,83 @@ export default function RNBO({
     }
   }, [index]);
 
-  useEffect(() => {
-    if (uploadedFile) {
-      setDevice(null);
-      setLoading(true);
-      setParamValues([]);
-      const fr = new FileReader();
-      fr.onload = async function () {
-        if (typeof this.result == "string") {
-          try {
-            const parsedPatcher = JSON.parse(this.result);
-            await createDevice({ context: ctx, patcher: parsedPatcher }).then(
-              (d) => {
-                d.parameters.forEach((p, i) => {
-                  setParamValues((prev) => {
-                    const newParams = [...prev];
-                    newParams[p.index] = p.V;
-                    return newParams;
+  const loadPatcher = useCallback(
+    async (uploadedFile: Blob | null, initialParamValues?: number[]) => {
+      if (uploadedFile) {
+        setDevice(null);
+        setLoading(true);
+        setParamValues([]);
+        const fr = new FileReader();
+        fr.onload = async function () {
+          if (typeof this.result == "string") {
+            try {
+              const parsedPatcher = JSON.parse(this.result);
+              await createDevice({ context: ctx, patcher: parsedPatcher }).then(
+                (d) => {
+                  if (initialParamValues) {
+                    setParamValues(initialParamValues);
+                    d.parameters.forEach((p) => {
+                      p.value = initialParamValues[p.index];
+                    });
+                  } else {
+                    d.parameters.forEach((p, i) => {
+                      setParamValues((prev) => {
+                        const newParams = [...prev];
+                        newParams[p.index] = p.V;
+                        return newParams;
+                      });
+                    });
+                  }
+                  d.parameterChangeEvent.subscribe((v) => {
+                    setParamValues((prev) => {
+                      const newParams = [...prev];
+                      newParams[v.index] = v.V;
+                      return newParams;
+                    });
                   });
-                });
-                d.parameterChangeEvent.subscribe((v) => {
-                  setParamValues((prev) => {
-                    const newParams = [...prev];
-                    newParams[v.index] = v.V;
-                    return newParams;
-                  });
-                });
-                setDevice(d);
-                setPatcher(parsedPatcher);
-                setLoading(false);
-              }
-            );
-          } catch (error) {
-            console.log(error);
+                  setDevice(d);
+                  setPatcher(parsedPatcher);
+                  setLoading(false);
+                }
+              );
+            } catch (error) {
+              console.log(error);
+            }
           }
-        }
-      };
-      fr.readAsText(uploadedFile);
-    }
-  }, [uploadedFile]);
+        };
+        fr.readAsText(uploadedFile);
+      }
+    },
+    [uploadedFile]
+  );
 
   useEffect(() => {
     gainNode?.gain.setValueAtTime(gain, ctx.currentTime);
   }, [gain]);
+
+  useSerialiazable({
+    ref,
+    serialize: async () => {
+      return {
+        module: "RNBO",
+        bypass: Boolean(bypass),
+        gain: safeNumber(gain),
+        uploadedFile: uploadedFile ? await serializeBlob(uploadedFile) : null,
+        paramValues: paramValues,
+      };
+    },
+    deserialize: (data: any) => {
+      setBypass(Boolean(data.bypass));
+      setGain(safeNumber(data.gain));
+      setUploadedFile(
+        data.uploadedFile ? deserializeBlob(String(data.uploadedFile)) : null
+      );
+      loadPatcher(
+        data.uploadedFile ? deserializeBlob(String(data.uploadedFile)) : null,
+        data.paramValues
+      );
+    },
+  });
 
   return (
     <ModuleUI
@@ -130,6 +171,7 @@ export default function RNBO({
             const file = e.target.files && e.target.files[0];
             if (!file) return;
             setUploadedFile(file);
+            loadPatcher(file);
           }}
         />
       </div>
@@ -202,14 +244,15 @@ export default function RNBO({
       )}
       {device && (
         <ParamSlider
-          name="Gain"
+          name="Volume"
           min={0}
-          max={3}
+          max={dbToLinear(24)}
           value={gain}
           defaultValue={1}
           step={0.001}
           setValue={setGain}
-          rep={(gain * 100).toFixed(0) + " %"}
+          rep={linearToDb(gain).toFixed(1) + " dB"}
+          logScale
         />
       )}
     </ModuleUI>
