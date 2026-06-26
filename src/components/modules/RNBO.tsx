@@ -72,8 +72,8 @@ export default function RNBO({
   }, [index]);
 
   const loadPatcher = useCallback(
-    async (uploadedFile: Blob | null, initialParamValues?: number[]) => {
-      if (uploadedFile) {
+    async (file: Blob | null, initialParamValues?: number[]) => {
+      if (file) {
         setDevice(null);
         setLoading(true);
         setParamValues([]);
@@ -115,10 +115,10 @@ export default function RNBO({
             }
           }
         };
-        fr.readAsText(uploadedFile);
+        fr.readAsText(file);
       }
     },
-    [uploadedFile]
+    []
   );
 
   useEffect(() => {
