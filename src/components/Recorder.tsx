@@ -120,9 +120,6 @@ export default function Recorder({
       return;
     }
 
-    // Ensure the Blob has the correct MIME type
-    const wavBlob = new Blob([recordingBlob], { type: "audio/wav" });
-
     const date = new Date();
     const formattedDate = date.toISOString().replace(/:/g, "-").split(".")[0]; // Ensures a valid filename
     const filename = `recording-${formattedDate}.wav`;
