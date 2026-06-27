@@ -5,6 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const moduleSurfaceClasses =
+  "border-1 border-border dark:border-card rounded-3xl shadow-xl transition-all bg-card [.bg-card_&]:bg-secondary/50 [.bg-card_&]:dark:bg-secondary [.bg-card_&]:dark:border-secondary [.bg-secondary_&]:dark:bg-card [.bg-secondary_&]:dark:border-card";
+
 export function formatTime(
   seconds: number,
   smallResolution: boolean = true

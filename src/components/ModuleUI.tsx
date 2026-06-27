@@ -7,7 +7,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { X, Power, PowerOff } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, moduleSurfaceClasses } from "@/lib/utils";
 
 export interface ModuleUIProps {
   name: string;
@@ -31,8 +31,9 @@ export default function ModuleUI({
       type="single"
       collapsible
       className={cn(
-        "w-full flex flex-col items-stretch border-1 px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card",
-        bypass && "opacity-50 transition-all dark:bg-muted"
+        "w-full flex flex-col items-stretch px-6 py-2",
+        moduleSurfaceClasses,
+        bypass && "opacity-50 dark:bg-muted"
       )}
       defaultValue="item-1"
     >

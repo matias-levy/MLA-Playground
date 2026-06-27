@@ -21,6 +21,7 @@ import Splitter from "@/components/modules/Splitter";
 import Group from "@/components/modules/Group";
 import { AudioModuleComponent } from "@/components/Chain";
 import { Button } from "@/components/ui/button";
+import { cn, moduleSurfaceClasses } from "@/lib/utils";
 import { useState } from "react";
 
 export const availableModules: Record<string, AudioModuleComponent> = {
@@ -51,7 +52,12 @@ export default function AddModule({
     .sort((a, b) => a[0].localeCompare(b[0]));
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="relative group w-full flex flex-col items-center gap-5 border-1 text-muted-foreground border-border p-6 rounded-3xl shadow-xl hover:text-foreground transition-all duration-300 hover:pb-11 bg-card dark:border-card z-10 hover:cursor-pointer">
+      <DialogTrigger
+        className={cn(
+          "relative group w-full flex flex-col items-center gap-5 text-muted-foreground p-6 hover:text-foreground duration-300 hover:pb-11 z-10 hover:cursor-pointer",
+          moduleSurfaceClasses
+        )}
+      >
         <Plus />
 
         <h3 className="group-hover:scale-y-100 scale-y-0 group-hover:opacity-100 opacity-0 transition-all absolute top-12 origin-top">
