@@ -49,12 +49,15 @@ const Snapshots = ({
       if (Number(e.key) <= snapshots.length && Number(e.key) > 0) {
         handleSnapshotSelect(Number(e.key) - 1);
       }
+      if (e.key === "0") {
+        onSaveSnapshot(currentSnapshot);
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [snapshots.length, handleSnapshotSelect]);
+  }, [snapshots.length, handleSnapshotSelect, onSaveSnapshot, currentSnapshot]);
 
   return (
     <Accordion

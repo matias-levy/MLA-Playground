@@ -15,6 +15,7 @@ export default function useAudioChain({ ctx }: { ctx: AudioContext }) {
   };
 
   const removeModule = (module: AudioModule) => {
+    module.input.disconnect();
     module.output.disconnect();
     setModules((prevModules) =>
       prevModules.filter(

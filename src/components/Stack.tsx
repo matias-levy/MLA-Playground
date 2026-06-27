@@ -79,8 +79,8 @@ function Stack() {
       );
       setFileIsAudio(deserialized.fileIsAudio);
       setFileMode(deserialized.fileMode);
-      audioInputRef.current.deserialize(deserialized.audioInput);
       chainRef.current.deserialize(deserialized.chain);
+      audioInputRef.current.deserialize(deserialized.audioInput);
     } catch (error) {
       console.error("Error loading project:", error);
       toast.error("There was an error loading the project file", {
@@ -128,8 +128,8 @@ function Stack() {
     );
     setFileIsAudio(content.fileIsAudio);
     setFileMode(content.fileMode);
-    audioInputRef.current.deserialize(content.audioInput);
     chainRef.current.deserialize(content.chain);
+    audioInputRef.current.deserialize(content.audioInput);
   };
 
   return (
