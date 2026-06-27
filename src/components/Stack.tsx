@@ -79,7 +79,9 @@ function Stack() {
       );
       setFileIsAudio(deserialized.fileIsAudio);
       setFileMode(deserialized.fileMode);
-      setSnapshots(deserialized.snapshots);
+      if (deserialized.snapshots) {
+        setSnapshots(deserialized.snapshots);
+      }
       chainRef.current.deserialize(deserialized.chain);
       audioInputRef.current.deserialize(deserialized.audioInput, {
         isFromSnapshot: false,
