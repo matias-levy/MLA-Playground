@@ -38,18 +38,18 @@ const Header = ({
             <DialogHeader>
               <DialogTitle>The Playground</DialogTitle>
               <DialogDescription>
-                🎛 Just a few tips to get you started 🎶
+                Just a few tips to get you started
               </DialogDescription>
             </DialogHeader>
             <div className="text-sm flex flex-col gap-4">
               <p>
                 {
-                  "Choose any input device—your microphone, a synth, or even a noisy fan—and run it through the playground’s effects. Or, if you’re feeling adventurous, upload any file (yes, even an image or text file!) in the File tab and explore how it sounds when looped, detuned, or warped with different playback rates."
+                  "Choose any input device, your microphone, a synth, or even a noisy fan and run it through the playground’s effects. Or, if you’re feeling adventurous, upload any file (yes, even an image or text file!) in the File tab and explore how it sounds when looped, detuned, or warped with different playback rates."
                 }
               </p>
               <p>
                 {
-                  "Need inspiration? Log in with FreeSound and dive into their massive collection of samples—you might stumble upon the perfect starting point!"
+                  "Need inspiration? Log in with FreeSound and dive into their massive collection of samples. You might stumble upon the perfect starting point!"
                 }
               </p>
               <p>
@@ -57,11 +57,7 @@ const Header = ({
                   "With a variety of effects at your fingertips, tweak, twist, and shape the sound in real-time. Once you’ve crafted something unique, try recording it! You can then download your creation or reintroduce it as an input to push your experiment even further."
                 }
               </p>
-              <p>
-                {
-                  "No rules, just sonic exploration—let’s see what you can create! 🚀🔊"
-                }
-              </p>
+              <p>{"No rules, just sonic exploration."}</p>
             </div>
           </DialogContent>
         </Dialog>
