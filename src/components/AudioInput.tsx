@@ -9,6 +9,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
+import {
   convertUint8ToFloat32,
   dbToLinear,
   linearToDb,
@@ -311,226 +318,249 @@ export default function AudioInput({
   });
 
   return (
-    <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl bg-card dark:border-card">
-      <Label>Input Module</Label>
-      <Tabs
-        defaultValue="External"
-        className="w-full"
-        value={selectedTab}
-        onValueChange={setSelectedTab}
-      >
-        <TabsList className="w-full">
-          <TabsTrigger value="External">External</TabsTrigger>
-          <TabsTrigger value="File">File</TabsTrigger>
-          <TabsTrigger value="FreeSound">FreeSound</TabsTrigger>
-        </TabsList>
-        <TabsContent value="External">
-          <div className="w-full flex flex-col items-stretch gap-5 rounded-3xl mt-4">
-            <div className="flex gap-3">
-              <Select
-                onValueChange={setStreamCallback}
-                value={selectedDevice}
-                onOpenChange={scanDevices}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Input" />
-                </SelectTrigger>
-                <SelectContent>
-                  {devices.map((d, i) => {
-                    return (
-                      <SelectItem key={i} value={d.deviceId ? d.deviceId : " "}>
-                        {d.label}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-            <ParamSlider
-              name="Volume"
-              min={0}
-              max={dbToLinear(24)}
-              value={volume}
-              defaultValue={1}
-              step={0.001}
-              setValue={setVolume}
-              rep={linearToDb(volume).toFixed(1) + " dB"}
-              logScale
-            />
-          </div>
-        </TabsContent>
-        <TabsContent value="File">
-          <div className="w-full flex flex-col items-stretch gap-5 rounded-3xl mt-4">
-            <div className="flex flex-row gap-6 items-center">
-              <Input
-                type="file"
-                onChange={(e) => {
-                  const file = e.target.files && e.target.files[0];
-                  if (!file) return;
-
-                  const isAudio = file.type.startsWith("audio/");
-                  setFileIsAudio(isAudio);
-
-                  // Determine the correct mode before setting the file
-                  setFileMode((prevMode) => {
-                    if (!isAudio && prevMode === "audio") return "1byte";
-                    return isAudio ? "audio" : prevMode;
-                  });
-
-                  // Set the file last, so fileMode updates first
-                  setDownloadedSoundId(-1);
-                  setCurrentFile(file);
-                }}
-              />
-              {loading && <Loader2 className="animate-spin text-gray-400" />}
-            </div>
-            <div className="flex flex-wrap justify-between">
-              <RadioGroup
-                defaultValue="audio"
-                value={fileMode}
-                onValueChange={setFileMode}
-                className="flex flex-wrap justify-start gap-x-6 gap-y-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value="audio"
-                    id="r1"
-                    disabled={!fileIsAudio}
-                  />
-                  <Label
-                    htmlFor="r1"
-                    className={!fileIsAudio ? "text-gray-400" : ""}
+    <Accordion
+      type="single"
+      collapsible
+      className={cn(
+        "w-full flex flex-col items-stretch border-1 px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card"
+      )}
+      defaultValue="audio-input"
+    >
+      <AccordionItem value="audio-input">
+        <div className="flex flex-row justify-between items-center gap-4">
+          <Label>Input Module</Label>
+          <AccordionTrigger />
+        </div>
+        <AccordionContent className="w-full flex flex-col gap-5 px-1 pt-2">
+          <Tabs
+            defaultValue="External"
+            className="w-full"
+            value={selectedTab}
+            onValueChange={setSelectedTab}
+          >
+            <TabsList className="w-full">
+              <TabsTrigger value="External">External</TabsTrigger>
+              <TabsTrigger value="File">File</TabsTrigger>
+              <TabsTrigger value="FreeSound">FreeSound</TabsTrigger>
+            </TabsList>
+            <TabsContent value="External">
+              <div className="w-full flex flex-col items-stretch gap-5 rounded-3xl mt-4">
+                <div className="flex gap-3">
+                  <Select
+                    onValueChange={setStreamCallback}
+                    value={selectedDevice}
+                    onOpenChange={scanDevices}
                   >
-                    Audio
-                  </Label>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Input" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {devices.map((d, i) => {
+                        return (
+                          <SelectItem
+                            key={i}
+                            value={d.deviceId ? d.deviceId : " "}
+                          >
+                            {d.label}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="1byte" id="r2" />
-                  <Label htmlFor="r2">Raw 1-byte to Float</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="4byte" id="r3" />
-                  <Label htmlFor="r3">Raw 4-byte to Clamped Float</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="c1"
-                    checked={loop}
-                    onCheckedChange={(e) => {
-                      if (e !== "indeterminate") {
-                        setLoop(e);
-                      }
-                    }}
-                  />
-                  <Label htmlFor="c1">Loop</Label>
-                </div>
-              </RadioGroup>
-              <Label className="self-end">
-                {audioBuffer && formatTime(audioBuffer?.duration)}
-              </Label>
-            </div>
-            {audioBuffer && (
-              <>
-                <Waveform
-                  audioBuffer={audioBuffer}
-                  loop={true}
-                  start={cues[0]}
-                  end={cues[1]}
-                />
-                <div className="mt-6 flex flex-row justify-between">
-                  <Label>Loop Start and End</Label>
-                  <Label>
-                    {audioBuffer &&
-                      formatTime((audioBuffer.duration * cues[0]) / 100) +
-                        " - " +
-                        formatTime((audioBuffer.duration * cues[1]) / 100)}
-                  </Label>
-                </div>
-                <Slider
+                <ParamSlider
+                  name="Volume"
                   min={0}
-                  max={100}
-                  step={0.001}
-                  value={cues}
-                  defaultValue={[0, 100]}
-                  onValueChange={(e) => {
-                    setCues(e);
-                  }}
-                  onDoubleClick={() => {
-                    setCues([0, 100]);
-                  }}
-                />
-                <ParamSlider
-                  name="Detune"
-                  min={-1200}
-                  max={1200}
-                  value={detune}
-                  defaultValue={0}
-                  step={0.001}
-                  setValue={(e: number) => {
-                    setDetune(e);
-                    if (audioBufferNode) {
-                      audioBufferNode.detune.setValueAtTime(e, 0);
-                    }
-                  }}
-                  rep={detune.toFixed(0) + " cents"}
-                />
-
-                <ParamSlider
-                  name="Playback Rate"
-                  min={0.01}
-                  max={4}
-                  value={playbackRate}
+                  max={dbToLinear(24)}
+                  value={volume}
                   defaultValue={1}
                   step={0.001}
-                  setValue={(e: number) => {
-                    setPlaybackRate(e);
-                    if (audioBufferNode) {
-                      audioBufferNode.playbackRate.setValueAtTime(e, 0);
-                    }
-                  }}
-                  rep={(playbackRate * 100).toFixed(0) + "%"}
+                  setValue={setVolume}
+                  rep={linearToDb(volume).toFixed(1) + " dB"}
+                  logScale
                 />
-              </>
-            )}
+              </div>
+            </TabsContent>
+            <TabsContent value="File">
+              <div className="w-full flex flex-col items-stretch gap-5 rounded-3xl mt-4">
+                <div className="flex flex-row gap-6 items-center">
+                  <Input
+                    type="file"
+                    onChange={(e) => {
+                      const file = e.target.files && e.target.files[0];
+                      if (!file) return;
 
-            <div className="flex flex-row gap-2 justify-between items-stretch">
-              <Button
-                className="grow"
-                disabled={!currentFile || loading}
-                onClick={handlePlay}
-              >
-                Start
-                <CirclePlay />
-              </Button>
-              <Button className="grow" disabled={!playing} onClick={handleStop}>
-                Stop
-                <CircleStop />
-              </Button>
-            </div>
-            <ParamSlider
-              name="Volume"
-              min={0}
-              max={dbToLinear(24)}
-              value={volume}
-              defaultValue={1}
-              step={0.001}
-              setValue={setVolume}
-              rep={linearToDb(volume).toFixed(1) + " dB"}
-              logScale
-            />
-          </div>
-        </TabsContent>
-        <TabsContent value="FreeSound">
-          <FreeSound
-            freeSoundObjectProps={freeSoundObjectProps}
-            setCurrentFile={setCurrentFile}
-            setFileIsAudio={setFileIsAudio}
-            setFileMode={setFileMode}
-            downloadedSoundId={downloadedSoundId}
-            setDownloadedSoundId={setDownloadedSoundId}
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
+                      const isAudio = file.type.startsWith("audio/");
+                      setFileIsAudio(isAudio);
+
+                      // Determine the correct mode before setting the file
+                      setFileMode((prevMode) => {
+                        if (!isAudio && prevMode === "audio") return "1byte";
+                        return isAudio ? "audio" : prevMode;
+                      });
+
+                      // Set the file last, so fileMode updates first
+                      setDownloadedSoundId(-1);
+                      setCurrentFile(file);
+                    }}
+                  />
+                  {loading && (
+                    <Loader2 className="animate-spin text-gray-400" />
+                  )}
+                </div>
+                <div className="flex flex-wrap justify-between">
+                  <RadioGroup
+                    defaultValue="audio"
+                    value={fileMode}
+                    onValueChange={setFileMode}
+                    className="flex flex-wrap justify-start gap-x-6 gap-y-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value="audio"
+                        id="r1"
+                        disabled={!fileIsAudio}
+                      />
+                      <Label
+                        htmlFor="r1"
+                        className={!fileIsAudio ? "text-gray-400" : ""}
+                      >
+                        Audio
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="1byte" id="r2" />
+                      <Label htmlFor="r2">Raw 1-byte to Float</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="4byte" id="r3" />
+                      <Label htmlFor="r3">Raw 4-byte to Clamped Float</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="c1"
+                        checked={loop}
+                        onCheckedChange={(e) => {
+                          if (e !== "indeterminate") {
+                            setLoop(e);
+                          }
+                        }}
+                      />
+                      <Label htmlFor="c1">Loop</Label>
+                    </div>
+                  </RadioGroup>
+                  <Label className="self-end">
+                    {audioBuffer && formatTime(audioBuffer?.duration)}
+                  </Label>
+                </div>
+                {audioBuffer && (
+                  <>
+                    <Waveform
+                      audioBuffer={audioBuffer}
+                      loop={true}
+                      start={cues[0]}
+                      end={cues[1]}
+                    />
+                    <div className="mt-6 flex flex-row justify-between">
+                      <Label>Loop Start and End</Label>
+                      <Label>
+                        {audioBuffer &&
+                          formatTime((audioBuffer.duration * cues[0]) / 100) +
+                            " - " +
+                            formatTime((audioBuffer.duration * cues[1]) / 100)}
+                      </Label>
+                    </div>
+                    <Slider
+                      min={0}
+                      max={100}
+                      step={0.001}
+                      value={cues}
+                      defaultValue={[0, 100]}
+                      onValueChange={(e) => {
+                        setCues(e);
+                      }}
+                      onDoubleClick={() => {
+                        setCues([0, 100]);
+                      }}
+                    />
+                    <ParamSlider
+                      name="Detune"
+                      min={-1200}
+                      max={1200}
+                      value={detune}
+                      defaultValue={0}
+                      step={0.001}
+                      setValue={(e: number) => {
+                        setDetune(e);
+                        if (audioBufferNode) {
+                          audioBufferNode.detune.setValueAtTime(e, 0);
+                        }
+                      }}
+                      rep={detune.toFixed(0) + " cents"}
+                    />
+
+                    <ParamSlider
+                      name="Playback Rate"
+                      min={0.01}
+                      max={4}
+                      value={playbackRate}
+                      defaultValue={1}
+                      step={0.001}
+                      setValue={(e: number) => {
+                        setPlaybackRate(e);
+                        if (audioBufferNode) {
+                          audioBufferNode.playbackRate.setValueAtTime(e, 0);
+                        }
+                      }}
+                      rep={(playbackRate * 100).toFixed(0) + "%"}
+                    />
+                  </>
+                )}
+
+                <div className="flex flex-row gap-2 justify-between items-stretch">
+                  <Button
+                    className="grow"
+                    disabled={!currentFile || loading}
+                    onClick={handlePlay}
+                  >
+                    Start
+                    <CirclePlay />
+                  </Button>
+                  <Button
+                    className="grow"
+                    disabled={!playing}
+                    onClick={handleStop}
+                  >
+                    Stop
+                    <CircleStop />
+                  </Button>
+                </div>
+                <ParamSlider
+                  name="Volume"
+                  min={0}
+                  max={dbToLinear(24)}
+                  value={volume}
+                  defaultValue={1}
+                  step={0.001}
+                  setValue={setVolume}
+                  rep={linearToDb(volume).toFixed(1) + " dB"}
+                  logScale
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="FreeSound">
+              <FreeSound
+                freeSoundObjectProps={freeSoundObjectProps}
+                setCurrentFile={setCurrentFile}
+                setFileIsAudio={setFileIsAudio}
+                setFileMode={setFileMode}
+                downloadedSoundId={downloadedSoundId}
+                setDownloadedSoundId={setDownloadedSoundId}
+              />
+            </TabsContent>
+          </Tabs>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }

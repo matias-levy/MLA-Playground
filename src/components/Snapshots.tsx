@@ -67,7 +67,7 @@ const Snapshots = ({
         "w-full flex flex-col items-stretch border-1 px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card"
       )}
     >
-      <AccordionItem value="item-1">
+      <AccordionItem value="snapshots">
         <div className="flex flex-row justify-between items-center gap-4">
           <Label>Snapshots</Label>
           <AccordionTrigger />
