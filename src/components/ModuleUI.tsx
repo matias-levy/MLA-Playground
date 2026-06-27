@@ -1,6 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import {
   Accordion,
-  AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
@@ -26,47 +28,66 @@ export default function ModuleUI({
   bypass,
   toggleBypass,
 }: ModuleUIProps) {
+  const [open, setOpen] = useState("item-1");
+  const isOpen = open === "item-1";
+
   return (
-    <Accordion
-      type="single"
-      collapsible
+    <div
       className={cn(
         "w-full flex flex-col items-stretch px-6 py-2",
         moduleSurfaceClasses,
         bypass && "opacity-50 dark:bg-muted"
       )}
-      defaultValue="item-1"
     >
-      <AccordionItem value="item-1">
-        <div className="flex flex-row justify-between items-center gap-5">
-          <div className="flex flex-row gap-2">
-            <Button
-              variant="outline"
-              className="rounded-full"
-              onClick={() => toggleBypass()}
-            >
-              {bypass ? <PowerOff /> : <Power />}
-            </Button>
+      <Accordion
+        type="single"
+        collapsible
+        value={open}
+        onValueChange={setOpen}
+        className="w-full"
+      >
+        <AccordionItem value="item-1" className="border-b-0">
+          <div className="flex flex-row justify-between items-center gap-5">
+            <div className="flex flex-row gap-2">
+              <Button
+                variant="outline"
+                className="rounded-full"
+                onClick={() => toggleBypass()}
+              >
+                {bypass ? <PowerOff /> : <Power />}
+              </Button>
 
-            <Label>{name}</Label>
+              <Label>{name}</Label>
+            </div>
+            <div className="flex flex-row gap-2 items-center">
+              <AccordionTrigger />
+              <Button
+                variant="ghost"
+                className="rounded-full"
+                onClick={() => {
+                  unregisterModule(index);
+                }}
+              >
+                <X />
+              </Button>
+            </div>
           </div>
-          <div className="flex flex-row gap-2 items-center">
-            <AccordionTrigger />
-            <Button
-              variant="ghost"
-              className="rounded-full"
-              onClick={() => {
-                unregisterModule(index);
-              }}
-            >
-              <X />
-            </Button>
+        </AccordionItem>
+      </Accordion>
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows] duration-300 ease-in-out",
+          isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr] pointer-events-none"
+        )}
+        aria-hidden={!isOpen}
+        inert={!isOpen ? true : undefined}
+      >
+        <div className="overflow-hidden">
+          <div className="w-full flex flex-col gap-5 px-1 pt-2 pb-4">
+            {children}
           </div>
         </div>
-        <AccordionContent className="w-full flex flex-col gap-5 px-1 pt-2">
-          {children}
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+      </div>
+    </div>
   );
 }
