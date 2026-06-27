@@ -110,7 +110,6 @@ export default function AudioInput({
       const buff = await file.arrayBuffer();
       switch (fileMode) {
         case "audio":
-          console.log(buff);
           ctx.decodeAudioData(buff).then((audio) => {
             setAudioBuffer(audio);
             setLoading(false);
