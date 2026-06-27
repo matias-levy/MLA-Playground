@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Button } from "./ui/button";
+import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import AudioInput from "@/components/AudioInput";
 import RecorderSkeleton from "./RecorderSkeleton";
@@ -11,6 +10,7 @@ import {
   deserializeBlob,
   SerializedStack,
 } from "@/lib/useSerialiazable";
+import Header from "./Header";
 
 const Recorder = dynamic(() => import("@/components/Recorder"), {
   ssr: false,
@@ -18,7 +18,6 @@ const Recorder = dynamic(() => import("@/components/Recorder"), {
 });
 
 import Chain from "./Chain";
-import { FolderOpen, Save } from "lucide-react";
 import { toast } from "sonner";
 
 function Stack() {
@@ -28,7 +27,7 @@ function Stack() {
   const [downloadedSoundId, setDownloadedSoundId] = useState(-1);
   const chainRef = useRef<any>(null);
   const audioInputRef = useRef<any>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [snapshots, setSnapshots] = useState<Snapshot[]>(
     createDefaultSnapshots(8)
   );
@@ -138,36 +137,18 @@ function Stack() {
     });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    openProjectFile(file);
+    e.target.value = "";
+  };
+
   return (
     <div className="flex flex-col gap-4 row-start-2 w-full">
-      <div className="flex flex-row gap-2 justify-end">
-        <Button
-          variant="outline"
-          className="rounded-full"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <FolderOpen />
-        </Button>
-        <Button
-          variant="outline"
-          className="rounded-full"
-          onClick={saveProjectFile}
-        >
-          <Save />
-        </Button>
-      </div>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".playgroundproject"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          openProjectFile(file);
-          e.target.value = "";
-        }}
+      <Header
+        saveProjectFile={saveProjectFile}
+        handleFileChange={handleFileChange}
       />
       <Snapshots
         snapshots={snapshots}

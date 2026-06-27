@@ -23,7 +23,7 @@ export function ModeToggle() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="rounded-full">
+      <Button variant="outline" size="icon" className="rounded-full">
         <Sun />
       </Button>
     );
@@ -33,7 +33,7 @@ export function ModeToggle() {
 
   return (
     <Button
-      variant="ghost"
+      variant="outline"
       size="icon"
       className="rounded-full"
       onClick={() => setTheme(isDark ? "light" : "dark")}
