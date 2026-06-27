@@ -1,11 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import dynamic from "next/dynamic";
 import AudioInput from "@/components/AudioInput";
 import RecorderSkeleton from "./RecorderSkeleton";
-import Snapshots from "./Snapshots";
+import Snapshots, { type Snapshot, createDefaultSnapshots } from "./Snapshots";
 import {
   serializeBlob,
   deserializeBlob,
@@ -29,7 +29,10 @@ function Stack() {
   const chainRef = useRef<any>(null);
   const audioInputRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [currentSnapshot, setCurrentSnapshot] = useState(0);
+  const [snapshots, setSnapshots] = useState<Snapshot[]>(
+    createDefaultSnapshots(8)
+  );
+  const [currentSnapshot, setCurrentSnapshot] = useState(0); // index of snapshots array
 
   const [input, setInput] = useState<AudioNode | null>(null);
   const [output, setOutput] = useState<AudioNode | null>(null);
@@ -91,6 +94,44 @@ function Stack() {
     }
   };
 
+  const handleSaveSnapshot = async (snapshot: number) => {
+    const internal = await Promise.all([
+      audioInputRef.current.serialize(),
+      chainRef.current.serialize(),
+    ]);
+
+    const newSnapshot: Snapshot = {
+      isDefaultSnapshot: false,
+      content: {
+        currentFile: currentFile ? await serializeBlob(currentFile) : null,
+        fileIsAudio: fileIsAudio,
+        fileMode: fileMode,
+        audioInput: internal[0],
+        chain: internal[1],
+      },
+    };
+    setSnapshots((prev) => {
+      const newSnapshots = [...prev];
+      newSnapshots[snapshot] = newSnapshot;
+      return newSnapshots;
+    });
+  };
+
+  const handleLoadSnapshot = async (snapshotIndex: number) => {
+    setCurrentSnapshot(snapshotIndex);
+    const snapshot = snapshots[snapshotIndex];
+    if (snapshot.isDefaultSnapshot) return;
+    if (!snapshot.content) return;
+    const { content } = snapshot;
+    setCurrentFile(
+      content.currentFile ? deserializeBlob(content.currentFile) : null
+    );
+    setFileIsAudio(content.fileIsAudio);
+    setFileMode(content.fileMode);
+    audioInputRef.current.deserialize(content.audioInput);
+    chainRef.current.deserialize(content.chain);
+  };
+
   return (
     <div className="flex flex-col gap-4 row-start-2 w-full">
       <div className="flex flex-row gap-2 justify-end">
@@ -123,10 +164,10 @@ function Stack() {
         }}
       />
       <Snapshots
-        numberOfSnapshots={8}
+        snapshots={snapshots}
         currentSnapshot={currentSnapshot}
-        setCurrentSnapshot={setCurrentSnapshot}
-        onSaveSnapshot={(snapshot) => console.log(snapshot)}
+        onSaveSnapshot={handleSaveSnapshot}
+        onLoadSnapshot={handleLoadSnapshot}
       />
       <AudioInput
         ref={audioInputRef}

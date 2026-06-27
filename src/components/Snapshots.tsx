@@ -13,23 +13,40 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowBigUp } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { SerializedStack } from "@/lib/useSerialiazable";
+
+export interface Snapshot {
+  isDefaultSnapshot: boolean;
+  content?: Omit<SerializedStack, "version" | "createdAt">;
+}
+
+export const createDefaultSnapshots = (length: number): Snapshot[] => {
+  return Array.from({ length }, (_, i) => ({
+    isDefaultSnapshot: true,
+    content: undefined,
+  }));
+};
 
 interface SnapshotsProps {
-  numberOfSnapshots: number;
   currentSnapshot: number;
-  setCurrentSnapshot: (snapshot: number) => void;
+  snapshots: Snapshot[];
   onSaveSnapshot: (snapshot: number) => void;
+  onLoadSnapshot: (snapshot: number) => void;
 }
 
 const Snapshots = ({
-  numberOfSnapshots,
   currentSnapshot,
-  setCurrentSnapshot,
+  snapshots,
   onSaveSnapshot,
+  onLoadSnapshot,
 }: SnapshotsProps) => {
+  const handleSnapshotSelect = (snapshot: number) => {
+    onLoadSnapshot(snapshot);
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (Number(e.key) <= numberOfSnapshots && Number(e.key) > 0) {
+      if (Number(e.key) <= snapshots.length && Number(e.key) > 0) {
         handleSnapshotSelect(Number(e.key) - 1);
       }
     };
@@ -37,12 +54,7 @@ const Snapshots = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [numberOfSnapshots, setCurrentSnapshot]);
-
-  const handleSnapshotSelect = (snapshot: number) => {
-    console.log("snapshot selected", snapshot);
-    setCurrentSnapshot(snapshot);
-  };
+  }, [snapshots.length, handleSnapshotSelect]);
 
   return (
     <Accordion
@@ -51,7 +63,6 @@ const Snapshots = ({
       className={cn(
         "w-full flex flex-col items-stretch border-1 px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card"
       )}
-      defaultValue="item-1"
     >
       <AccordionItem value="item-1">
         <div className="flex flex-row justify-between items-center gap-4">
@@ -61,10 +72,9 @@ const Snapshots = ({
         <AccordionContent className="w-full flex flex-col gap-5 px-1 pt-2">
           <RadioGroup
             value={String(currentSnapshot)}
-            onValueChange={(value) => handleSnapshotSelect(Number(value))}
             className="flex flex-row justify-stretch items-stretch gap-2"
           >
-            {Array.from({ length: numberOfSnapshots }, (_, i) => {
+            {snapshots.map((snapshot, i) => {
               const num = String(i + 1);
               return (
                 <RadioGroupPrimitive.Item
@@ -76,8 +86,10 @@ const Snapshots = ({
                     "rounded-md border shadow-xs outline-none flex-1",
                     "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary data-[state=checked]:hover:bg-primary/90",
                     "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-                    "dark:data-[state=checked]:bg-primary dark:data-[state=checked]:text-primary-foreground dark:data-[state=checked]:border-primary dark:data-[state=checked]:hover:bg-primary/90"
+                    "dark:data-[state=checked]:bg-primary dark:data-[state=checked]:text-primary-foreground dark:data-[state=checked]:border-primary dark:data-[state=checked]:hover:bg-primary/90",
+                    snapshot.isDefaultSnapshot ? "opacity-50" : ""
                   )}
+                  onClick={() => handleSnapshotSelect(i)}
                 >
                   {num}
                 </RadioGroupPrimitive.Item>
@@ -85,7 +97,7 @@ const Snapshots = ({
             })}
           </RadioGroup>
           <div className="flex flex-row gap-2">
-            {Array.from({ length: numberOfSnapshots }, (_, i) => {
+            {snapshots.map((_snapshot, i) => {
               return (
                 <Button
                   key={i}
