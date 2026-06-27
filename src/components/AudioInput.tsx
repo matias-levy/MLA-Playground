@@ -234,6 +234,9 @@ export default function AudioInput({
     if (micNode) {
       micNode.disconnect();
     }
+    if (selectedDevice !== "") {
+      setSelectedDevice("");
+    }
 
     if (audioBuffer && gainNode) {
       const bufferNode = new AudioBufferSourceNode(ctx, {
