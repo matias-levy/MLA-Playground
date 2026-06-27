@@ -1,4 +1,5 @@
 import { useImperativeHandle } from "react";
+import { Snapshot } from "@/components/Snapshots";
 
 export async function serializeBlob(blob: Blob | null): Promise<string | null> {
   if (!blob) return null;
@@ -45,14 +46,15 @@ export interface SerializedStack {
   fileMode: string;
   audioInput: any;
   chain: any;
+  snapshots: Snapshot[];
 }
-export interface SerialiazableProps {
+export interface SerialiazableProps<T> {
   ref: React.RefObject<any>;
   serialize: () => any;
-  deserialize: (data: any) => void;
+  deserialize: (data: any, options?: T) => void;
 }
 
-const useSerialiazable = (config: SerialiazableProps) => {
+const useSerialiazable = <T extends any>(config: SerialiazableProps<T>) => {
   const { ref, serialize, deserialize } = config;
   useImperativeHandle(ref, () => ({
     serialize,

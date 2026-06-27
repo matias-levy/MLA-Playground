@@ -50,6 +50,7 @@ function Stack() {
       fileMode: fileMode,
       audioInput: internal[0],
       chain: internal[1],
+      snapshots: snapshots,
     };
     const stringified = JSON.stringify(serialized, null, 2);
     // download the stringified as a file
@@ -79,8 +80,11 @@ function Stack() {
       );
       setFileIsAudio(deserialized.fileIsAudio);
       setFileMode(deserialized.fileMode);
+      setSnapshots(deserialized.snapshots);
       chainRef.current.deserialize(deserialized.chain);
-      audioInputRef.current.deserialize(deserialized.audioInput);
+      audioInputRef.current.deserialize(deserialized.audioInput, {
+        isFromSnapshot: false,
+      });
     } catch (error) {
       console.error("Error loading project:", error);
       toast.error("There was an error loading the project file", {
@@ -129,7 +133,9 @@ function Stack() {
     setFileIsAudio(content.fileIsAudio);
     setFileMode(content.fileMode);
     chainRef.current.deserialize(content.chain);
-    audioInputRef.current.deserialize(content.audioInput);
+    audioInputRef.current.deserialize(content.audioInput, {
+      isFromSnapshot: true,
+    });
   };
 
   return (

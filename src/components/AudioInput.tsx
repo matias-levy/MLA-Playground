@@ -276,7 +276,7 @@ export default function AudioInput({
     };
   }, [handlePlay, handleStop]);
 
-  useSerialiazable({
+  useSerialiazable<{ isFromSnapshot: boolean }>({
     ref,
     serialize: async () => {
       return {
@@ -290,9 +290,13 @@ export default function AudioInput({
         playbackRate,
       };
     },
-    deserialize: (data: any) => {
+    deserialize: (data: any, options) => {
       setVolume(data.volume);
-      setPlaying(data.playing);
+      if (options?.isFromSnapshot) {
+        setPlaying(data.playing);
+      } else {
+        handleStop();
+      }
       setCues(data.cues);
       setLoop(data.loop);
       setDetune(data.detune);

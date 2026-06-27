@@ -17,7 +17,7 @@ import { SerializedStack } from "@/lib/useSerialiazable";
 
 export interface Snapshot {
   isDefaultSnapshot: boolean;
-  content?: Omit<SerializedStack, "version" | "createdAt">;
+  content?: Omit<SerializedStack, "version" | "createdAt" | "snapshots">;
 }
 
 export const createDefaultSnapshots = (length: number): Snapshot[] => {
