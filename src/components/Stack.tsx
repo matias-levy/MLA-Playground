@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import dynamic from "next/dynamic";
 import AudioInput from "@/components/AudioInput";
 import RecorderSkeleton from "./RecorderSkeleton";
+import Snapshots from "./Snapshots";
 import {
   serializeBlob,
   deserializeBlob,
@@ -28,6 +29,7 @@ function Stack() {
   const chainRef = useRef<any>(null);
   const audioInputRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [currentSnapshot, setCurrentSnapshot] = useState(0);
 
   const [input, setInput] = useState<AudioNode | null>(null);
   const [output, setOutput] = useState<AudioNode | null>(null);
@@ -119,6 +121,12 @@ function Stack() {
           openProjectFile(file);
           e.target.value = "";
         }}
+      />
+      <Snapshots
+        numberOfSnapshots={8}
+        currentSnapshot={currentSnapshot}
+        setCurrentSnapshot={setCurrentSnapshot}
+        onSaveSnapshot={(snapshot) => console.log(snapshot)}
       />
       <AudioInput
         ref={audioInputRef}

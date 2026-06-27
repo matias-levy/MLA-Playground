@@ -28,7 +28,6 @@ export default function ModuleUI({
 }: ModuleUIProps) {
   return (
     <Accordion
-      id="eso"
       type="single"
       collapsible
       className={cn(
