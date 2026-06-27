@@ -14,6 +14,15 @@ import { cn } from "@/lib/utils";
 import { ArrowBigUp } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { SerializedStack } from "@/lib/useSerialiazable";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Info } from "lucide-react";
 
 export interface Snapshot {
   isDefaultSnapshot: boolean;
@@ -70,7 +79,10 @@ const Snapshots = ({
       <AccordionItem value="snapshots">
         <div className="flex flex-row justify-between items-center gap-4">
           <Label>Snapshots</Label>
-          <AccordionTrigger />
+          <div className="flex flex-row items-center gap-2">
+            <SnapshotInstructions />
+            <AccordionTrigger />
+          </div>
         </div>
         <AccordionContent className="w-full flex flex-col gap-5 px-1 pt-2">
           <RadioGroup
@@ -116,6 +128,41 @@ const Snapshots = ({
         </AccordionContent>
       </AccordionItem>
     </Accordion>
+  );
+};
+
+const SnapshotInstructions = () => {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <Info />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="">
+        <DialogHeader>
+          <DialogTitle>The Snapshots Module</DialogTitle>
+        </DialogHeader>
+        <div className="text-sm flex flex-col gap-4">
+          <p>
+            The Playground now allows you to save and load up to 8 snapshots of
+            your audio chains and input configurations per project.
+          </p>
+          <p>
+            To save a snapshot, press the <b>↑</b> button below the snapshot you
+            want to save. To load a snapshot, press the number of the snapshot
+            you want to load. If you save a snapshot while an audio file is
+            playing, loading the snapshop will trigger the audio file to play
+            again.
+          </p>
+          <p>
+            You can also use the keyboard to load a snapshot. Simply press the
+            numbers 1-8 to load the corresponding snapshot. You can also save a
+            snapshot to the currently selected slot by pressing number 0.
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
