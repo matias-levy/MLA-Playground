@@ -201,7 +201,7 @@ export default function AudioInput({
   };
 
   useEffect(() => {
-    if (playing) {
+    if (playing && audioBuffer) {
       restartBufferWithNewLoopPoints(
         cues[0],
         cues[1],
@@ -210,7 +210,7 @@ export default function AudioInput({
         playbackRate
       );
     }
-  }, [cues, playing, loop]);
+  }, [cues, playing, loop, audioBuffer]);
 
   useEffect(() => {
     gainNode?.gain.setValueAtTime(volume, 0);
@@ -298,15 +298,6 @@ export default function AudioInput({
       setDetune(data.detune);
       setPlaybackRate(data.playbackRate);
       setSelectedTab(data.selectedTab);
-      if (data.playing) {
-        restartBufferWithNewLoopPoints(
-          data.cues[0],
-          data.cues[1],
-          data.loop,
-          data.detune,
-          data.playbackRate
-        );
-      }
       if (
         data.selectedTab === "External" &&
         data.selectedDevice !== selectedDevice
