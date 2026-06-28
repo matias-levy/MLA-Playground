@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { AudioModuleProps } from "@/components/Chain";
 import ModuleUI from "@/components/ModuleUI";
@@ -28,15 +28,17 @@ export default function BitCrush({
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
 
-  const workletNodeRef = useRef<AudioWorkletNode | null>(null);
+  const [workletNode, setWorkletNode] = useState<AudioWorkletNode | null>(
+    null
+  );
 
   // Bypass Hook
 
   const { bypass, toggleBypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
-    inputConnectsTo: [workletNodeRef.current],
-    connectedToOutput: [workletNodeRef.current],
+    inputConnectsTo: [workletNode],
+    connectedToOutput: [workletNode],
   });
 
   useEffect(() => {
@@ -45,15 +47,16 @@ export default function BitCrush({
       if (inputNode && outputNode) {
         await ctx.audioWorklet.addModule("worklets/bit-crush-processor.js");
         const newNode = new AudioWorkletNode(ctx, "bit-crush-processor");
-        workletNodeRef.current = newNode; // Update ref instead of state
-        inputNode.connect(workletNodeRef.current);
-        workletNodeRef.current.connect(outputNode);
+        inputNode.connect(newNode);
+        newNode.connect(outputNode);
+        setWorkletNode(newNode);
         addModule({ input: inputNode, output: outputNode }, index);
       }
     }
     loadAudioWorklet();
 
     return () => {
+      setWorkletNode(null);
       if (inputNode && outputNode) {
         removeModule({
           input: inputNode,
@@ -64,12 +67,15 @@ export default function BitCrush({
   }, [index]);
 
   useEffect(() => {
-    workletNodeRef.current?.parameters
-      .get("reduction")
-      ?.setValueAtTime(sampleRate, 0);
+    if (!workletNode) return;
 
-    workletNodeRef.current?.parameters.get("bits")?.setValueAtTime(bits, 0);
-  }, [bits, sampleRate]);
+    workletNode.parameters
+      .get("reduction")
+      ?.setValueAtTime(sampleRate, ctx.currentTime);
+    workletNode.parameters
+      .get("bits")
+      ?.setValueAtTime(bits, ctx.currentTime);
+  }, [bits, sampleRate, workletNode]);
 
   useSerialiazable({
     ref,
