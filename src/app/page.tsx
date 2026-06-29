@@ -24,7 +24,7 @@ function FreeSoundAuthParams() {
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-background text-foreground transition-colors duration-300">
+    <div className="flex flex-col items-center min-h-screen p-8 pb-20 sm:p-20 font-(family-name:--font-geist-sans) bg-background text-foreground transition-colors duration-300">
       <main className="container mx-auto flex flex-col items-start w-full max-w-4xl">
         <AudioProvider>
           <MidiMapProvider>
