@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -12,63 +11,23 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { KeyboardMusic, Plus } from "lucide-react";
-import { useAudioContext } from "@/components/AudioProvider";
-import { parseMidiMessage } from "@/utils/MidiParser";
-
-interface MidiInputMap {
-  [key: string]: {
-    MIDIInput: MIDIInput;
-    enabled: boolean;
-  };
-}
+import { KeyboardMusic, Plus, X } from "lucide-react";
+import { useMidiMap } from "@/lib/useMidiMap";
 
 const MidiMapping = () => {
-  const { midiInstance } = useAudioContext();
-  const [inputs, setInputs] = useState<MidiInputMap>();
-  const [mappings, setMappings] = useState();
+  const {
+    midiInputs,
+    setMidiInputStatus,
+    isLearning,
+    pendingParamId,
+    mappings,
+    startLearning,
+    cancelLearning,
+    getParam,
+    removeMapping,
+  } = useMidiMap();
 
-  useEffect(() => {
-    if (midiInstance) {
-      setInputs(
-        Object.fromEntries(
-          Array.from(midiInstance.inputs.values()).map((input) => [
-            input.id,
-            { MIDIInput: input, enabled: false },
-          ])
-        )
-      );
-    }
-  }, [midiInstance]);
-
-  useEffect(() => {
-    const callback = (msg: MIDIMessageEvent) => {
-      const parsedMessage = parseMidiMessage(Array.from(msg.data ?? []));
-      if (
-        parsedMessage.command === "controlChange" &&
-        parsedMessage.data[0] === 1
-      ) {
-        console.log(parsedMessage);
-      }
-    };
-
-    if (midiInstance && inputs) {
-      Object.entries(inputs).forEach(([_id, input]) => {
-        if (input.enabled) {
-          input.MIDIInput.onmidimessage = callback;
-        }
-      });
-    }
-    return () => {
-      if (midiInstance && inputs) {
-        Object.entries(inputs).forEach(([_id, input]) => {
-          if (input.enabled) {
-            input.MIDIInput.onmidimessage = null;
-          }
-        });
-      }
-    };
-  }, [mappings, inputs]);
+  const pendingParam = pendingParamId ? getParam(pendingParamId) : null;
 
   return (
     <Sheet>
@@ -87,8 +46,8 @@ const MidiMapping = () => {
         <div className="flex flex-col gap-2 px-4">
           <Label>Inputs</Label>
           <div className="flex flex-col gap-2">
-            {inputs &&
-              Object.entries(inputs).map(([id, input]) => (
+            {midiInputs &&
+              Object.entries(midiInputs).map(([id, input]) => (
                 <div
                   key={id}
                   className="flex flex-row justify-between items-center gap-2"
@@ -97,16 +56,7 @@ const MidiMapping = () => {
                   <Switch
                     checked={input.enabled}
                     onCheckedChange={(checked) =>
-                      setInputs((prev) => ({
-                        ...prev,
-                        [id]: {
-                          ...(prev?.[id] ?? {
-                            MIDIInput: input.MIDIInput,
-                            enabled: false,
-                          }),
-                          enabled: checked,
-                        },
-                      }))
+                      setMidiInputStatus(id, checked)
                     }
                   />
                 </div>
@@ -114,10 +64,65 @@ const MidiMapping = () => {
           </div>
           <hr className="h-px w-full bg-border border-0 dark:bg-card rounded-2xl my-2" />
           <Label>Parameters</Label>
-          <Button variant="outline" className="rounded-full">
-            Learn Mapping
-            <Plus />
-          </Button>
+          {isLearning ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-muted-foreground">
+                {pendingParam
+                  ? `Move a MIDI control to map ${pendingParam.moduleName} · ${pendingParam.paramName}`
+                  : "Click a parameter on a module to select it"}
+              </p>
+
+              <Button
+                variant="outline"
+                className="rounded-full"
+                onClick={cancelLearning}
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={startLearning}
+            >
+              Learn Mapping
+              <Plus />
+            </Button>
+          )}
+
+          {mappings.length > 0 && (
+            <div className="flex flex-col gap-2 mt-2">
+              <Label>Mappings</Label>
+
+              {mappings.map((mapping) => {
+                const param = getParam(mapping.paramId);
+
+                return (
+                  <div
+                    key={mapping.paramId}
+                    className="flex flex-row justify-between items-center gap-2 text-sm"
+                  >
+                    <span>
+                      {param
+                        ? `${param.moduleName} · ${param.paramName}`
+                        : mapping.paramId}{" "}
+                      ← CC{mapping.cc} (ch {mapping.channel})
+                    </span>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full h-8 w-8"
+                      onClick={() => removeMapping(mapping.paramId)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>

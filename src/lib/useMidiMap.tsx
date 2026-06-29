@@ -1,0 +1,304 @@
+"use client";
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { MidiCommand, parseMidiMessage } from "@/utils/MidiParser";
+import { logSliderPosToLinear } from "@/utils/conversion";
+
+export interface MidiParamHandle {
+  paramId: string;
+  moduleId: string;
+  moduleName: string;
+  paramName: string;
+  setValue: (value: number) => void;
+  min: number;
+  max: number;
+  logScale?: boolean;
+}
+
+export interface MidiMappingEntry {
+  paramId: string;
+  channel: number;
+  command: MidiCommand;
+  cc: number;
+}
+
+interface MidiMapContextValue {
+  midiInstance: MIDIAccess | null;
+  midiInputs: MidiInputMap;
+  setMidiInputStatus: (inputId: string, enabled: boolean) => void;
+  isLearning: boolean;
+  pendingParamId: string | null;
+  mappings: MidiMappingEntry[];
+  startLearning: () => void;
+  cancelLearning: () => void;
+  selectParam: (paramId: string) => void;
+  registerParam: (handle: MidiParamHandle) => () => void;
+  removeMapping: (paramId: string) => void;
+  handleMidiMessage: (
+    channel: number,
+    command: MidiCommand,
+    cc: number,
+    value: number
+  ) => void;
+  getParam: (paramId: string) => MidiParamHandle | undefined;
+}
+
+const MidiMapContext = createContext<MidiMapContextValue | null>(null);
+
+function applyMidiValue(handle: MidiParamHandle, midiValue: number) {
+  const normalized = midiValue / 127;
+  if (handle.logScale) {
+    handle.setValue(logSliderPosToLinear(normalized, handle.min, handle.max));
+  } else {
+    handle.setValue(handle.min + normalized * (handle.max - handle.min));
+  }
+}
+
+interface MidiInputMap {
+  [key: string]: {
+    MIDIInput: MIDIInput;
+    enabled: boolean;
+  };
+}
+
+export function MidiMapProvider({ children }: { children: React.ReactNode }) {
+  const [midiInstance, setMidiInstance] = useState<MIDIAccess | null>(null);
+  const [midiInputs, setMidiInputs] = useState<MidiInputMap>({});
+
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && "requestMIDIAccess" in navigator) {
+      navigator.requestMIDIAccess().then((midi) => {
+        setMidiInstance(midi);
+        setMidiInputs(
+          Object.fromEntries(
+            Array.from(midi.inputs.values()).map((input) => [
+              input.id,
+              { MIDIInput: input, enabled: false },
+            ])
+          )
+        );
+      });
+    }
+  }, []);
+
+  const [isLearning, setIsLearning] = useState(false);
+  const [pendingParamId, setPendingParamId] = useState<string | null>(null);
+  const [mappings, setMappings] = useState<MidiMappingEntry[]>([]);
+  const paramsRef = useRef(new Map<string, MidiParamHandle>());
+
+  const registerParam = useCallback((handle: MidiParamHandle) => {
+    paramsRef.current.set(handle.paramId, handle);
+    return () => {
+      paramsRef.current.delete(handle.paramId);
+    };
+  }, []);
+
+  const getParam = useCallback(
+    (paramId: string) => paramsRef.current.get(paramId),
+    []
+  );
+
+  const startLearning = useCallback(() => {
+    setIsLearning(true);
+    setPendingParamId(null);
+  }, []);
+
+  const cancelLearning = useCallback(() => {
+    setIsLearning(false);
+    setPendingParamId(null);
+  }, []);
+
+  const selectParam = useCallback((paramId: string) => {
+    setPendingParamId(paramId);
+  }, []);
+
+  const removeMapping = useCallback((paramId: string) => {
+    setMappings((prev) => prev.filter((m) => m.paramId !== paramId));
+  }, []);
+
+  const setMidiInputStatus = useCallback(
+    (inputId: string, enabled: boolean) => {
+      setMidiInputs((prev) => ({
+        ...prev,
+        [inputId]: {
+          ...prev[inputId],
+          enabled,
+        },
+      }));
+    },
+    []
+  );
+
+  const handleMidiMessage = useCallback(
+    (channel: number, command: MidiCommand, cc: number, value: number) => {
+      if (command !== "controlChange") return;
+
+      if (isLearning && pendingParamId) {
+        setMappings((prev) => [
+          ...prev.filter((m) => !(m.paramId === pendingParamId)),
+          {
+            // id: crypto.randomUUID(),
+            paramId: pendingParamId,
+            channel,
+            command,
+            cc,
+          },
+        ]);
+        setIsLearning(false);
+        setPendingParamId(null);
+        return;
+      }
+
+      const matchingMappings = mappings.filter(
+        (m) => m.channel === channel && m.command === command && m.cc === cc
+      );
+      if (matchingMappings.length === 0) return;
+
+      for (const mapping of matchingMappings) {
+        const handle = paramsRef.current.get(mapping.paramId);
+        if (handle) applyMidiValue(handle, value);
+      }
+    },
+    [isLearning, pendingParamId, mappings]
+  );
+
+  useEffect(() => {
+    const callback = (msg: MIDIMessageEvent) => {
+      const parsedMessage = parseMidiMessage(Array.from(msg.data ?? []));
+
+      if (
+        parsedMessage.command === "controlChange" &&
+        parsedMessage.data.length >= 2
+      ) {
+        handleMidiMessage(
+          parsedMessage.channel,
+          parsedMessage.command,
+          parsedMessage.data[0],
+          parsedMessage.data[1]
+        );
+      }
+    };
+
+    if (midiInstance && midiInputs) {
+      Object.entries(midiInputs).forEach(([_id, input]) => {
+        if (input.enabled) {
+          input.MIDIInput.onmidimessage = callback;
+        }
+      });
+    }
+
+    return () => {
+      if (midiInstance && midiInputs) {
+        Object.entries(midiInputs).forEach(([_id, input]) => {
+          if (input.enabled) {
+            input.MIDIInput.onmidimessage = null;
+          }
+        });
+      }
+    };
+  }, [mappings, midiInputs, midiInstance, handleMidiMessage]);
+
+  const value = useMemo(
+    () => ({
+      midiInstance,
+      midiInputs,
+      setMidiInputStatus,
+      isLearning,
+      pendingParamId,
+      mappings,
+      startLearning,
+      cancelLearning,
+      selectParam,
+      registerParam,
+      removeMapping,
+      handleMidiMessage,
+      getParam,
+    }),
+    [
+      midiInstance,
+      midiInputs,
+      setMidiInputStatus,
+      isLearning,
+      pendingParamId,
+      mappings,
+      startLearning,
+      cancelLearning,
+      selectParam,
+      registerParam,
+      removeMapping,
+      handleMidiMessage,
+      getParam,
+    ]
+  );
+
+  return (
+    <MidiMapContext.Provider value={value}>{children}</MidiMapContext.Provider>
+  );
+}
+
+export function useMidiMap() {
+  const ctx = useContext(MidiMapContext);
+  if (!ctx) {
+    throw new Error("useMidiMap must be used within a MidiMapProvider");
+  }
+  return ctx;
+}
+
+export function useMidiParam({
+  moduleId,
+  moduleName,
+  paramName,
+  setValue,
+  min,
+  max,
+  logScale,
+}: Omit<MidiParamHandle, "paramId">) {
+  const { registerParam, isLearning, pendingParamId, selectParam } =
+    useMidiMap();
+  const paramId = `${moduleId}:${paramName}`;
+  const setValueRef = useRef(setValue);
+
+  useEffect(() => {
+    setValueRef.current = setValue;
+  }, [setValue]);
+
+  useEffect(() => {
+    return registerParam({
+      paramId,
+      moduleId,
+      moduleName,
+      paramName,
+      setValue: (value) => setValueRef.current(value),
+      min,
+      max,
+      logScale,
+    });
+  }, [
+    paramId,
+    moduleId,
+    moduleName,
+    paramName,
+    min,
+    max,
+    logScale,
+    registerParam,
+  ]);
+
+  return {
+    isLearning,
+    isSelected: pendingParamId === paramId,
+    onLearnClick: () => {
+      if (isLearning) selectParam(paramId);
+    },
+    paramId,
+    label: `${moduleName} · ${paramName}`,
+  };
+}

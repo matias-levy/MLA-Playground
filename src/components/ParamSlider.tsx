@@ -1,9 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import {
-  linearToLogSliderPos,
-  logSliderPosToLinear,
-} from "@/utils/conversion";
+import { linearToLogSliderPos, logSliderPosToLinear } from "@/utils/conversion";
+import { cn } from "@/lib/utils";
 
 const LOG_SLIDER_RESOLUTION = 1000;
 
@@ -18,6 +16,9 @@ export interface ParamSliderProps {
   rep: string;
   disabled?: boolean;
   logScale?: boolean;
+  learnMode?: boolean;
+  learnSelected?: boolean;
+  onLearnClick?: () => void;
 }
 
 export default function ParamSlider({
@@ -31,6 +32,9 @@ export default function ParamSlider({
   rep,
   disabled,
   logScale = false,
+  learnMode = false,
+  learnSelected = false,
+  onLearnClick,
 }: ParamSliderProps) {
   const snapToStep = (v: number) => Math.round(v / step) * step;
 
@@ -45,7 +49,15 @@ export default function ParamSlider({
     : defaultValue;
 
   return (
-    <div className="flex flex-col gap-5 px-1">
+    <div
+      className={cn(
+        "flex flex-col gap-5 p-2 rounded-lg transition-colors",
+        learnMode && "cursor-pointer",
+        learnSelected && "ring-1 ring-primary",
+        learnMode && !learnSelected && "hover:bg-secondary"
+      )}
+      onClick={learnMode ? onLearnClick : undefined}
+    >
       <div className="flex flex-row justify-between">
         <Label>{name}</Label>
         <Label>{rep}</Label>

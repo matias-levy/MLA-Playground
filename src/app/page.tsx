@@ -6,6 +6,7 @@ import { redirect, useSearchParams } from "next/navigation";
 import { Toaster } from "@/components/ui/sonner";
 
 import AudioProvider from "@/components/AudioProvider";
+import { MidiMapProvider } from "@/lib/useMidiMap";
 import Stack from "@/components/Stack";
 import { Button } from "@/components/ui/button";
 
@@ -26,7 +27,9 @@ export default function Home() {
     <div className="flex flex-col items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-background text-foreground transition-colors duration-300">
       <main className="container mx-auto flex flex-col items-start w-full max-w-4xl">
         <AudioProvider>
-          <Stack />
+          <MidiMapProvider>
+            <Stack />
+          </MidiMapProvider>
         </AudioProvider>
         <footer className="flex flex-col items-center justify-between w-full mt-32 text-center">
           <p className="mb-3">
