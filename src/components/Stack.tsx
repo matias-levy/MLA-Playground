@@ -27,7 +27,6 @@ function Stack() {
   const [downloadedSoundId, setDownloadedSoundId] = useState(-1);
   const chainRef = useRef<any>(null);
   const audioInputRef = useRef<any>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [snapshots, setSnapshots] = useState<Snapshot[]>(
     createDefaultSnapshots(8)
   );

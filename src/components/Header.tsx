@@ -11,6 +11,7 @@ import { Button } from "./ui/button";
 import { Info } from "lucide-react";
 import { ModeToggle } from "@/app/theme-provider";
 import { FolderOpen, Save } from "lucide-react";
+import MidiMapping from "./MidiMapping";
 
 const Header = ({
   saveProjectFile,
@@ -62,6 +63,7 @@ const Header = ({
           </DialogContent>
         </Dialog>
         <ModeToggle />
+        <MidiMapping />
         <Button
           variant="outline"
           size="icon"
