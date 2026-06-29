@@ -9,10 +9,12 @@ import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
+import { useMidiParam } from "@/lib/useMidiMap";
 import { dbToLinear, linearToDb } from "@/utils/conversion";
 
 export default function Utility({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -23,6 +25,25 @@ export default function Utility({
   // UI Params
   const [gain, setGain] = useState(1); //linear gain
   const [pan, setPan] = useState(0);
+
+  const gainMidi = useMidiParam({
+    moduleId,
+    moduleName: "Utility",
+    paramName: "Gain",
+    setValue: setGain,
+    min: 0,
+    max: dbToLinear(24),
+    logScale: true,
+  });
+
+  const panMidi = useMidiParam({
+    moduleId,
+    moduleName: "Utility",
+    paramName: "Pan",
+    setValue: setPan,
+    min: -1,
+    max: 1,
+  });
 
   // Create nodes
   const [inputNode] = useState(() =>
@@ -86,11 +107,12 @@ export default function Utility({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Utility"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       {/* Gain */}
       <ParamSlider
@@ -103,6 +125,9 @@ export default function Utility({
         setValue={setGain}
         rep={linearToDb(gain).toFixed(1) + " dB"}
         logScale
+        learnMode={gainMidi.isLearning}
+        learnSelected={gainMidi.isSelected}
+        onLearnClick={gainMidi.onLearnClick}
       />
 
       {/* Pan */}
@@ -115,6 +140,9 @@ export default function Utility({
         step={0.01}
         setValue={setPan}
         rep={pan.toFixed(2)}
+        learnMode={panMidi.isLearning}
+        learnSelected={panMidi.isSelected}
+        onLearnClick={panMidi.onLearnClick}
       />
     </ModuleUI>
   );

@@ -13,6 +13,7 @@ import { dbToLinear, linearToDb } from "@/utils/conversion";
 
 export default function Compressor({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -50,7 +51,7 @@ export default function Compressor({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [compressorNode],
@@ -111,11 +112,12 @@ export default function Compressor({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Compressor"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       {/* Threshold */}
       <ParamSlider

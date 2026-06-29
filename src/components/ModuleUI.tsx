@@ -10,26 +10,48 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { X, Power, PowerOff } from "lucide-react";
 import { cn, moduleSurfaceClasses } from "@/lib/utils";
+import { useMidiParam } from "@/lib/useMidiMap";
 
 export interface ModuleUIProps {
+  moduleId: string;
   name: string;
   unregisterModule: (index: number) => void;
   index: number;
   children: React.ReactNode;
   bypass: boolean;
-  toggleBypass: Function;
+  setBypass: Function;
 }
 
 export default function ModuleUI({
+  moduleId,
   name,
   unregisterModule,
   index,
   children,
   bypass,
-  toggleBypass,
+  setBypass,
 }: ModuleUIProps) {
   const [open, setOpen] = useState("item-1");
   const isOpen = open === "item-1";
+
+  const bypassMidi = useMidiParam({
+    moduleId,
+    moduleName: name,
+    paramName: "Bypass",
+    setValue: (value: number) => {
+      setBypass(value < 64);
+    },
+    min: 0,
+    max: 127,
+  });
+
+  const handleBypassClick = () => {
+    if (bypassMidi.isLearning) {
+      bypassMidi.onLearnClick();
+    } else {
+      setBypass(!bypass);
+    }
+  };
 
   return (
     <div
@@ -51,8 +73,12 @@ export default function ModuleUI({
             <div className="flex flex-row gap-2">
               <Button
                 variant="outline"
-                className="rounded-full"
-                onClick={() => toggleBypass()}
+                className={cn(
+                  "rounded-full",
+                  bypassMidi.isLearning && "cursor-pointer",
+                  bypassMidi.isSelected && "ring-1 ring-primary"
+                )}
+                onClick={handleBypassClick}
               >
                 {bypass ? <PowerOff /> : <Power />}
               </Button>
@@ -83,7 +109,7 @@ export default function ModuleUI({
         inert={!isOpen ? true : undefined}
       >
         <div className="overflow-hidden">
-          <div className="w-full flex flex-col gap-5 px-1 pt-2 pb-4">
+          <div className="w-full flex flex-col gap-3 px-1 pt-2 pb-4">
             {children}
           </div>
         </div>

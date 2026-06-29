@@ -222,40 +222,42 @@ export default function Filter({
       />
 
       {/* Filter Type */}
-      <Label>Filter Type</Label>
-      <RadioGroup
-        value={filterType}
-        onValueChange={setFilterType}
-        className="flex flex-wrap"
-      >
-        {[
-          "lowpass",
-          "highpass",
-          "bandpass",
-          "lowshelf",
-          "highshelf",
-          "peaking",
-          "notch",
-          "allpass",
-        ].map((wave) => (
-          <div key={wave} className="flex flex-row gap-2">
-            <RadioGroupItem value={wave} />
-            <Label>{wave.charAt(0).toUpperCase() + wave.slice(1)}</Label>
+      <div className="flex flex-col gap-5 p-2">
+        <Label>Filter Type</Label>
+        <RadioGroup
+          value={filterType}
+          onValueChange={setFilterType}
+          className="flex flex-wrap"
+        >
+          {[
+            "lowpass",
+            "highpass",
+            "bandpass",
+            "lowshelf",
+            "highshelf",
+            "peaking",
+            "notch",
+            "allpass",
+          ].map((wave) => (
+            <div key={wave} className="flex flex-row gap-2">
+              <RadioGroupItem value={wave} />
+              <Label>{wave.charAt(0).toUpperCase() + wave.slice(1)}</Label>
+            </div>
+          ))}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="c1"
+              checked={is24db}
+              onCheckedChange={(e) => {
+                if (e !== "indeterminate") {
+                  setIs24db(e);
+                }
+              }}
+            />
+            <Label htmlFor="c1">24dB/Oct</Label>
           </div>
-        ))}
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="c1"
-            checked={is24db}
-            onCheckedChange={(e) => {
-              if (e !== "indeterminate") {
-                setIs24db(e);
-              }
-            }}
-          />
-          <Label htmlFor="c1">24dB/Oct</Label>
-        </div>
-      </RadioGroup>
+        </RadioGroup>
+      </div>
 
       {/* LFO Rate */}
       <ParamSlider
@@ -282,19 +284,21 @@ export default function Filter({
       />
 
       {/* LFO Waveform */}
-      <Label>LFO Waveform</Label>
-      <RadioGroup
-        value={waveform}
-        onValueChange={setWaveform}
-        className="flex flex-wrap"
-      >
-        {["sine", "square", "sawtooth", "triangle"].map((wave) => (
-          <div key={wave} className="flex flex-row gap-2">
-            <RadioGroupItem value={wave} />
-            <Label>{wave.charAt(0).toUpperCase() + wave.slice(1)}</Label>
-          </div>
-        ))}
-      </RadioGroup>
+      <div className="flex flex-col gap-5 p-2">
+        <Label>LFO Waveform</Label>
+        <RadioGroup
+          value={waveform}
+          onValueChange={setWaveform}
+          className="flex flex-wrap"
+        >
+          {["sine", "square", "sawtooth", "triangle"].map((wave) => (
+            <div key={wave} className="flex flex-row gap-2">
+              <RadioGroupItem value={wave} />
+              <Label>{wave.charAt(0).toUpperCase() + wave.slice(1)}</Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
     </ModuleUI>
   );
 }

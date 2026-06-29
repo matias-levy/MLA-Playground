@@ -13,6 +13,7 @@ import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function Tremolo({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -52,7 +53,7 @@ export default function Tremolo({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [tremoloGain],
@@ -111,11 +112,12 @@ export default function Tremolo({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Tremolo"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       {/* Frequency */}
       <ParamSlider

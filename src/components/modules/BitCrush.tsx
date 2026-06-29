@@ -11,6 +11,7 @@ import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function BitCrush({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -28,13 +29,11 @@ export default function BitCrush({
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
 
-  const [workletNode, setWorkletNode] = useState<AudioWorkletNode | null>(
-    null
-  );
+  const [workletNode, setWorkletNode] = useState<AudioWorkletNode | null>(null);
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [workletNode],
@@ -72,9 +71,7 @@ export default function BitCrush({
     workletNode.parameters
       .get("reduction")
       ?.setValueAtTime(sampleRate, ctx.currentTime);
-    workletNode.parameters
-      .get("bits")
-      ?.setValueAtTime(bits, ctx.currentTime);
+    workletNode.parameters.get("bits")?.setValueAtTime(bits, ctx.currentTime);
   }, [bits, sampleRate, workletNode]);
 
   useSerialiazable({
@@ -96,11 +93,12 @@ export default function BitCrush({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Bit Crush"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       <ParamSlider
         name="Sample Rate Reduction"

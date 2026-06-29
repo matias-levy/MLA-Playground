@@ -13,6 +13,7 @@ import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function AutoPan({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -57,7 +58,7 @@ export default function AutoPan({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [inputPanNode],
@@ -120,11 +121,12 @@ export default function AutoPan({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Auto Pan"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       {/* Offset */}
       <ParamSlider

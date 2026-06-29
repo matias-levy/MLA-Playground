@@ -11,6 +11,7 @@ import useSerialiazable from "@/lib/useSerialiazable";
 
 export default function Group({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -37,7 +38,7 @@ export default function Group({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: generalIn,
     output: generalOut,
     inputConnectsTo: [in1],
@@ -76,11 +77,12 @@ export default function Group({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Group"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       <div className="flex flex-row gap-4 items-stretch justify-between w-full">
         {/* @ts-ignore:next-line */}

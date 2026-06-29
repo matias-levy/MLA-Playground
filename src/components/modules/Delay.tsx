@@ -18,6 +18,7 @@ const handleTimeChange = (value: number) => {
 
 export default function Delay({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -73,7 +74,7 @@ export default function Delay({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [delayNode, dryGain],
@@ -154,11 +155,12 @@ export default function Delay({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Delay / Time Modulation"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       {/* Delay Time */}
       <ParamSlider
