@@ -105,13 +105,6 @@ export default function RNBO({
                       });
                     });
                   }
-                  d.parameterChangeEvent.subscribe((v) => {
-                    setParamValues((prev) => {
-                      const newParams = [...prev];
-                      newParams[v.index] = v.value;
-                      return newParams;
-                    });
-                  });
                   setDevice(d);
                   setPatcher(parsedPatcher);
                   setLoading(false);
@@ -201,6 +194,11 @@ export default function RNBO({
                   min={p.min}
                   max={p.max}
                   setValue={(v: number) => {
+                    setParamValues((prev) => {
+                      const newParams = [...prev];
+                      newParams[p.index] = v;
+                      return newParams;
+                    });
                     p.value = v;
                   }}
                   value={paramValues[p.index]}
