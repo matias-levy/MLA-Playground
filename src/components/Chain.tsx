@@ -245,7 +245,7 @@ function Chain({
                 <GripHorizontal className="text-gray-400" />
               </div>
               <activeModule.Component
-                moduleId={activeModule.id}
+                moduleId={"dragging-module"}
                 ref={null}
                 index={-1}
                 unregisterModule={() => {}}

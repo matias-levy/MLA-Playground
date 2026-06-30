@@ -200,7 +200,6 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
         setMappings((prev) => [
           ...prev.filter((m) => !(m.paramId === pendingParamId)),
           {
-            // id: crypto.randomUUID(),
             paramId: pendingParamId,
             channel,
             command,
@@ -332,6 +331,7 @@ export function useMidiParam({
   }, [setValue]);
 
   useEffect(() => {
+    if (moduleId === "dragging-module") return;
     return registerParam({
       paramId,
       moduleId,
