@@ -38,6 +38,7 @@ import {
 import { Label } from "./ui/label";
 import { formatTime } from "@/lib/utils";
 import MappableButton from "./MappableButton";
+import { MappableRadioGroupItem } from "./MappableRadioGroupItem";
 
 export interface AudioInputProps {
   currentFile: Blob | null;
@@ -414,11 +415,14 @@ export default function AudioInput({
                   <RadioGroup
                     defaultValue="audio"
                     value={fileMode}
-                    onValueChange={setFileMode}
                     className="flex flex-wrap justify-start gap-x-6 gap-y-4"
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem
+                      <MappableRadioGroupItem
+                        moduleId="audio-input"
+                        moduleName="Audio Input"
+                        paramName="Audio"
+                        onAction={() => setFileMode("audio")}
                         value="audio"
                         id="r1"
                         disabled={!fileIsAudio}
@@ -431,11 +435,25 @@ export default function AudioInput({
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="1byte" id="r2" />
+                      <MappableRadioGroupItem
+                        moduleId="audio-input"
+                        moduleName="Audio Input"
+                        paramName="1byte"
+                        onAction={() => setFileMode("1byte")}
+                        value="1byte"
+                        id="r2"
+                      />
                       <Label htmlFor="r2">Raw 1-byte to Float</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="4byte" id="r3" />
+                      <MappableRadioGroupItem
+                        moduleId="audio-input"
+                        moduleName="Audio Input"
+                        paramName="4byte"
+                        onAction={() => setFileMode("4byte")}
+                        value="4byte"
+                        id="r3"
+                      />
                       <Label htmlFor="r3">Raw 4-byte to Clamped Float</Label>
                     </div>
                     <div className="flex items-center space-x-2">

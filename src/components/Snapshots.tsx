@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Info } from "lucide-react";
 import MappableButton from "./MappableButton";
-import MappableRadioGroupItem from "./MappableRadioGroupItem";
+import { MappableRadioGroupPrimitiveItem } from "./MappableRadioGroupItem";
 
 export interface Snapshot {
   isDefaultSnapshot: boolean;
@@ -92,7 +92,7 @@ const Snapshots = ({
             {snapshots.map((snapshot, i) => {
               const num = String(i + 1);
               return (
-                <MappableRadioGroupItem
+                <MappableRadioGroupPrimitiveItem
                   moduleId="snapshots"
                   moduleName="Snapshots"
                   paramName={`Snapshot ${num}`}
@@ -110,7 +110,7 @@ const Snapshots = ({
                   )}
                 >
                   {num}
-                </MappableRadioGroupItem>
+                </MappableRadioGroupPrimitiveItem>
               );
             })}
           </RadioGroup>
