@@ -38,8 +38,11 @@ export default function ModuleUI({
     moduleId,
     moduleName: name,
     paramName: "Bypass",
-    setValue: (value: number) => {
+    onCC: (value: number) => {
       setBypass(value < 64);
+    },
+    onNoteOn: () => {
+      setBypass(!bypass);
     },
     min: 0,
     max: 127,

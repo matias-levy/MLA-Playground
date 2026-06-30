@@ -93,7 +93,7 @@ const MidiMapping = () => {
                 }
                 channel={mapping.channel}
                 command={mapping.command}
-                data1={mapping.cc}
+                data1={mapping.data1}
                 range={mapping.range}
                 isInverted={mapping.isInverted}
                 onRemove={() => removeMapping(mapping.paramId)}

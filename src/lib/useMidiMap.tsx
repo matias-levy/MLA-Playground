@@ -17,7 +17,8 @@ export interface MidiParamHandle {
   moduleId: string;
   moduleName: string;
   paramName: string;
-  setValue: (value: number) => void;
+  onCC?: (value: number, mapping: MidiMappingEntry) => void;
+  onNoteOn?: (mapping: MidiMappingEntry) => void;
   min: number;
   max: number;
   logScale?: boolean;
@@ -27,7 +28,7 @@ export interface MidiMappingEntry {
   paramId: string;
   channel: number;
   command: MidiCommand;
-  cc: number;
+  data1: number;
   range: [number, number]; // [min, max] in percentage; max < min inverts
   isInverted: boolean;
 }
@@ -49,7 +50,7 @@ interface MidiMapContextValue {
   handleMidiMessage: (
     channel: number,
     command: MidiCommand,
-    cc: number,
+    data1: number,
     value: number
   ) => void;
   getParam: (paramId: string) => MidiParamHandle | undefined;
@@ -71,28 +72,53 @@ function scaleNumberClamped(
   return Math.max(lo, Math.min(hi, result));
 }
 
+function paramValueFromNormalized(normalized: number, handle: MidiParamHandle) {
+  if (handle.logScale) {
+    return logSliderPosToLinear(normalized, handle.min, handle.max);
+  }
+  return handle.min + normalized * (handle.max - handle.min);
+}
+
+function getMappingRangePercentages(mapping: MidiMappingEntry) {
+  return {
+    min: mapping.isInverted ? mapping.range[1] : mapping.range[0],
+    max: mapping.isInverted ? mapping.range[0] : mapping.range[1],
+  };
+}
+
+function getMappingParamRange(
+  mapping: MidiMappingEntry,
+  paramMin: number,
+  paramMax: number,
+  logScale?: boolean
+) {
+  const { min, max } = getMappingRangePercentages(mapping);
+  const handle = { min: paramMin, max: paramMax, logScale } as MidiParamHandle;
+  return {
+    low: paramValueFromNormalized(min / 100, handle),
+    high: paramValueFromNormalized(max / 100, handle),
+  };
+}
+
 function applyMidiValue(
   handle: MidiParamHandle,
-  midiValue: number,
-  mapping: MidiMappingEntry
+  mapping: MidiMappingEntry,
+  command: MidiCommand,
+  midiValue: number
 ) {
-  const normalized = midiValue / 127;
-  const min = mapping.isInverted ? mapping.range[1] : mapping.range[0];
-  const max = mapping.isInverted ? mapping.range[0] : mapping.range[1];
+  const { min, max } = getMappingRangePercentages(mapping);
 
-  const scaledNormalized = scaleNumberClamped(
-    normalized,
-    0,
-    1,
-    min / 100,
-    max / 100
-  );
-  if (handle.logScale) {
-    handle.setValue(
-      logSliderPosToLinear(scaledNormalized, handle.min, handle.max)
+  if (command === "controlChange") {
+    const scaledNormalized = scaleNumberClamped(
+      midiValue / 127,
+      0,
+      1,
+      min / 100,
+      max / 100
     );
-  } else {
-    handle.setValue(handle.min + scaledNormalized * (handle.max - handle.min));
+    handle.onCC?.(paramValueFromNormalized(scaledNormalized, handle), mapping);
+  } else if (command === "noteOn") {
+    handle.onNoteOn?.(mapping);
   }
 }
 
@@ -193,8 +219,8 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
   );
 
   const handleMidiMessage = useCallback(
-    (channel: number, command: MidiCommand, cc: number, value: number) => {
-      if (command !== "controlChange") return;
+    (channel: number, command: MidiCommand, data1: number, value: number) => {
+      if (command !== "controlChange" && command !== "noteOn") return;
 
       if (isLearning && pendingParamId) {
         setMappings((prev) => [
@@ -203,7 +229,7 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
             paramId: pendingParamId,
             channel,
             command,
-            cc,
+            data1,
             range: [0, 100],
             isInverted: false,
           },
@@ -214,13 +240,14 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
       }
 
       const matchingMappings = mappings.filter(
-        (m) => m.channel === channel && m.command === command && m.cc === cc
+        (m) =>
+          m.channel === channel && m.command === command && m.data1 === data1
       );
       if (matchingMappings.length === 0) return;
 
       for (const mapping of matchingMappings) {
         const handle = paramsRef.current.get(mapping.paramId);
-        if (handle) applyMidiValue(handle, value, mapping);
+        if (handle) applyMidiValue(handle, mapping, command, value);
       }
     },
     [isLearning, pendingParamId, mappings]
@@ -230,10 +257,7 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
     const callback = (msg: MIDIMessageEvent) => {
       const parsedMessage = parseMidiMessage(Array.from(msg.data ?? []));
 
-      if (
-        parsedMessage.command === "controlChange" &&
-        parsedMessage.data.length >= 2
-      ) {
+      if (parsedMessage.command && parsedMessage.data.length >= 2) {
         handleMidiMessage(
           parsedMessage.channel,
           parsedMessage.command,
@@ -304,6 +328,8 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+export { getMappingParamRange };
+
 export function useMidiMap() {
   const ctx = useContext(MidiMapContext);
   if (!ctx) {
@@ -316,7 +342,8 @@ export function useMidiParam({
   moduleId,
   moduleName,
   paramName,
-  setValue,
+  onCC,
+  onNoteOn,
   min,
   max,
   logScale,
@@ -324,11 +351,13 @@ export function useMidiParam({
   const { registerParam, isLearning, pendingParamId, selectParam } =
     useMidiMap();
   const paramId = `${moduleId}:${paramName}`;
-  const setValueRef = useRef(setValue);
+  const onCCRef = useRef(onCC);
+  const onNoteOnRef = useRef(onNoteOn);
 
   useEffect(() => {
-    setValueRef.current = setValue;
-  }, [setValue]);
+    onCCRef.current = onCC;
+    onNoteOnRef.current = onNoteOn;
+  }, [onCC, onNoteOn]);
 
   useEffect(() => {
     if (moduleId === "dragging-module") return;
@@ -337,7 +366,8 @@ export function useMidiParam({
       moduleId,
       moduleName,
       paramName,
-      setValue: (value) => setValueRef.current(value),
+      onCC: (value, mapping) => onCCRef.current?.(value, mapping),
+      onNoteOn: (mapping) => onNoteOnRef.current?.(mapping),
       min,
       max,
       logScale,
@@ -347,6 +377,8 @@ export function useMidiParam({
     moduleId,
     moduleName,
     paramName,
+    onCC,
+    onNoteOn,
     min,
     max,
     logScale,

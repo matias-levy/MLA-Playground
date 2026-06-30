@@ -1,8 +1,13 @@
+import { useCallback } from "react";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { linearToLogSliderPos, logSliderPosToLinear } from "@/utils/conversion";
 import { cn } from "@/lib/utils";
-import { useMidiParam } from "@/lib/useMidiMap";
+import {
+  getMappingParamRange,
+  MidiMappingEntry,
+  useMidiParam,
+} from "@/lib/useMidiMap";
 
 const LOG_SLIDER_RESOLUTION = 1000;
 
@@ -47,11 +52,25 @@ export default function ParamSlider({
     ? linearToLogSliderPos(defaultValue, min, max) * LOG_SLIDER_RESOLUTION
     : defaultValue;
 
+  const onNoteOn = useCallback(
+    (mapping: MidiMappingEntry) => {
+      const { low, high } = getMappingParamRange(mapping, min, max, logScale);
+      const snappedHigh = snapToStep(high);
+      if (Math.abs(value - snappedHigh) <= step / 2) {
+        setValue(snapToStep(low));
+      } else {
+        setValue(snappedHigh);
+      }
+    },
+    [value, min, max, logScale, setValue, step]
+  );
+
   const { isLearning, isSelected, onLearnClick } = useMidiParam({
     moduleId,
     moduleName,
     paramName: name,
-    setValue,
+    onCC: setValue,
+    onNoteOn,
     min,
     max,
     logScale,
