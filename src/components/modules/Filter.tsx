@@ -21,6 +21,7 @@ const handleTimeChange = (value: number) => {
 };
 
 export default function Filter({
+  moduleId,
   index,
   ref,
   unregisterModule,
@@ -82,7 +83,7 @@ export default function Filter({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [filterNode],
@@ -179,11 +180,12 @@ export default function Filter({
   });
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Filter"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       {/* Frequency */}
       <ParamSlider

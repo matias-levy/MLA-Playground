@@ -48,6 +48,7 @@ const handleTimeChange = (value: number) => {
 
 export default function Convolver({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -104,7 +105,7 @@ export default function Convolver({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [convolverNode, dryGain],
@@ -256,11 +257,12 @@ export default function Convolver({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Reverb / Convolver"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       <Label>Impulse Response</Label>
       <RadioGroup
