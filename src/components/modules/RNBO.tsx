@@ -5,7 +5,13 @@ import { useAudioContext } from "@/components/AudioProvider";
 import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 
-import { createDevice, Device } from "@rnbo/js";
+import {
+  createDevice,
+  Device,
+  EnumParameter,
+  EnumValue,
+  ParameterType,
+} from "@rnbo/js";
 
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/ParamSlider";
@@ -23,6 +29,7 @@ import { dbToLinear, linearToDb } from "@/utils/conversion";
 
 export default function RNBO({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -93,7 +100,7 @@ export default function RNBO({
                     d.parameters.forEach((p, i) => {
                       setParamValues((prev) => {
                         const newParams = [...prev];
-                        newParams[p.index] = p.V;
+                        newParams[p.index] = p.value;
                         return newParams;
                       });
                     });
@@ -101,7 +108,7 @@ export default function RNBO({
                   d.parameterChangeEvent.subscribe((v) => {
                     setParamValues((prev) => {
                       const newParams = [...prev];
-                      newParams[v.index] = v.V;
+                      newParams[v.index] = v.value;
                       return newParams;
                     });
                   });
@@ -151,6 +158,7 @@ export default function RNBO({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name={
         patcher?.desc.meta.filename
@@ -159,7 +167,7 @@ export default function RNBO({
       }
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       <Label>External RNBO JSON Patcher</Label>
 
@@ -181,8 +189,8 @@ export default function RNBO({
       {!loading ? (
         device?.parameters.map((p) => {
           let component;
-          switch (p.type) {
-            case 0:
+          switch (p.type as ParameterType) {
+            case ParameterType.Number:
               //numberic, use slider
               component = (
                 <ParamSlider
@@ -201,36 +209,37 @@ export default function RNBO({
               );
               break;
 
-            case 1:
+            case ParameterType.Bang:
               //bang, didn't find documentation about this
               component = <></>;
               break;
 
-            case 5:
-              //enum, use RadioGroup
+            case ParameterType.Enum: {
+              const enumParam = p as EnumParameter;
               component = (
                 <div key={p.id}>
                   <Label className="mb-4">{p.displayName}</Label>
                   <RadioGroup
-                    value={p.G[paramValues[p.index]]}
+                    value={enumParam.enumValue.toString()}
                     onValueChange={(e) => {
-                      p.value = p.enumValues.indexOf(e);
+                      enumParam.enumValue = e;
                     }}
                     className="flex flex-wrap"
                   >
-                    {p.enumValues.map((enumItem: string) => (
+                    {enumParam.enumValues.map((enumItem: EnumValue) => (
                       <div key={enumItem} className="flex flex-row gap-2">
-                        <RadioGroupItem value={enumItem} />
+                        <RadioGroupItem value={enumItem.toString()} />
                         <Label>
-                          {enumItem.charAt(0).toUpperCase() + enumItem.slice(1)}
+                          {enumItem.toString().charAt(0).toUpperCase() +
+                            enumItem.toString().slice(1)}
                         </Label>
                       </div>
                     ))}
                   </RadioGroup>
                 </div>
               );
-
               break;
+            }
 
             default:
               break;
