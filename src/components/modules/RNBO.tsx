@@ -222,6 +222,11 @@ export default function RNBO({
                   <RadioGroup
                     value={enumParam.enumValue.toString()}
                     onValueChange={(e) => {
+                      setParamValues((prev) => {
+                        const newParams = [...prev];
+                        newParams[p.index] = parseInt(e);
+                        return newParams;
+                      });
                       enumParam.enumValue = e;
                     }}
                     className="flex flex-wrap"
