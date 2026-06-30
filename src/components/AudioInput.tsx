@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "./ui/label";
 import { formatTime } from "@/lib/utils";
+import MappableButton from "./MappableButton";
 
 export interface AudioInputProps {
   currentFile: Blob | null;
@@ -523,22 +524,28 @@ export default function AudioInput({
                 )}
 
                 <div className="flex flex-row gap-2 justify-between items-stretch">
-                  <Button
+                  <MappableButton
+                    moduleId="audio-input"
+                    moduleName="Audio Input"
+                    paramName="Play"
                     className="grow"
                     disabled={!currentFile || loading}
-                    onClick={handlePlay}
+                    onAction={handlePlay}
                   >
                     Start
                     <CirclePlay />
-                  </Button>
-                  <Button
+                  </MappableButton>
+                  <MappableButton
+                    moduleId="audio-input"
+                    moduleName="Audio Input"
+                    paramName="Stop"
                     className="grow"
                     disabled={!playing}
-                    onClick={handleStop}
+                    onAction={handleStop}
                   >
                     Stop
                     <CircleStop />
-                  </Button>
+                  </MappableButton>
                 </div>
                 <ParamSlider
                   moduleId="audio-input"

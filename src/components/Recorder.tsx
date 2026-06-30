@@ -19,7 +19,7 @@ import {
   IMediaRecorder,
   register,
 } from "extendable-media-recorder";
-
+import MappableButton from "./MappableButton";
 import { connect } from "extendable-media-recorder-wav-encoder";
 
 let chunks: Blob[] = [];
@@ -147,14 +147,28 @@ export default function Recorder({
     <div className="w-full flex flex-col items-stretch gap-5 border-1 p-6 rounded-3xl shadow-xl bg-card dark:border-card">
       <Label>Recorder</Label>
       <div className="flex flex-row gap-2 justify-between items-stretch">
-        <Button className="grow" onClick={start} disabled={recording}>
+        <MappableButton
+          moduleId="recorder"
+          moduleName="Recorder"
+          paramName="Start"
+          className="grow"
+          onAction={start}
+          disabled={recording}
+        >
           Start
           <CirclePlay />
-        </Button>
-        <Button className="grow" onClick={stop} disabled={!recording}>
+        </MappableButton>
+        <MappableButton
+          moduleId="recorder"
+          moduleName="Recorder"
+          paramName="Stop"
+          className="grow"
+          onAction={stop}
+          disabled={!recording}
+        >
           Stop
           <CircleStop />
-        </Button>
+        </MappableButton>
       </div>
       <div className="flex flex-row justify-between items-center gap-2">
         <audio
@@ -181,12 +195,15 @@ export default function Recorder({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
+              <MappableButton
+                moduleId="recorder"
+                moduleName="Recorder"
+                paramName="Feedback"
+                onAction={feedbackRecording}
                 disabled={!recordingBlob || currentFile == recordingBlob}
-                onClick={feedbackRecording}
               >
                 <ArrowUpFromDot />
-              </Button>
+              </MappableButton>
             </TooltipTrigger>
             <TooltipContent>
               <p>Feedback into file input</p>

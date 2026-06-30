@@ -7,7 +7,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useEffect } from "react";
-import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -20,9 +19,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Info } from "lucide-react";
+import MappableButton from "./MappableButton";
+import MappableRadioGroupItem from "./MappableRadioGroupItem";
 
 export interface Snapshot {
   isDefaultSnapshot: boolean;
@@ -73,7 +73,7 @@ const Snapshots = ({
       type="single"
       collapsible
       className={cn(
-        "w-full flex flex-col items-stretch border-1 px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card"
+        "w-full flex flex-col items-stretch border px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card"
       )}
     >
       <AccordionItem value="snapshots">
@@ -92,7 +92,11 @@ const Snapshots = ({
             {snapshots.map((snapshot, i) => {
               const num = String(i + 1);
               return (
-                <RadioGroupPrimitive.Item
+                <MappableRadioGroupItem
+                  moduleId="snapshots"
+                  moduleName="Snapshots"
+                  paramName={`Snapshot ${num}`}
+                  onAction={() => handleSnapshotSelect(i)}
                   key={num}
                   value={String(i)}
                   aria-label={`Snapshot ${num}`}
@@ -104,24 +108,26 @@ const Snapshots = ({
                     "dark:data-[state=checked]:bg-primary dark:data-[state=checked]:text-primary-foreground dark:data-[state=checked]:border-primary dark:data-[state=checked]:hover:bg-primary/90",
                     snapshot.isDefaultSnapshot ? "opacity-50" : ""
                   )}
-                  onClick={() => handleSnapshotSelect(i)}
                 >
                   {num}
-                </RadioGroupPrimitive.Item>
+                </MappableRadioGroupItem>
               );
             })}
           </RadioGroup>
           <div className="flex flex-row gap-2">
             {snapshots.map((_snapshot, i) => {
               return (
-                <Button
+                <MappableButton
+                  moduleId="snapshots"
+                  moduleName="Snapshots"
+                  paramName={`Save ${i + 1}`}
                   key={i}
                   variant="ghost"
                   className="flex-1"
-                  onClick={() => onSaveSnapshot(i)}
+                  onAction={() => onSaveSnapshot(i)}
                 >
                   <ArrowBigUp />
-                </Button>
+                </MappableButton>
               );
             })}
           </div>
