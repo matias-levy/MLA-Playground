@@ -101,6 +101,8 @@ export default function BitCrush({
       setBypass={setBypass}
     >
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Bit Crush"
         name="Sample Rate Reduction"
         min={0}
         max={88}
@@ -111,6 +113,8 @@ export default function BitCrush({
         rep={(ctx.sampleRate / (sampleRate + 1)).toFixed(0) + " Hz"}
       />
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Bit Crush"
         name="Bit Reduction"
         min={1}
         max={31}

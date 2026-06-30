@@ -98,6 +98,8 @@ export default function Distortion({
       setBypass={setBypass}
     >
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Distortion"
         name="Amount"
         min={1}
         max={400}

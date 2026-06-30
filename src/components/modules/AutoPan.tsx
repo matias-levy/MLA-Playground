@@ -130,6 +130,8 @@ export default function AutoPan({
     >
       {/* Offset */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Auto Pan"
         name="Offset"
         min={-1}
         max={1}
@@ -141,6 +143,8 @@ export default function AutoPan({
       />
       {/* Frequency */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Auto Pan"
         name="Frequency"
         defaultValue={5}
         step={0.1}
@@ -153,6 +157,8 @@ export default function AutoPan({
 
       {/* Depth */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Auto Pan"
         name="Depth"
         min={-1}
         max={1}

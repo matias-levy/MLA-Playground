@@ -189,6 +189,8 @@ export default function Filter({
     >
       {/* Frequency */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Filter"
         name="Frequency"
         defaultValue={0.2}
         step={0.000001}
@@ -201,6 +203,8 @@ export default function Filter({
 
       {/* Q */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Filter"
         name="Q"
         defaultValue={0}
         step={0.1}
@@ -213,6 +217,8 @@ export default function Filter({
 
       {/* Gain */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Filter"
         name="Gain"
         defaultValue={0}
         step={0.1}
@@ -263,6 +269,8 @@ export default function Filter({
 
       {/* LFO Rate */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Filter"
         name="LFO Rate"
         defaultValue={0.5}
         step={0.1}
@@ -275,6 +283,8 @@ export default function Filter({
 
       {/* LFO Depth */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Filter"
         name="LFO Depth"
         min={-1}
         max={1}

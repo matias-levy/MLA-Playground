@@ -331,6 +331,8 @@ export default function Convolver({
 
       {/* Feedback Delay Time */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Convolver"
         name="Feedback Delay Time"
         min={0}
         max={1}
@@ -343,6 +345,8 @@ export default function Convolver({
 
       {/* Feedback Delay Amount */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Convolver"
         name="Feedback Delay Amount (Careful with this)"
         min={0}
         max={0.8}
@@ -355,6 +359,8 @@ export default function Convolver({
 
       {/* Mix */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Convolver"
         name="Mix"
         min={0}
         max={1}

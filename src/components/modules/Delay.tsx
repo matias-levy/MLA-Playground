@@ -164,6 +164,8 @@ export default function Delay({
     >
       {/* Delay Time */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Delay / Time Modulation"
         name="Time"
         min={0}
         max={1}
@@ -176,6 +178,8 @@ export default function Delay({
 
       {/* Feedback */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Delay / Time Modulation"
         name="Feedback"
         min={0}
         max={1.2}
@@ -188,6 +192,8 @@ export default function Delay({
 
       {/* LFO Rate */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Delay / Time Modulation"
         name="LFO Rate"
         min={0.1}
         max={10}
@@ -200,6 +206,8 @@ export default function Delay({
 
       {/* LFO Depth */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Delay / Time Modulation"
         name="LFO Depth"
         min={0}
         max={0.01}
@@ -227,6 +235,8 @@ export default function Delay({
 
       {/* Mix */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Delay / Time Modulation"
         name="Mix"
         min={0}
         max={1}

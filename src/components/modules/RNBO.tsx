@@ -194,6 +194,8 @@ export default function RNBO({
               //numberic, use slider
               component = (
                 <ParamSlider
+                  moduleId={moduleId}
+                  moduleName="RNBO"
                   name={p.displayName}
                   defaultValue={p.initialValue}
                   min={p.min}
@@ -253,6 +255,8 @@ export default function RNBO({
       )}
       {device && (
         <ParamSlider
+          moduleId={moduleId}
+          moduleName="RNBO"
           name="Volume"
           min={0}
           max={dbToLinear(24)}

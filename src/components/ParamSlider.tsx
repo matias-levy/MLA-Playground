@@ -2,13 +2,16 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { linearToLogSliderPos, logSliderPosToLinear } from "@/utils/conversion";
 import { cn } from "@/lib/utils";
+import { useMidiParam } from "@/lib/useMidiMap";
 
 const LOG_SLIDER_RESOLUTION = 1000;
 
 export interface ParamSliderProps {
+  moduleId: string;
+  moduleName: string;
   name: string;
   value: number;
-  setValue: Function;
+  setValue: (value: number) => void;
   defaultValue: number;
   min: number;
   max: number;
@@ -16,12 +19,11 @@ export interface ParamSliderProps {
   rep: string;
   disabled?: boolean;
   logScale?: boolean;
-  learnMode?: boolean;
-  learnSelected?: boolean;
-  onLearnClick?: () => void;
 }
 
 export default function ParamSlider({
+  moduleId,
+  moduleName,
   name,
   value,
   setValue,
@@ -32,9 +34,6 @@ export default function ParamSlider({
   rep,
   disabled,
   logScale = false,
-  learnMode = false,
-  learnSelected = false,
-  onLearnClick,
 }: ParamSliderProps) {
   const snapToStep = (v: number) => Math.round(v / step) * step;
 
@@ -48,15 +47,25 @@ export default function ParamSlider({
     ? linearToLogSliderPos(defaultValue, min, max) * LOG_SLIDER_RESOLUTION
     : defaultValue;
 
+  const { isLearning, isSelected, onLearnClick } = useMidiParam({
+    moduleId,
+    moduleName,
+    paramName: name,
+    setValue,
+    min,
+    max,
+    logScale,
+  });
+
   return (
     <div
       className={cn(
         "flex flex-col gap-5 p-2 rounded-lg transition-colors",
-        learnMode && "cursor-pointer",
-        learnSelected && "ring-1 ring-primary",
-        learnMode && !learnSelected && "hover:bg-secondary"
+        isLearning && "cursor-pointer",
+        isSelected && "ring-1 ring-primary",
+        isLearning && !isSelected && "hover:bg-secondary"
       )}
-      onClick={learnMode ? onLearnClick : undefined}
+      onClick={isLearning ? onLearnClick : undefined}
     >
       <div className="flex flex-row justify-between">
         <Label>{name}</Label>

@@ -121,6 +121,8 @@ export default function Tremolo({
     >
       {/* Frequency */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Tremolo"
         name="Frequency"
         defaultValue={5}
         step={0.1}
@@ -133,6 +135,8 @@ export default function Tremolo({
 
       {/* Depth */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Tremolo"
         name="Depth"
         min={-1}
         max={1}

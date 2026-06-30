@@ -321,7 +321,7 @@ export default function AudioInput({
       type="single"
       collapsible
       className={cn(
-        "w-full flex flex-col items-stretch border-1 px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card"
+        "w-full flex flex-col items-stretch border px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card"
       )}
       defaultValue="audio-input"
     >
@@ -368,6 +368,8 @@ export default function AudioInput({
                   </Select>
                 </div>
                 <ParamSlider
+                  moduleId="audio-input"
+                  moduleName="Audio Input"
                   name="Volume"
                   min={0}
                   max={dbToLinear(24)}
@@ -483,6 +485,8 @@ export default function AudioInput({
                       }}
                     />
                     <ParamSlider
+                      moduleId="audio-input"
+                      moduleName="Audio Input"
                       name="Detune"
                       min={-1200}
                       max={1200}
@@ -499,6 +503,8 @@ export default function AudioInput({
                     />
 
                     <ParamSlider
+                      moduleId="audio-input"
+                      moduleName="Audio Input"
                       name="Playback Rate"
                       min={0.01}
                       max={4}
@@ -535,6 +541,8 @@ export default function AudioInput({
                   </Button>
                 </div>
                 <ParamSlider
+                  moduleId="audio-input"
+                  moduleName="Audio Input"
                   name="Volume"
                   min={0}
                   max={dbToLinear(24)}

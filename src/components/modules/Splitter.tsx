@@ -109,6 +109,8 @@ export default function Splitter({
       setBypass={setBypass}
     >
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Splitter"
         name="Crossfade"
         min={0}
         max={1}
