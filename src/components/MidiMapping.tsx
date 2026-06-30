@@ -52,7 +52,7 @@ const MidiMapping = () => {
           <KeyboardMusic />
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="overflow-y-auto pb-10">
         <SheetHeader>
           <SheetTitle>MIDI Mapping</SheetTitle>
           <SheetDescription>
