@@ -28,6 +28,8 @@ export interface MidiMappingEntry {
   channel: number;
   command: MidiCommand;
   cc: number;
+  range: [number, number]; // [min, max] in percentage; max < min inverts
+  isInverted: boolean;
 }
 
 interface MidiMapContextValue {
@@ -42,6 +44,8 @@ interface MidiMapContextValue {
   selectParam: (paramId: string) => void;
   registerParam: (handle: MidiParamHandle) => () => void;
   removeMapping: (paramId: string) => void;
+  updateMappingRange: (paramId: string, newRange: [number, number]) => void;
+  invertMappingRange: (paramId: string) => void;
   handleMidiMessage: (
     channel: number,
     command: MidiCommand,
@@ -53,12 +57,42 @@ interface MidiMapContextValue {
 
 const MidiMapContext = createContext<MidiMapContextValue | null>(null);
 
-function applyMidiValue(handle: MidiParamHandle, midiValue: number) {
+function scaleNumberClamped(
+  value: number,
+  inMin: number,
+  inMax: number,
+  outMin: number,
+  outMax: number
+) {
+  const result =
+    ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+  const lo = Math.min(outMin, outMax);
+  const hi = Math.max(outMin, outMax);
+  return Math.max(lo, Math.min(hi, result));
+}
+
+function applyMidiValue(
+  handle: MidiParamHandle,
+  midiValue: number,
+  mapping: MidiMappingEntry
+) {
   const normalized = midiValue / 127;
+  const min = mapping.isInverted ? mapping.range[1] : mapping.range[0];
+  const max = mapping.isInverted ? mapping.range[0] : mapping.range[1];
+
+  const scaledNormalized = scaleNumberClamped(
+    normalized,
+    0,
+    1,
+    min / 100,
+    max / 100
+  );
   if (handle.logScale) {
-    handle.setValue(logSliderPosToLinear(normalized, handle.min, handle.max));
+    handle.setValue(
+      logSliderPosToLinear(scaledNormalized, handle.min, handle.max)
+    );
   } else {
-    handle.setValue(handle.min + normalized * (handle.max - handle.min));
+    handle.setValue(handle.min + scaledNormalized * (handle.max - handle.min));
   }
 }
 
@@ -124,6 +158,27 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
     setMappings((prev) => prev.filter((m) => m.paramId !== paramId));
   }, []);
 
+  const updateMappingRange = useCallback(
+    (paramId: string, newRange: [number, number]) => {
+      setMappings((prev) =>
+        prev.map((m) => {
+          if (m.paramId !== paramId) return m;
+          return { ...m, range: newRange };
+        })
+      );
+    },
+    []
+  );
+
+  const invertMappingRange = useCallback((paramId: string) => {
+    setMappings((prev) =>
+      prev.map((m) => {
+        if (m.paramId !== paramId) return m;
+        return { ...m, isInverted: !m.isInverted };
+      })
+    );
+  }, []);
+
   const setMidiInputStatus = useCallback(
     (inputId: string, enabled: boolean) => {
       setMidiInputs((prev) => ({
@@ -150,6 +205,8 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
             channel,
             command,
             cc,
+            range: [0, 100],
+            isInverted: false,
           },
         ]);
         setIsLearning(false);
@@ -164,7 +221,7 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
 
       for (const mapping of matchingMappings) {
         const handle = paramsRef.current.get(mapping.paramId);
-        if (handle) applyMidiValue(handle, value);
+        if (handle) applyMidiValue(handle, value, mapping);
       }
     },
     [isLearning, pendingParamId, mappings]
@@ -219,6 +276,8 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
       selectParam,
       registerParam,
       removeMapping,
+      updateMappingRange,
+      invertMappingRange,
       handleMidiMessage,
       getParam,
     }),
@@ -234,6 +293,8 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
       selectParam,
       registerParam,
       removeMapping,
+      updateMappingRange,
+      invertMappingRange,
       handleMidiMessage,
       getParam,
     ]
