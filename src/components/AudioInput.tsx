@@ -500,7 +500,7 @@ export default function AudioInput({
                       min={0}
                       max={100}
                       step={0.001}
-                      stepGuard={1000}
+                      stepGuard={500}
                       value={cues}
                       defaultValue={[0, 100]}
                       onRangeChange={(e) => {
