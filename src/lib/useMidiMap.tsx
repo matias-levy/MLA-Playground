@@ -156,6 +156,15 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
         );
       });
     }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        cancelLearning();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   const [isLearning, setIsLearning] = useState(false);
@@ -258,7 +267,6 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
             isInverted: false,
           },
         ]);
-        setIsLearning(false);
         setPendingParamId(null);
         return;
       }
