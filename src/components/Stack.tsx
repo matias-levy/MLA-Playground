@@ -20,6 +20,7 @@ const Recorder = dynamic(() => import("@/components/Recorder"), {
 
 import Chain from "./Chain";
 import { toast } from "sonner";
+import { getModulesUsedInChain } from "@/utils/utils";
 
 function Stack() {
   const [currentFile, setCurrentFile] = useState<Blob | null>(null);
@@ -36,7 +37,8 @@ function Stack() {
   const [input, setInput] = useState<AudioNode | null>(null);
   const [output, setOutput] = useState<AudioNode | null>(null);
 
-  const { mappings, setMappings } = useMidiMap();
+  const { mappings, setMappings, snapshotsRef, removeMappingByModuleId } =
+    useMidiMap();
 
   const saveProjectFile = async () => {
     const internal = await Promise.all([
@@ -84,6 +86,7 @@ function Stack() {
       setFileMode(deserialized.fileMode);
       if (deserialized.snapshots) {
         setSnapshots(deserialized.snapshots);
+        snapshotsRef.current = deserialized.snapshots;
       }
       if (deserialized.midiMappings) {
         setMappings(deserialized.midiMappings);
@@ -112,7 +115,7 @@ function Stack() {
       audioInputRef.current.serialize(),
       chainRef.current.serialize(),
     ]);
-
+    const chain = internal[1];
     const newSnapshot: Snapshot = {
       isDefaultSnapshot: false,
       content: {
@@ -120,14 +123,29 @@ function Stack() {
         fileIsAudio: fileIsAudio,
         fileMode: fileMode,
         audioInput: internal[0],
-        chain: internal[1],
+        chain: chain,
       },
     };
-    setSnapshots((prev) => {
-      const newSnapshots = [...prev];
-      newSnapshots[snapshot] = newSnapshot;
-      return newSnapshots;
-    });
+    // If we are saving a new snapshot, we need to remove the midi mappings from the modules that are not used in the new snapshot
+    const modulesUsedInSnapshotBeforeSaving = getModulesUsedInChain(
+      snapshots[snapshot].content?.chain ?? []
+    );
+
+    const modulesUsedInChainAfterSaving = getModulesUsedInChain(chain);
+
+    // Get the modules that are used in theprevious snapshot but not in the new one
+    const modulesToRemove = modulesUsedInSnapshotBeforeSaving.filter(
+      (module) => !modulesUsedInChainAfterSaving.some((m) => m.id === module.id)
+    );
+
+    const newSnapshots = [...snapshots];
+    newSnapshots[snapshot] = newSnapshot;
+    snapshotsRef.current = newSnapshots;
+    // Remove the mappings for the modules that are not used in the new snapshot
+    for (const module of modulesToRemove) {
+      removeMappingByModuleId(module.id, newSnapshots);
+    }
+    setSnapshots(newSnapshots);
   };
 
   const handleLoadSnapshot = async (snapshotIndex: number) => {

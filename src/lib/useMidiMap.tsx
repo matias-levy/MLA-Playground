@@ -11,6 +11,8 @@ import {
 } from "react";
 import { MidiCommand, parseMidiMessage } from "@/utils/MidiParser";
 import { logSliderPosToLinear } from "@/utils/conversion";
+import { Snapshot } from "@/components/Snapshots";
+import { isModuleUsedInSnapshots } from "@/utils/utils";
 
 export interface MidiParamHandle {
   paramId: string;
@@ -49,6 +51,7 @@ interface MidiMapContextValue {
   selectParam: (paramId: string) => void;
   registerParam: (handle: MidiParamHandle) => () => void;
   removeMapping: (paramId: string) => void;
+  removeMappingByModuleId: (moduleId: string, snapshots?: Snapshot[]) => void;
   updateMappingRange: (paramId: string, newRange: [number, number]) => void;
   invertMappingRange: (paramId: string) => void;
   handleMidiMessage: (
@@ -58,6 +61,7 @@ interface MidiMapContextValue {
     value: number
   ) => void;
   getParam: (paramId: string) => MidiParamHandle | undefined;
+  snapshotsRef: React.RefObject<Snapshot[]>;
 }
 
 const MidiMapContext = createContext<MidiMapContextValue | null>(null);
@@ -136,6 +140,7 @@ interface MidiInputMap {
 export function MidiMapProvider({ children }: { children: React.ReactNode }) {
   const [midiInstance, setMidiInstance] = useState<MIDIAccess | null>(null);
   const [midiInputs, setMidiInputs] = useState<MidiInputMap>({});
+  const snapshotsRef = useRef<Snapshot[]>([]);
 
   useEffect(() => {
     if (typeof navigator !== "undefined" && "requestMIDIAccess" in navigator) {
@@ -187,6 +192,16 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
   const removeMapping = useCallback((paramId: string) => {
     setMappings((prev) => prev.filter((m) => m.paramId !== paramId));
   }, []);
+
+  const removeMappingByModuleId = useCallback(
+    (moduleId: string, snapshots?: Snapshot[]) => {
+      // Only remove mappings if this module is not on any other snapshot
+      if (isModuleUsedInSnapshots(moduleId, snapshots ?? snapshotsRef.current))
+        return;
+      setMappings((prev) => prev.filter((m) => m.moduleId !== moduleId));
+    },
+    [snapshotsRef]
+  );
 
   const updateMappingRange = useCallback(
     (paramId: string, newRange: [number, number]) => {
@@ -309,10 +324,12 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
       selectParam,
       registerParam,
       removeMapping,
+      removeMappingByModuleId,
       updateMappingRange,
       invertMappingRange,
       handleMidiMessage,
       getParam,
+      snapshotsRef,
     }),
     [
       midiInstance,
@@ -327,10 +344,12 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
       selectParam,
       registerParam,
       removeMapping,
+      removeMappingByModuleId,
       updateMappingRange,
       invertMappingRange,
       handleMidiMessage,
       getParam,
+      snapshotsRef,
     ]
   );
 
