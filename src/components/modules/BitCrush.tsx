@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { AudioModuleProps } from "@/components/Chain";
 import ModuleUI from "@/components/ModuleUI";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
 import { createSafeAudioNode } from "@/utils/utils";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function BitCrush({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -28,13 +29,11 @@ export default function BitCrush({
     createSafeAudioNode(ctx, (ctx) => new GainNode(ctx, { gain: 1 }))
   );
 
-  const [workletNode, setWorkletNode] = useState<AudioWorkletNode | null>(
-    null
-  );
+  const [workletNode, setWorkletNode] = useState<AudioWorkletNode | null>(null);
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [workletNode],
@@ -72,9 +71,7 @@ export default function BitCrush({
     workletNode.parameters
       .get("reduction")
       ?.setValueAtTime(sampleRate, ctx.currentTime);
-    workletNode.parameters
-      .get("bits")
-      ?.setValueAtTime(bits, ctx.currentTime);
+    workletNode.parameters.get("bits")?.setValueAtTime(bits, ctx.currentTime);
   }, [bits, sampleRate, workletNode]);
 
   useSerialiazable({
@@ -96,13 +93,16 @@ export default function BitCrush({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Bit Crush"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Bit Crush"
         name="Sample Rate Reduction"
         min={0}
         max={88}
@@ -113,6 +113,8 @@ export default function BitCrush({
         rep={(ctx.sampleRate / (sampleRate + 1)).toFixed(0) + " Hz"}
       />
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Bit Crush"
         name="Bit Reduction"
         min={1}
         max={31}

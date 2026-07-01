@@ -7,7 +7,9 @@ import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ModuleUI from "@/components/ModuleUI";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
+import { MappableRadioGroupItem } from "@/components/mappables/MappableRadioGroupItem";
+import { MappableCheckbox } from "@/components/mappables/MappableCheckbox";
 import { Checkbox } from "@/components/ui/checkbox";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
@@ -21,6 +23,7 @@ const handleTimeChange = (value: number) => {
 };
 
 export default function Filter({
+  moduleId,
   index,
   ref,
   unregisterModule,
@@ -82,7 +85,7 @@ export default function Filter({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [filterNode],
@@ -179,14 +182,17 @@ export default function Filter({
   });
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Filter"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       {/* Frequency */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Filter"
         name="Frequency"
         defaultValue={0.2}
         step={0.000001}
@@ -199,6 +205,8 @@ export default function Filter({
 
       {/* Q */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Filter"
         name="Q"
         defaultValue={0}
         step={0.1}
@@ -211,6 +219,8 @@ export default function Filter({
 
       {/* Gain */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Filter"
         name="Gain"
         defaultValue={0}
         step={0.1}
@@ -222,43 +232,51 @@ export default function Filter({
       />
 
       {/* Filter Type */}
-      <Label>Filter Type</Label>
-      <RadioGroup
-        value={filterType}
-        onValueChange={setFilterType}
-        className="flex flex-wrap"
-      >
-        {[
-          "lowpass",
-          "highpass",
-          "bandpass",
-          "lowshelf",
-          "highshelf",
-          "peaking",
-          "notch",
-          "allpass",
-        ].map((wave) => (
-          <div key={wave} className="flex flex-row gap-2">
-            <RadioGroupItem value={wave} />
-            <Label>{wave.charAt(0).toUpperCase() + wave.slice(1)}</Label>
-          </div>
-        ))}
+      <div className="flex flex-col gap-5 p-2">
+        <Label>Filter Type</Label>
+        <RadioGroup value={filterType} className="flex flex-wrap">
+          {[
+            "lowpass",
+            "highpass",
+            "bandpass",
+            "lowshelf",
+            "highshelf",
+            "peaking",
+            "notch",
+            "allpass",
+          ].map((wave) => (
+            <div key={wave} className="flex flex-row gap-2">
+              <MappableRadioGroupItem
+                moduleId={moduleId}
+                moduleName="Filter"
+                paramName={wave.charAt(0).toUpperCase() + wave.slice(1)}
+                onAction={() => setFilterType(wave)}
+                value={wave}
+              />
+              <Label>{wave.charAt(0).toUpperCase() + wave.slice(1)}</Label>
+            </div>
+          ))}
+        </RadioGroup>
         <div className="flex items-center space-x-2">
-          <Checkbox
-            id="c1"
-            checked={is24db}
-            onCheckedChange={(e) => {
-              if (e !== "indeterminate") {
-                setIs24db(e);
+          <MappableCheckbox
+            moduleId={moduleId}
+            moduleName="Filter"
+            paramName="24dB/Oct"
+            onAction={(checked) => {
+              if (checked !== "indeterminate") {
+                setIs24db(checked);
               }
             }}
+            checked={is24db}
           />
-          <Label htmlFor="c1">24dB/Oct</Label>
+          <Label>24dB/Oct</Label>
         </div>
-      </RadioGroup>
+      </div>
 
       {/* LFO Rate */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Filter"
         name="LFO Rate"
         defaultValue={0.5}
         step={0.1}
@@ -271,6 +289,8 @@ export default function Filter({
 
       {/* LFO Depth */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Filter"
         name="LFO Depth"
         min={-1}
         max={1}
@@ -282,19 +302,23 @@ export default function Filter({
       />
 
       {/* LFO Waveform */}
-      <Label>LFO Waveform</Label>
-      <RadioGroup
-        value={waveform}
-        onValueChange={setWaveform}
-        className="flex flex-wrap"
-      >
-        {["sine", "square", "sawtooth", "triangle"].map((wave) => (
-          <div key={wave} className="flex flex-row gap-2">
-            <RadioGroupItem value={wave} />
-            <Label>{wave.charAt(0).toUpperCase() + wave.slice(1)}</Label>
-          </div>
-        ))}
-      </RadioGroup>
+      <div className="flex flex-col gap-5 p-2">
+        <Label>LFO Waveform</Label>
+        <RadioGroup value={waveform} className="flex flex-wrap">
+          {["sine", "square", "sawtooth", "triangle"].map((wave) => (
+            <div key={wave} className="flex flex-row gap-2">
+              <MappableRadioGroupItem
+                moduleId={moduleId}
+                moduleName="Filter"
+                paramName={wave.charAt(0).toUpperCase() + wave.slice(1)}
+                onAction={() => setWaveform(wave)}
+                value={wave}
+              />
+              <Label>{wave.charAt(0).toUpperCase() + wave.slice(1)}</Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
     </ModuleUI>
   );
 }

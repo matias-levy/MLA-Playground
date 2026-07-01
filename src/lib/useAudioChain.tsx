@@ -26,7 +26,7 @@ export default function useAudioChain({ ctx }: { ctx: AudioContext }) {
 
   // This effect is used to connect the actual nodes of the chain
   useEffect(() => {
-    console.log("use effect useAudioChain", modules);
+    // console.log("use effect useAudioChain", modules);
     if (ctx) {
       if (!input || !output) {
         return;

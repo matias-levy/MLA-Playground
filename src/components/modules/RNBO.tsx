@@ -5,10 +5,16 @@ import { useAudioContext } from "@/components/AudioProvider";
 import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 
-import { createDevice, Device } from "@rnbo/js";
+import {
+  createDevice,
+  Device,
+  EnumParameter,
+  EnumValue,
+  ParameterType,
+} from "@rnbo/js";
 
 import ModuleUI from "@/components/ModuleUI";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -20,9 +26,11 @@ import useSerialiazable, {
   serializeBlob,
 } from "@/lib/useSerialiazable";
 import { dbToLinear, linearToDb } from "@/utils/conversion";
+import { MappableRadioGroupItem } from "../mappables/MappableRadioGroupItem";
 
 export default function RNBO({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -93,18 +101,18 @@ export default function RNBO({
                     d.parameters.forEach((p, i) => {
                       setParamValues((prev) => {
                         const newParams = [...prev];
-                        newParams[p.index] = p.V;
+                        newParams[p.index] = p.value;
                         return newParams;
                       });
                     });
                   }
-                  d.parameterChangeEvent.subscribe((v) => {
-                    setParamValues((prev) => {
-                      const newParams = [...prev];
-                      newParams[v.index] = v.V;
-                      return newParams;
-                    });
-                  });
+                  // d.parameterChangeEvent.subscribe((v) => {
+                  //   setParamValues((prev) => {
+                  //     const newParams = [...prev];
+                  //     newParams[v.index] = v.value;
+                  //     return newParams;
+                  //   });
+                  // });
                   setDevice(d);
                   setPatcher(parsedPatcher);
                   setLoading(false);
@@ -151,6 +159,7 @@ export default function RNBO({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name={
         patcher?.desc.meta.filename
@@ -159,7 +168,7 @@ export default function RNBO({
       }
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       <Label>External RNBO JSON Patcher</Label>
 
@@ -181,16 +190,23 @@ export default function RNBO({
       {!loading ? (
         device?.parameters.map((p) => {
           let component;
-          switch (p.type) {
-            case 0:
+          switch (p.type as ParameterType) {
+            case ParameterType.Number:
               //numberic, use slider
               component = (
                 <ParamSlider
+                  moduleId={moduleId}
+                  moduleName="RNBO"
                   name={p.displayName}
                   defaultValue={p.initialValue}
                   min={p.min}
                   max={p.max}
                   setValue={(v: number) => {
+                    setParamValues((prev) => {
+                      const newParams = [...prev];
+                      newParams[p.index] = v;
+                      return newParams;
+                    });
                     p.value = v;
                   }}
                   value={paramValues[p.index]}
@@ -201,36 +217,49 @@ export default function RNBO({
               );
               break;
 
-            case 1:
+            case ParameterType.Bang:
               //bang, didn't find documentation about this
               component = <></>;
               break;
 
-            case 5:
-              //enum, use RadioGroup
+            case ParameterType.Enum: {
+              const enumParam = p as EnumParameter;
+              const selectEnum = (enumItem: EnumValue) => {
+                enumParam.enumValue = enumItem;
+                setParamValues((prev) => {
+                  const newParams = [...prev];
+                  newParams[p.index] = enumParam.value;
+                  return newParams;
+                });
+              };
+              const selectedValue =
+                paramValues[p.index] !== undefined
+                  ? enumParam.enumValues[paramValues[p.index]]?.toString()
+                  : enumParam.enumValue.toString();
               component = (
-                <div key={p.id}>
-                  <Label className="mb-4">{p.displayName}</Label>
-                  <RadioGroup
-                    value={p.G[paramValues[p.index]]}
-                    onValueChange={(e) => {
-                      p.value = p.enumValues.indexOf(e);
-                    }}
-                    className="flex flex-wrap"
-                  >
-                    {p.enumValues.map((enumItem: string) => (
+                <div key={p.id} className="flex flex-col gap-5 p-2">
+                  <Label>{p.displayName}</Label>
+                  <RadioGroup value={selectedValue} className="flex flex-wrap">
+                    {enumParam.enumValues.map((enumItem: EnumValue) => (
                       <div key={enumItem} className="flex flex-row gap-2">
-                        <RadioGroupItem value={enumItem} />
+                        <MappableRadioGroupItem
+                          moduleId={moduleId}
+                          moduleName="RNBO"
+                          paramName={`${p.displayName} · ${enumItem}`}
+                          onAction={() => selectEnum(enumItem)}
+                          value={enumItem.toString()}
+                        />
                         <Label>
-                          {enumItem.charAt(0).toUpperCase() + enumItem.slice(1)}
+                          {enumItem.toString().charAt(0).toUpperCase() +
+                            enumItem.toString().slice(1)}
                         </Label>
                       </div>
                     ))}
                   </RadioGroup>
                 </div>
               );
-
               break;
+            }
 
             default:
               break;
@@ -244,6 +273,8 @@ export default function RNBO({
       )}
       {device && (
         <ParamSlider
+          moduleId={moduleId}
+          moduleName="RNBO"
           name="Volume"
           min={0}
           max={dbToLinear(24)}

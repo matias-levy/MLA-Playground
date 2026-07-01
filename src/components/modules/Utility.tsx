@@ -6,13 +6,14 @@ import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 
 import ModuleUI from "@/components/ModuleUI";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 import { dbToLinear, linearToDb } from "@/utils/conversion";
 
 export default function Utility({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -43,7 +44,7 @@ export default function Utility({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [gainNode],
@@ -86,14 +87,17 @@ export default function Utility({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Utility"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       {/* Gain */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Utility"
         name="Gain"
         min={0}
         max={dbToLinear(24)}
@@ -107,6 +111,8 @@ export default function Utility({
 
       {/* Pan */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Utility"
         name="Pan"
         min={-1}
         max={1}

@@ -7,12 +7,14 @@ import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ModuleUI from "@/components/ModuleUI";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
+import { MappableRadioGroupItem } from "../mappables/MappableRadioGroupItem";
 
 export default function Tremolo({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -52,7 +54,7 @@ export default function Tremolo({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [tremoloGain],
@@ -111,14 +113,17 @@ export default function Tremolo({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Tremolo"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       {/* Frequency */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Tremolo"
         name="Frequency"
         defaultValue={5}
         step={0.1}
@@ -131,6 +136,8 @@ export default function Tremolo({
 
       {/* Depth */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Tremolo"
         name="Depth"
         min={-1}
         max={1}
@@ -142,21 +149,43 @@ export default function Tremolo({
       />
 
       {/* Waveform Selection */}
-      <Label>Waveform</Label>
-      <RadioGroup
-        className="flex flex-wrap"
-        value={waveform}
-        onValueChange={(value) => setWaveform(value as OscillatorType)}
-      >
-        <RadioGroupItem value="sine" />
-        <Label>Sine</Label>
-        <RadioGroupItem value="square" />
-        <Label>Square</Label>
-        <RadioGroupItem value="sawtooth" />
-        <Label>Sawtooth</Label>
-        <RadioGroupItem value="triangle" />
-        <Label>Triangle</Label>
-      </RadioGroup>
+      <div className="flex flex-col gap-5 p-2">
+        <Label>Waveform</Label>
+        <RadioGroup className="flex flex-wrap" value={waveform}>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Tremolo"
+            paramName="Sine"
+            onAction={() => setWaveform("sine")}
+            value="sine"
+          />
+          <Label>Sine</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Tremolo"
+            paramName="Square"
+            onAction={() => setWaveform("square")}
+            value="square"
+          />
+          <Label>Square</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Tremolo"
+            paramName="Sawtooth"
+            onAction={() => setWaveform("sawtooth")}
+            value="sawtooth"
+          />
+          <Label>Sawtooth</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Tremolo"
+            paramName="Triangle"
+            onAction={() => setWaveform("triangle")}
+            value="triangle"
+          />
+          <Label>Triangle</Label>
+        </RadioGroup>
+      </div>
     </ModuleUI>
   );
 }

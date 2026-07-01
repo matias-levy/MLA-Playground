@@ -6,12 +6,13 @@ import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 import Chain from "../Chain";
 import ModuleUI from "@/components/ModuleUI";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function Splitter({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -47,7 +48,7 @@ export default function Splitter({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: generalIn,
     output: generalOut,
     inputConnectsTo: [in1, in2],
@@ -100,13 +101,16 @@ export default function Splitter({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Splitter"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Splitter"
         name="Crossfade"
         min={0}
         max={1}

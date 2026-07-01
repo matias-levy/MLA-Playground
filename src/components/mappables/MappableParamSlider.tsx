@@ -1,16 +1,22 @@
+import { useCallback } from "react";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { linearToLogSliderPos, logSliderPosToLinear } from "@/utils/conversion";
+import { cn } from "@/lib/utils";
 import {
-  linearToLogSliderPos,
-  logSliderPosToLinear,
-} from "@/utils/conversion";
+  getMappingParamRange,
+  MidiMappingEntry,
+  useMidiParam,
+} from "@/lib/useMidiMap";
 
 const LOG_SLIDER_RESOLUTION = 1000;
 
 export interface ParamSliderProps {
+  moduleId: string;
+  moduleName: string;
   name: string;
   value: number;
-  setValue: Function;
+  setValue: (value: number) => void;
   defaultValue: number;
   min: number;
   max: number;
@@ -21,6 +27,8 @@ export interface ParamSliderProps {
 }
 
 export default function ParamSlider({
+  moduleId,
+  moduleName,
   name,
   value,
   setValue,
@@ -44,8 +52,40 @@ export default function ParamSlider({
     ? linearToLogSliderPos(defaultValue, min, max) * LOG_SLIDER_RESOLUTION
     : defaultValue;
 
+  const onNoteOn = useCallback(
+    (mapping: MidiMappingEntry) => {
+      const { low, high } = getMappingParamRange(mapping, min, max, logScale);
+      const snappedHigh = snapToStep(high);
+      if (Math.abs(value - snappedHigh) <= step / 2) {
+        setValue(snapToStep(low));
+      } else {
+        setValue(snappedHigh);
+      }
+    },
+    [value, min, max, logScale, setValue, step]
+  );
+
+  const { isLearning, isSelected, onLearnClick } = useMidiParam({
+    moduleId,
+    moduleName,
+    paramName: name,
+    onCC: setValue,
+    onNoteOn,
+    min,
+    max,
+    logScale,
+  });
+
   return (
-    <div className="flex flex-col gap-5 px-1">
+    <div
+      className={cn(
+        "flex flex-col gap-5 p-2 rounded-lg transition-colors",
+        isLearning && "cursor-pointer",
+        isSelected && "ring-1 ring-primary",
+        isLearning && !isSelected && "hover:bg-secondary"
+      )}
+      onClick={isLearning ? onLearnClick : undefined}
+    >
       <div className="flex flex-row justify-between">
         <Label>{name}</Label>
         <Label>{rep}</Label>

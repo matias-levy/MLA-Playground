@@ -6,7 +6,7 @@ import { useAudioContext } from "@/components/AudioProvider";
 import { AudioModuleProps } from "@/components/Chain";
 
 import ModuleUI from "@/components/ModuleUI";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
@@ -25,6 +25,7 @@ function makeDistortionCurve(amount: number) {
 
 export default function Distortion({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -47,7 +48,7 @@ export default function Distortion({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [waveshaperNode],
@@ -89,13 +90,16 @@ export default function Distortion({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       name="Distortion"
       index={index}
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Distortion"
         name="Amount"
         min={1}
         max={400}

@@ -11,6 +11,7 @@ import {
   SerializedStack,
 } from "@/lib/useSerialiazable";
 import Header from "./Header";
+import { useMidiMap } from "@/lib/useMidiMap";
 
 const Recorder = dynamic(() => import("@/components/Recorder"), {
   ssr: false,
@@ -19,6 +20,7 @@ const Recorder = dynamic(() => import("@/components/Recorder"), {
 
 import Chain from "./Chain";
 import { toast } from "sonner";
+import { getModulesUsedInChain } from "@/utils/utils";
 
 function Stack() {
   const [currentFile, setCurrentFile] = useState<Blob | null>(null);
@@ -27,7 +29,6 @@ function Stack() {
   const [downloadedSoundId, setDownloadedSoundId] = useState(-1);
   const chainRef = useRef<any>(null);
   const audioInputRef = useRef<any>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [snapshots, setSnapshots] = useState<Snapshot[]>(
     createDefaultSnapshots(8)
   );
@@ -35,6 +36,9 @@ function Stack() {
 
   const [input, setInput] = useState<AudioNode | null>(null);
   const [output, setOutput] = useState<AudioNode | null>(null);
+
+  const { mappings, setMappings, snapshotsRef, removeMappingByModuleId } =
+    useMidiMap();
 
   const saveProjectFile = async () => {
     const internal = await Promise.all([
@@ -50,6 +54,7 @@ function Stack() {
       audioInput: internal[0],
       chain: internal[1],
       snapshots: snapshots,
+      midiMappings: mappings ?? undefined,
     };
     const stringified = JSON.stringify(serialized, null, 2);
     // download the stringified as a file
@@ -81,6 +86,12 @@ function Stack() {
       setFileMode(deserialized.fileMode);
       if (deserialized.snapshots) {
         setSnapshots(deserialized.snapshots);
+        snapshotsRef.current = deserialized.snapshots;
+      }
+      if (deserialized.midiMappings) {
+        setMappings(deserialized.midiMappings);
+      } else {
+        setMappings([]);
       }
       chainRef.current.deserialize(deserialized.chain);
       audioInputRef.current.deserialize(deserialized.audioInput, {
@@ -104,7 +115,7 @@ function Stack() {
       audioInputRef.current.serialize(),
       chainRef.current.serialize(),
     ]);
-
+    const chain = internal[1];
     const newSnapshot: Snapshot = {
       isDefaultSnapshot: false,
       content: {
@@ -112,14 +123,29 @@ function Stack() {
         fileIsAudio: fileIsAudio,
         fileMode: fileMode,
         audioInput: internal[0],
-        chain: internal[1],
+        chain: chain,
       },
     };
-    setSnapshots((prev) => {
-      const newSnapshots = [...prev];
-      newSnapshots[snapshot] = newSnapshot;
-      return newSnapshots;
-    });
+    // If we are saving a new snapshot, we need to remove the midi mappings from the modules that are not used in the new snapshot
+    const modulesUsedInSnapshotBeforeSaving = getModulesUsedInChain(
+      snapshots[snapshot].content?.chain ?? []
+    );
+
+    const modulesUsedInChainAfterSaving = getModulesUsedInChain(chain);
+
+    // Get the modules that are used in theprevious snapshot but not in the new one
+    const modulesToRemove = modulesUsedInSnapshotBeforeSaving.filter(
+      (module) => !modulesUsedInChainAfterSaving.some((m) => m.id === module.id)
+    );
+
+    const newSnapshots = [...snapshots];
+    newSnapshots[snapshot] = newSnapshot;
+    snapshotsRef.current = newSnapshots;
+    // Remove the mappings for the modules that are not used in the new snapshot
+    for (const module of modulesToRemove) {
+      removeMappingByModuleId(module.id, newSnapshots);
+    }
+    setSnapshots(newSnapshots);
   };
 
   const handleLoadSnapshot = async (snapshotIndex: number) => {

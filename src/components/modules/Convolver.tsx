@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 
 import ModuleUI from "@/components/ModuleUI";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -25,6 +25,7 @@ import useSerialiazable, {
   deserializeBlob,
   safeNumber,
 } from "@/lib/useSerialiazable";
+import { MappableRadioGroupItem } from "@/components/mappables/MappableRadioGroupItem";
 
 interface IR {
   name: string;
@@ -48,6 +49,7 @@ const handleTimeChange = (value: number) => {
 
 export default function Convolver({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -104,7 +106,7 @@ export default function Convolver({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [convolverNode, dryGain],
@@ -256,55 +258,68 @@ export default function Convolver({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Reverb / Convolver"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
-      <Label>Impulse Response</Label>
-      <RadioGroup
-        defaultValue="audio"
-        value={IRSource}
-        onValueChange={setIRSource}
-        className="flex justify-start gap-x-6 gap-y-4 flex-wrap"
-      >
-        <div className="flex flex-row items-center justify-center space-x-2 grow">
-          <RadioGroupItem value="internal" id="r1" />
-          <Label htmlFor="r1">Internal IR</Label>
-          <Select
-            onValueChange={setSelectedInternalIR}
-            value={selectedInternalIR}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select IR" />
-            </SelectTrigger>
-            <SelectContent>
-              {IRs.map((IR, i) => {
-                return (
-                  <SelectItem key={i} value={IR.name}>
-                    {IR.name}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-row items-center justify-center space-x-2 grow">
-          <RadioGroupItem value="external" id="r2" />
-          <Label htmlFor="r2">External IR</Label>
-          <Input
-            type="file"
-            accept="audio/*"
-            onChange={(e) => {
-              const file = e.target.files && e.target.files[0];
-              if (!file) return;
-              setUploadedIRBlob(file);
-            }}
-          />
-        </div>
-      </RadioGroup>
-
+      <div className="flex flex-col gap-5 p-2">
+        <Label>Impulse Response</Label>
+        <RadioGroup
+          defaultValue="audio"
+          value={IRSource}
+          className="flex justify-start gap-x-6 gap-y-4 flex-wrap"
+        >
+          <div className="flex flex-row items-center justify-center space-x-2 grow">
+            <MappableRadioGroupItem
+              moduleId={moduleId}
+              moduleName="Convolver"
+              paramName="Internal IR"
+              onAction={() => setIRSource("internal")}
+              value="internal"
+            />
+            <Label>Internal IR</Label>
+            <Select
+              onValueChange={setSelectedInternalIR}
+              value={selectedInternalIR}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select IR" />
+              </SelectTrigger>
+              <SelectContent>
+                {IRs.map((IR, i) => {
+                  return (
+                    <SelectItem key={i} value={IR.name}>
+                      {IR.name}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-row items-center justify-center space-x-2 grow">
+            <MappableRadioGroupItem
+              moduleId={moduleId}
+              moduleName="Convolver"
+              paramName="External IR"
+              onAction={() => setIRSource("external")}
+              value="external"
+            />
+            <Label>External IR</Label>
+            <Input
+              type="file"
+              accept="audio/*"
+              onChange={(e) => {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+                setUploadedIRBlob(file);
+              }}
+            />
+          </div>
+        </RadioGroup>
+      </div>
       {/* Stretch */}
       <div className="flex flex-col gap-5 px-1">
         <div className="flex flex-row justify-between">
@@ -329,6 +344,8 @@ export default function Convolver({
 
       {/* Feedback Delay Time */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Convolver"
         name="Feedback Delay Time"
         min={0}
         max={1}
@@ -341,6 +358,8 @@ export default function Convolver({
 
       {/* Feedback Delay Amount */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Convolver"
         name="Feedback Delay Amount (Careful with this)"
         min={0}
         max={0.8}
@@ -353,6 +372,8 @@ export default function Convolver({
 
       {/* Mix */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Convolver"
         name="Mix"
         min={0}
         max={1}

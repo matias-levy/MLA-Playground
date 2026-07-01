@@ -6,13 +6,14 @@ import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 
 import ModuleUI from "@/components/ModuleUI";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 import { dbToLinear, linearToDb } from "@/utils/conversion";
 
 export default function Compressor({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -50,7 +51,7 @@ export default function Compressor({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [compressorNode],
@@ -111,14 +112,17 @@ export default function Compressor({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Compressor"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       {/* Threshold */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Compressor"
         name="Threshold"
         min={-100}
         max={0}
@@ -131,6 +135,8 @@ export default function Compressor({
 
       {/* Ratio */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Compressor"
         name="Ratio / Reduction"
         min={1}
         max={20}
@@ -143,6 +149,8 @@ export default function Compressor({
 
       {/* Attack */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Compressor"
         name="Attack"
         min={0}
         max={1}
@@ -155,6 +163,8 @@ export default function Compressor({
 
       {/* Release */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Compressor"
         name="Release"
         min={0}
         max={1}
@@ -167,6 +177,8 @@ export default function Compressor({
 
       {/* Knee */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Compressor"
         name="Knee"
         min={0}
         max={40}
@@ -179,6 +191,8 @@ export default function Compressor({
 
       {/* Output Gain */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Compressor"
         name="Output Gain"
         min={0}
         max={dbToLinear(24)}

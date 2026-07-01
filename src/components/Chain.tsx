@@ -35,6 +35,7 @@ import { useAudioContext, AudioModule } from "@/components/AudioProvider";
 import useSerialiazable from "@/lib/useSerialiazable";
 
 import { GripHorizontal } from "lucide-react";
+import { useMidiMap } from "@/lib/useMidiMap";
 
 export interface SortableItemProps {
   id: string;
@@ -114,7 +115,7 @@ function Chain({
   const [activeModule, setActiveModule] = useState<
     AudioModuleStateType | null | undefined
   >(null);
-
+  const { removeMappingByModuleId } = useMidiMap();
   useEffect(() => {
     setInput(input);
     setOutput(output);
@@ -136,7 +137,11 @@ function Chain({
   }
 
   function unregisterModule(index: number) {
+    const module = modules[index];
     setModules((prevModules) => prevModules.filter((_, i) => i !== index));
+    if (module) {
+      removeMappingByModuleId(module.id);
+    }
   }
 
   function handleDragStart(event: DragStartEvent) {
@@ -245,7 +250,7 @@ function Chain({
                 <GripHorizontal className="text-gray-400" />
               </div>
               <activeModule.Component
-                moduleId={activeModule.id}
+                moduleId={"dragging-module"}
                 ref={null}
                 index={-1}
                 unregisterModule={() => {}}

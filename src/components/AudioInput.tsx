@@ -3,10 +3,10 @@
 import { SetStateAction, useEffect, useState, useCallback } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioGroup } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { MappableCheckbox } from "@/components/mappables/MappableCheckbox";
+// import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -25,7 +25,8 @@ import { Loader2, CirclePlay, CircleStop } from "lucide-react";
 import Waveform from "@/components/Waveform";
 import FreeSound from "@/components/FreeSound";
 import useFreeSoundQuery from "@/lib/useFreeSoundQuery";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
+import MappableRangeSlider from "@/components/mappables/MappableRangeSlider";
 import useSerialiazable from "@/lib/useSerialiazable";
 
 import {
@@ -37,6 +38,8 @@ import {
 } from "@/components/ui/select";
 import { Label } from "./ui/label";
 import { formatTime } from "@/lib/utils";
+import MappableButton from "@/components/mappables/MappableButton";
+import { MappableRadioGroupItem } from "@/components/mappables/MappableRadioGroupItem";
 
 export interface AudioInputProps {
   currentFile: Blob | null;
@@ -321,7 +324,7 @@ export default function AudioInput({
       type="single"
       collapsible
       className={cn(
-        "w-full flex flex-col items-stretch border-1 px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card"
+        "w-full flex flex-col items-stretch border px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card"
       )}
       defaultValue="audio-input"
     >
@@ -368,6 +371,8 @@ export default function AudioInput({
                   </Select>
                 </div>
                 <ParamSlider
+                  moduleId="audio-input"
+                  moduleName="Audio Input"
                   name="Volume"
                   min={0}
                   max={dbToLinear(24)}
@@ -411,11 +416,14 @@ export default function AudioInput({
                   <RadioGroup
                     defaultValue="audio"
                     value={fileMode}
-                    onValueChange={setFileMode}
                     className="flex flex-wrap justify-start gap-x-6 gap-y-4"
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem
+                      <MappableRadioGroupItem
+                        moduleId="audio-input"
+                        moduleName="Audio Input"
+                        paramName="Audio"
+                        onAction={() => setFileMode("audio")}
                         value="audio"
                         id="r1"
                         disabled={!fileIsAudio}
@@ -428,22 +436,37 @@ export default function AudioInput({
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="1byte" id="r2" />
+                      <MappableRadioGroupItem
+                        moduleId="audio-input"
+                        moduleName="Audio Input"
+                        paramName="1byte"
+                        onAction={() => setFileMode("1byte")}
+                        value="1byte"
+                        id="r2"
+                      />
                       <Label htmlFor="r2">Raw 1-byte to Float</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="4byte" id="r3" />
+                      <MappableRadioGroupItem
+                        moduleId="audio-input"
+                        moduleName="Audio Input"
+                        paramName="4byte"
+                        onAction={() => setFileMode("4byte")}
+                        value="4byte"
+                        id="r3"
+                      />
                       <Label htmlFor="r3">Raw 4-byte to Clamped Float</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="c1"
-                        checked={loop}
-                        onCheckedChange={(e) => {
-                          if (e !== "indeterminate") {
-                            setLoop(e);
-                          }
+                      <MappableCheckbox
+                        moduleId="audio-input"
+                        moduleName="Audio Input"
+                        paramName="Loop"
+                        onAction={(checked) => {
+                          if (checked !== "indeterminate") setLoop(checked);
                         }}
+                        checked={loop}
+                        id="c1"
                       />
                       <Label htmlFor="c1">Loop</Label>
                     </div>
@@ -469,13 +492,18 @@ export default function AudioInput({
                             formatTime((audioBuffer.duration * cues[1]) / 100)}
                       </Label>
                     </div>
-                    <Slider
+                    <MappableRangeSlider
+                      moduleId="audio-input"
+                      moduleName="Audio Input"
+                      minParamName="Loop Start"
+                      maxParamName="Loop End"
                       min={0}
                       max={100}
                       step={0.001}
+                      stepGuard={500}
                       value={cues}
                       defaultValue={[0, 100]}
-                      onValueChange={(e) => {
+                      onRangeChange={(e) => {
                         setCues(e);
                       }}
                       onDoubleClick={() => {
@@ -483,6 +511,8 @@ export default function AudioInput({
                       }}
                     />
                     <ParamSlider
+                      moduleId="audio-input"
+                      moduleName="Audio Input"
                       name="Detune"
                       min={-1200}
                       max={1200}
@@ -499,6 +529,8 @@ export default function AudioInput({
                     />
 
                     <ParamSlider
+                      moduleId="audio-input"
+                      moduleName="Audio Input"
                       name="Playback Rate"
                       min={0.01}
                       max={4}
@@ -517,24 +549,32 @@ export default function AudioInput({
                 )}
 
                 <div className="flex flex-row gap-2 justify-between items-stretch">
-                  <Button
+                  <MappableButton
+                    moduleId="audio-input"
+                    moduleName="Audio Input"
+                    paramName="Play"
                     className="grow"
                     disabled={!currentFile || loading}
-                    onClick={handlePlay}
+                    onAction={handlePlay}
                   >
                     Start
                     <CirclePlay />
-                  </Button>
-                  <Button
+                  </MappableButton>
+                  <MappableButton
+                    moduleId="audio-input"
+                    moduleName="Audio Input"
+                    paramName="Stop"
                     className="grow"
                     disabled={!playing}
-                    onClick={handleStop}
+                    onAction={handleStop}
                   >
                     Stop
                     <CircleStop />
-                  </Button>
+                  </MappableButton>
                 </div>
                 <ParamSlider
+                  moduleId="audio-input"
+                  moduleName="Audio Input"
                   name="Volume"
                   min={0}
                   max={dbToLinear(24)}

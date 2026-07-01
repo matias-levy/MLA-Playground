@@ -8,11 +8,13 @@ import { createSafeAudioNode } from "@/utils/utils";
 import { AudioModuleProps } from "@/components/Chain";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ModuleUI from "@/components/ModuleUI";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
+import { MappableRadioGroupItem } from "@/components/mappables/MappableRadioGroupItem";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function AutoPan({
   index,
+  moduleId,
   ref,
   unregisterModule,
   addModule,
@@ -57,7 +59,7 @@ export default function AutoPan({
 
   // Bypass Hook
 
-  const { bypass, toggleBypass, setBypass } = useBypass({
+  const { bypass, setBypass } = useBypass({
     input: inputNode,
     output: outputNode,
     inputConnectsTo: [inputPanNode],
@@ -120,14 +122,17 @@ export default function AutoPan({
 
   return (
     <ModuleUI
+      moduleId={moduleId}
       index={index}
       name="Auto Pan"
       unregisterModule={unregisterModule}
       bypass={bypass}
-      toggleBypass={toggleBypass}
+      setBypass={setBypass}
     >
       {/* Offset */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Auto Pan"
         name="Offset"
         min={-1}
         max={1}
@@ -139,6 +144,8 @@ export default function AutoPan({
       />
       {/* Frequency */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Auto Pan"
         name="Frequency"
         defaultValue={5}
         step={0.1}
@@ -151,6 +158,8 @@ export default function AutoPan({
 
       {/* Depth */}
       <ParamSlider
+        moduleId={moduleId}
+        moduleName="Auto Pan"
         name="Depth"
         min={-1}
         max={1}
@@ -162,21 +171,43 @@ export default function AutoPan({
       />
 
       {/* Waveform Selection */}
-      <Label>Waveform</Label>
-      <RadioGroup
-        className="flex flex-wrap"
-        value={waveform}
-        onValueChange={(value) => setWaveform(value as OscillatorType)}
-      >
-        <RadioGroupItem value="sine" />
-        <Label>Sine</Label>
-        <RadioGroupItem value="square" />
-        <Label>Square</Label>
-        <RadioGroupItem value="sawtooth" />
-        <Label>Sawtooth</Label>
-        <RadioGroupItem value="triangle" />
-        <Label>Triangle</Label>
-      </RadioGroup>
+      <div className="flex flex-col gap-5 p-2">
+        <Label>Waveform</Label>
+        <RadioGroup className="flex flex-wrap" value={waveform}>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Auto Pan"
+            paramName="Sine"
+            onAction={() => setWaveform("sine")}
+            value="sine"
+          />
+          <Label>Sine</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Auto Pan"
+            paramName="Square"
+            onAction={() => setWaveform("square")}
+            value="square"
+          />
+          <Label>Square</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Auto Pan"
+            paramName="Sawtooth"
+            onAction={() => setWaveform("sawtooth")}
+            value="sawtooth"
+          />
+          <Label>Sawtooth</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Auto Pan"
+            paramName="Triangle"
+            onAction={() => setWaveform("triangle")}
+            value="triangle"
+          />
+          <Label>Triangle</Label>
+        </RadioGroup>
+      </div>
     </ModuleUI>
   );
 }
