@@ -104,20 +104,8 @@ function MappableRangeSlider({
   const handleThumbClick = (hook: ReturnType<typeof useMidiParam>) => {
     if (hook.isLearning) {
       hook.onLearnClick();
-    } else {
-      console.log("handleThumbClick", hook.label);
     }
   };
-
-  //   const _values = React.useMemo(
-  //     () =>
-  //       Array.isArray(value)
-  //         ? value
-  //         : Array.isArray(defaultValue)
-  //         ? defaultValue
-  //         : [min, max],
-  //     [value, defaultValue, min, max]
-  //   );
 
   return (
     <SliderPrimitive.Root

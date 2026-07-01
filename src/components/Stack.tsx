@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import AudioInput from "@/components/AudioInput";
 import RecorderSkeleton from "./RecorderSkeleton";
@@ -171,10 +171,6 @@ function Stack() {
     openProjectFile(file);
     e.target.value = "";
   };
-
-  useEffect(() => {
-    console.log("mappings", mappings);
-  }, [mappings]);
 
   return (
     <div className="flex flex-col gap-4 row-start-2 w-full">
