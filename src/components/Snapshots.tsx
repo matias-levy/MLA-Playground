@@ -23,6 +23,12 @@ import {
 import { Info } from "lucide-react";
 import MappableButton from "@/components/mappables/MappableButton";
 import { MappableRadioGroupPrimitiveItem } from "@/components/mappables/MappableRadioGroupItem";
+import { useMidiMap } from "@/lib/useMidiMap";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export interface Snapshot {
   isDefaultSnapshot: boolean;
@@ -52,6 +58,7 @@ const Snapshots = ({
   onSaveSnapshot,
   onLoadSnapshot,
 }: SnapshotsProps) => {
+  const { isLearning } = useMidiMap();
   const handleSnapshotSelect = (snapshot: number) => {
     onLoadSnapshot(snapshot);
   };
@@ -83,6 +90,25 @@ const Snapshots = ({
         <div className="flex flex-row justify-between items-center gap-4">
           <Label>Snapshots</Label>
           <div className="flex flex-row items-center gap-2">
+            <Tooltip delayDuration={350}>
+              <TooltipTrigger asChild>
+                <MappableButton
+                  className="rounded-full"
+                  moduleId="snapshots"
+                  moduleName="Snapshots"
+                  paramName="Save any"
+                  variant="ghost"
+                  size="icon"
+                  onAction={() => onSaveSnapshot(currentSnapshot)}
+                >
+                  <ArrowBigUp />
+                </MappableButton>
+              </TooltipTrigger>
+              <TooltipContent>
+                Save to the currently selected snapshot
+              </TooltipContent>
+            </Tooltip>
+
             <SnapshotInstructions />
             <AccordionTrigger />
           </div>
