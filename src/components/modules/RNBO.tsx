@@ -26,6 +26,7 @@ import useSerialiazable, {
   serializeBlob,
 } from "@/lib/useSerialiazable";
 import { dbToLinear, linearToDb } from "@/utils/conversion";
+import { MappableRadioGroupItem } from "../mappables/MappableRadioGroupItem";
 
 export default function RNBO({
   index,
@@ -105,6 +106,13 @@ export default function RNBO({
                       });
                     });
                   }
+                  // d.parameterChangeEvent.subscribe((v) => {
+                  //   setParamValues((prev) => {
+                  //     const newParams = [...prev];
+                  //     newParams[v.index] = v.value;
+                  //     return newParams;
+                  //   });
+                  // });
                   setDevice(d);
                   setPatcher(parsedPatcher);
                   setLoading(false);
@@ -216,24 +224,31 @@ export default function RNBO({
 
             case ParameterType.Enum: {
               const enumParam = p as EnumParameter;
+              const selectEnum = (enumItem: EnumValue) => {
+                enumParam.enumValue = enumItem;
+                setParamValues((prev) => {
+                  const newParams = [...prev];
+                  newParams[p.index] = enumParam.value;
+                  return newParams;
+                });
+              };
+              const selectedValue =
+                paramValues[p.index] !== undefined
+                  ? enumParam.enumValues[paramValues[p.index]]?.toString()
+                  : enumParam.enumValue.toString();
               component = (
-                <div key={p.id}>
-                  <Label className="mb-4">{p.displayName}</Label>
-                  <RadioGroup
-                    value={enumParam.enumValue.toString()}
-                    onValueChange={(e) => {
-                      setParamValues((prev) => {
-                        const newParams = [...prev];
-                        newParams[p.index] = parseInt(e);
-                        return newParams;
-                      });
-                      enumParam.enumValue = e;
-                    }}
-                    className="flex flex-wrap"
-                  >
+                <div key={p.id} className="flex flex-col gap-5 p-2">
+                  <Label>{p.displayName}</Label>
+                  <RadioGroup value={selectedValue} className="flex flex-wrap">
                     {enumParam.enumValues.map((enumItem: EnumValue) => (
                       <div key={enumItem} className="flex flex-row gap-2">
-                        <RadioGroupItem value={enumItem.toString()} />
+                        <MappableRadioGroupItem
+                          moduleId={moduleId}
+                          moduleName="RNBO"
+                          paramName={`${p.displayName} · ${enumItem}`}
+                          onAction={() => selectEnum(enumItem)}
+                          value={enumItem.toString()}
+                        />
                         <Label>
                           {enumItem.toString().charAt(0).toUpperCase() +
                             enumItem.toString().slice(1)}

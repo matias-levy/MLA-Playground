@@ -8,6 +8,8 @@ import { AudioModuleProps } from "@/components/Chain";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/mappables/MappableParamSlider";
+import { MappableRadioGroupItem } from "@/components/mappables/MappableRadioGroupItem";
+import { MappableCheckbox } from "@/components/mappables/MappableCheckbox";
 import { Checkbox } from "@/components/ui/checkbox";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
@@ -232,11 +234,7 @@ export default function Filter({
       {/* Filter Type */}
       <div className="flex flex-col gap-5 p-2">
         <Label>Filter Type</Label>
-        <RadioGroup
-          value={filterType}
-          onValueChange={setFilterType}
-          className="flex flex-wrap"
-        >
+        <RadioGroup value={filterType} className="flex flex-wrap">
           {[
             "lowpass",
             "highpass",
@@ -248,23 +246,31 @@ export default function Filter({
             "allpass",
           ].map((wave) => (
             <div key={wave} className="flex flex-row gap-2">
-              <RadioGroupItem value={wave} />
+              <MappableRadioGroupItem
+                moduleId={moduleId}
+                moduleName="Filter"
+                paramName={wave.charAt(0).toUpperCase() + wave.slice(1)}
+                onAction={() => setFilterType(wave)}
+                value={wave}
+              />
               <Label>{wave.charAt(0).toUpperCase() + wave.slice(1)}</Label>
             </div>
           ))}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="c1"
-              checked={is24db}
-              onCheckedChange={(e) => {
-                if (e !== "indeterminate") {
-                  setIs24db(e);
-                }
-              }}
-            />
-            <Label htmlFor="c1">24dB/Oct</Label>
-          </div>
         </RadioGroup>
+        <div className="flex items-center space-x-2">
+          <MappableCheckbox
+            moduleId={moduleId}
+            moduleName="Filter"
+            paramName="24dB/Oct"
+            onAction={(checked) => {
+              if (checked !== "indeterminate") {
+                setIs24db(checked);
+              }
+            }}
+            checked={is24db}
+          />
+          <Label>24dB/Oct</Label>
+        </div>
       </div>
 
       {/* LFO Rate */}
@@ -298,14 +304,16 @@ export default function Filter({
       {/* LFO Waveform */}
       <div className="flex flex-col gap-5 p-2">
         <Label>LFO Waveform</Label>
-        <RadioGroup
-          value={waveform}
-          onValueChange={setWaveform}
-          className="flex flex-wrap"
-        >
+        <RadioGroup value={waveform} className="flex flex-wrap">
           {["sine", "square", "sawtooth", "triangle"].map((wave) => (
             <div key={wave} className="flex flex-row gap-2">
-              <RadioGroupItem value={wave} />
+              <MappableRadioGroupItem
+                moduleId={moduleId}
+                moduleName="Filter"
+                paramName={wave.charAt(0).toUpperCase() + wave.slice(1)}
+                onAction={() => setWaveform(wave)}
+                value={wave}
+              />
               <Label>{wave.charAt(0).toUpperCase() + wave.slice(1)}</Label>
             </div>
           ))}

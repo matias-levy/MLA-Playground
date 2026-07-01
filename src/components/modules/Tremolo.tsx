@@ -10,6 +10,7 @@ import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/mappables/MappableParamSlider";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
+import { MappableRadioGroupItem } from "../mappables/MappableRadioGroupItem";
 
 export default function Tremolo({
   index,
@@ -148,21 +149,43 @@ export default function Tremolo({
       />
 
       {/* Waveform Selection */}
-      <Label>Waveform</Label>
-      <RadioGroup
-        className="flex flex-wrap"
-        value={waveform}
-        onValueChange={(value) => setWaveform(value as OscillatorType)}
-      >
-        <RadioGroupItem value="sine" />
-        <Label>Sine</Label>
-        <RadioGroupItem value="square" />
-        <Label>Square</Label>
-        <RadioGroupItem value="sawtooth" />
-        <Label>Sawtooth</Label>
-        <RadioGroupItem value="triangle" />
-        <Label>Triangle</Label>
-      </RadioGroup>
+      <div className="flex flex-col gap-5 p-2">
+        <Label>Waveform</Label>
+        <RadioGroup className="flex flex-wrap" value={waveform}>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Tremolo"
+            paramName="Sine"
+            onAction={() => setWaveform("sine")}
+            value="sine"
+          />
+          <Label>Sine</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Tremolo"
+            paramName="Square"
+            onAction={() => setWaveform("square")}
+            value="square"
+          />
+          <Label>Square</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Tremolo"
+            paramName="Sawtooth"
+            onAction={() => setWaveform("sawtooth")}
+            value="sawtooth"
+          />
+          <Label>Sawtooth</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Tremolo"
+            paramName="Triangle"
+            onAction={() => setWaveform("triangle")}
+            value="triangle"
+          />
+          <Label>Triangle</Label>
+        </RadioGroup>
+      </div>
     </ModuleUI>
   );
 }

@@ -9,6 +9,7 @@ import { AudioModuleProps } from "@/components/Chain";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ModuleUI from "@/components/ModuleUI";
 import ParamSlider from "@/components/mappables/MappableParamSlider";
+import { MappableRadioGroupItem } from "@/components/mappables/MappableRadioGroupItem";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";
 
 export default function AutoPan({
@@ -170,21 +171,43 @@ export default function AutoPan({
       />
 
       {/* Waveform Selection */}
-      <Label>Waveform</Label>
-      <RadioGroup
-        className="flex flex-wrap"
-        value={waveform}
-        onValueChange={(value) => setWaveform(value as OscillatorType)}
-      >
-        <RadioGroupItem value="sine" />
-        <Label>Sine</Label>
-        <RadioGroupItem value="square" />
-        <Label>Square</Label>
-        <RadioGroupItem value="sawtooth" />
-        <Label>Sawtooth</Label>
-        <RadioGroupItem value="triangle" />
-        <Label>Triangle</Label>
-      </RadioGroup>
+      <div className="flex flex-col gap-5 p-2">
+        <Label>Waveform</Label>
+        <RadioGroup className="flex flex-wrap" value={waveform}>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Auto Pan"
+            paramName="Sine"
+            onAction={() => setWaveform("sine")}
+            value="sine"
+          />
+          <Label>Sine</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Auto Pan"
+            paramName="Square"
+            onAction={() => setWaveform("square")}
+            value="square"
+          />
+          <Label>Square</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Auto Pan"
+            paramName="Sawtooth"
+            onAction={() => setWaveform("sawtooth")}
+            value="sawtooth"
+          />
+          <Label>Sawtooth</Label>
+          <MappableRadioGroupItem
+            moduleId={moduleId}
+            moduleName="Auto Pan"
+            paramName="Triangle"
+            onAction={() => setWaveform("triangle")}
+            value="triangle"
+          />
+          <Label>Triangle</Label>
+        </RadioGroup>
+      </div>
     </ModuleUI>
   );
 }
