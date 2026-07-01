@@ -1,5 +1,6 @@
 import { useImperativeHandle } from "react";
 import { Snapshot } from "@/components/Snapshots";
+import { MidiMappingEntry } from "@/lib/useMidiMap";
 
 export async function serializeBlob(blob: Blob | null): Promise<string | null> {
   if (!blob) return null;
@@ -47,6 +48,7 @@ export interface SerializedStack {
   audioInput: any;
   chain: any;
   snapshots: Snapshot[];
+  midiMappings?: MidiMappingEntry[];
 }
 export interface SerialiazableProps<T> {
   ref: React.RefObject<any>;

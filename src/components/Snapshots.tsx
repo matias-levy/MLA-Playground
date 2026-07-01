@@ -26,7 +26,10 @@ import { MappableRadioGroupPrimitiveItem } from "@/components/mappables/Mappable
 
 export interface Snapshot {
   isDefaultSnapshot: boolean;
-  content?: Omit<SerializedStack, "version" | "createdAt" | "snapshots">;
+  content?: Omit<
+    SerializedStack,
+    "version" | "createdAt" | "snapshots" | "midiMappings"
+  >;
 }
 
 export const createDefaultSnapshots = (length: number): Snapshot[] => {

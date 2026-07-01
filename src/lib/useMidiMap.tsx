@@ -40,6 +40,7 @@ interface MidiMapContextValue {
   isLearning: boolean;
   pendingParamId: string | null;
   mappings: MidiMappingEntry[];
+  setMappings: (mappings: MidiMappingEntry[]) => void;
   startLearning: () => void;
   cancelLearning: () => void;
   selectParam: (paramId: string) => void;
@@ -294,6 +295,7 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
       isLearning,
       pendingParamId,
       mappings,
+      setMappings,
       startLearning,
       cancelLearning,
       selectParam,
@@ -311,6 +313,7 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
       isLearning,
       pendingParamId,
       mappings,
+      setMappings,
       startLearning,
       cancelLearning,
       selectParam,

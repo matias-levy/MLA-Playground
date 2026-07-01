@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import AudioInput from "@/components/AudioInput";
 import RecorderSkeleton from "./RecorderSkeleton";
@@ -11,6 +11,7 @@ import {
   SerializedStack,
 } from "@/lib/useSerialiazable";
 import Header from "./Header";
+import { useMidiMap } from "@/lib/useMidiMap";
 
 const Recorder = dynamic(() => import("@/components/Recorder"), {
   ssr: false,
@@ -35,6 +36,8 @@ function Stack() {
   const [input, setInput] = useState<AudioNode | null>(null);
   const [output, setOutput] = useState<AudioNode | null>(null);
 
+  const { mappings, setMappings } = useMidiMap();
+
   const saveProjectFile = async () => {
     const internal = await Promise.all([
       audioInputRef.current.serialize(),
@@ -49,6 +52,7 @@ function Stack() {
       audioInput: internal[0],
       chain: internal[1],
       snapshots: snapshots,
+      midiMappings: mappings ?? undefined,
     };
     const stringified = JSON.stringify(serialized, null, 2);
     // download the stringified as a file
@@ -80,6 +84,11 @@ function Stack() {
       setFileMode(deserialized.fileMode);
       if (deserialized.snapshots) {
         setSnapshots(deserialized.snapshots);
+      }
+      if (deserialized.midiMappings) {
+        setMappings(deserialized.midiMappings);
+      } else {
+        setMappings([]);
       }
       chainRef.current.deserialize(deserialized.chain);
       audioInputRef.current.deserialize(deserialized.audioInput, {
@@ -144,6 +153,10 @@ function Stack() {
     openProjectFile(file);
     e.target.value = "";
   };
+
+  useEffect(() => {
+    console.log("mappings", mappings);
+  }, [mappings]);
 
   return (
     <div className="flex flex-col gap-4 row-start-2 w-full">
