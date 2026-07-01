@@ -26,6 +26,7 @@ import Waveform from "@/components/Waveform";
 import FreeSound from "@/components/FreeSound";
 import useFreeSoundQuery from "@/lib/useFreeSoundQuery";
 import ParamSlider from "@/components/mappables/MappableParamSlider";
+import MappableRangeSlider from "@/components/mappables/MappableRangeSlider";
 import useSerialiazable from "@/lib/useSerialiazable";
 
 import {
@@ -491,13 +492,18 @@ export default function AudioInput({
                             formatTime((audioBuffer.duration * cues[1]) / 100)}
                       </Label>
                     </div>
-                    <Slider
+                    <MappableRangeSlider
+                      moduleId="audio-input"
+                      moduleName="Audio Input"
+                      minParamName="Loop Start"
+                      maxParamName="Loop End"
                       min={0}
                       max={100}
                       step={0.001}
+                      stepGuard={1000}
                       value={cues}
                       defaultValue={[0, 100]}
-                      onValueChange={(e) => {
+                      onRangeChange={(e) => {
                         setCues(e);
                       }}
                       onDoubleClick={() => {
