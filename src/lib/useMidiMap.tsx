@@ -26,6 +26,9 @@ export interface MidiParamHandle {
 
 export interface MidiMappingEntry {
   paramId: string;
+  moduleId: string;
+  moduleName: string;
+  paramName: string;
   channel: number;
   command: MidiCommand;
   data1: number;
@@ -224,10 +227,15 @@ export function MidiMapProvider({ children }: { children: React.ReactNode }) {
       if (command !== "controlChange" && command !== "noteOn") return;
 
       if (isLearning && pendingParamId) {
+        const param = getParam(pendingParamId);
+        if (!param) return;
         setMappings((prev) => [
           ...prev.filter((m) => !(m.paramId === pendingParamId)),
           {
             paramId: pendingParamId,
+            moduleId: param.moduleId,
+            moduleName: param.moduleName,
+            paramName: param.paramName,
             channel,
             command,
             data1,

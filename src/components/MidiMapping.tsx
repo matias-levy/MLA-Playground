@@ -82,15 +82,10 @@ const MidiMapping = () => {
           <Label>Parameters</Label>
 
           {mappings.map((mapping) => {
-            const param = getParam(mapping.paramId);
             return (
               <MidiMappingItem
                 key={mapping.paramId}
-                param={
-                  param
-                    ? `${param.moduleName} · ${param.paramName}`
-                    : mapping.paramId
-                }
+                param={`${mapping.moduleName} · ${mapping.paramName}`}
                 channel={mapping.channel}
                 command={mapping.command}
                 data1={mapping.data1}
