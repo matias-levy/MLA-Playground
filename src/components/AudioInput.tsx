@@ -5,7 +5,8 @@ import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
+import { MappableCheckbox } from "@/components/mappables/MappableCheckbox";
+// import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -456,14 +457,15 @@ export default function AudioInput({
                       <Label htmlFor="r3">Raw 4-byte to Clamped Float</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="c1"
-                        checked={loop}
-                        onCheckedChange={(e) => {
-                          if (e !== "indeterminate") {
-                            setLoop(e);
-                          }
+                      <MappableCheckbox
+                        moduleId="audio-input"
+                        moduleName="Audio Input"
+                        paramName="Loop"
+                        onAction={(checked) => {
+                          if (checked !== "indeterminate") setLoop(checked);
                         }}
+                        checked={loop}
+                        id="c1"
                       />
                       <Label htmlFor="c1">Loop</Label>
                     </div>
