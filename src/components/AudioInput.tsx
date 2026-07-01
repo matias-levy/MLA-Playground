@@ -3,10 +3,9 @@
 import { SetStateAction, useEffect, useState, useCallback } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { Slider } from "@/components/ui/slider";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioGroup } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -25,7 +24,7 @@ import { Loader2, CirclePlay, CircleStop } from "lucide-react";
 import Waveform from "@/components/Waveform";
 import FreeSound from "@/components/FreeSound";
 import useFreeSoundQuery from "@/lib/useFreeSoundQuery";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
 import useSerialiazable from "@/lib/useSerialiazable";
 
 import {
@@ -37,8 +36,8 @@ import {
 } from "@/components/ui/select";
 import { Label } from "./ui/label";
 import { formatTime } from "@/lib/utils";
-import MappableButton from "./MappableButton";
-import { MappableRadioGroupItem } from "./MappableRadioGroupItem";
+import MappableButton from "@/components/mappables/MappableButton";
+import { MappableRadioGroupItem } from "@/components/mappables/MappableRadioGroupItem";
 
 export interface AudioInputProps {
   currentFile: Blob | null;

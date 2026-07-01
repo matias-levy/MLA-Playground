@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAudioContext } from "@/components/AudioProvider";
 import { AudioModuleProps } from "@/components/Chain";
 import ModuleUI from "@/components/ModuleUI";
-import ParamSlider from "@/components/ParamSlider";
+import ParamSlider from "@/components/mappables/MappableParamSlider";
 import { createSafeAudioNode } from "@/utils/utils";
 import useBypass from "@/lib/useBypass";
 import useSerialiazable, { safeNumber } from "@/lib/useSerialiazable";

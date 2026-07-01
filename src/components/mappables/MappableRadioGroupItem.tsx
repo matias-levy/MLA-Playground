@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMidiParam } from "@/lib/useMidiMap";
 import { cn } from "@/lib/utils";
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
-import { RadioGroupItem } from "./ui/radio-group";
+import { RadioGroupItem } from "@/components/ui/radio-group";
 
 type MappableRadioGroupPrimitiveItem =
   RadioGroupPrimitive.RadioGroupItemProps & {

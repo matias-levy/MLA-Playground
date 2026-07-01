@@ -21,8 +21,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Info } from "lucide-react";
-import MappableButton from "./MappableButton";
-import { MappableRadioGroupPrimitiveItem } from "./MappableRadioGroupItem";
+import MappableButton from "@/components/mappables/MappableButton";
+import { MappableRadioGroupPrimitiveItem } from "@/components/mappables/MappableRadioGroupItem";
 
 export interface Snapshot {
   isDefaultSnapshot: boolean;

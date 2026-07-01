@@ -19,7 +19,7 @@ import {
   IMediaRecorder,
   register,
 } from "extendable-media-recorder";
-import MappableButton from "./MappableButton";
+import MappableButton from "@/components/mappables/MappableButton";
 import { connect } from "extendable-media-recorder-wav-encoder";
 
 let chunks: Blob[] = [];
