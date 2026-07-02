@@ -2,14 +2,13 @@
 
 import {
   Accordion,
-  AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, moduleSurfaceClasses } from "@/lib/utils";
 import { ArrowBigUp } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { SerializedStack } from "@/lib/useSerialiazable";
@@ -23,7 +22,6 @@ import {
 import { Info } from "lucide-react";
 import MappableButton from "@/components/mappables/MappableButton";
 import { MappableRadioGroupPrimitiveItem } from "@/components/mappables/MappableRadioGroupItem";
-import { useMidiMap } from "@/lib/useMidiMap";
 import {
   Tooltip,
   TooltipContent,
@@ -58,7 +56,10 @@ const Snapshots = ({
   onSaveSnapshot,
   onLoadSnapshot,
 }: SnapshotsProps) => {
-  const { isLearning } = useMidiMap();
+  // Accordion State
+  const [open, setOpen] = useState("snapshots");
+  const isOpen = open === "snapshots";
+
   const handleSnapshotSelect = (snapshot: number) => {
     onLoadSnapshot(snapshot);
   };
@@ -79,90 +80,109 @@ const Snapshots = ({
   }, [snapshots.length, handleSnapshotSelect, onSaveSnapshot, currentSnapshot]);
 
   return (
-    <Accordion
-      type="single"
-      collapsible
+    <div
       className={cn(
-        "w-full flex flex-col items-stretch border px-6 py-2 rounded-3xl shadow-xl transition-all bg-card dark:border-card"
+        "w-full flex flex-col items-stretch px-6 py-2",
+        moduleSurfaceClasses
       )}
     >
-      <AccordionItem value="snapshots">
-        <div className="flex flex-row justify-between items-center gap-4">
-          <Label>Snapshots</Label>
-          <div className="flex flex-row items-center gap-2">
-            <Tooltip delayDuration={350}>
-              <TooltipTrigger asChild>
-                <MappableButton
-                  className="rounded-full"
-                  moduleId="snapshots"
-                  moduleName="Snapshots"
-                  paramName="Save any"
-                  variant="ghost"
-                  size="icon"
-                  onAction={() => onSaveSnapshot(currentSnapshot)}
-                >
-                  <ArrowBigUp />
-                </MappableButton>
-              </TooltipTrigger>
-              <TooltipContent>
-                Save to the currently selected snapshot
-              </TooltipContent>
-            </Tooltip>
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full"
+        value={open}
+        onValueChange={setOpen}
+        defaultValue="snapshots"
+      >
+        <AccordionItem value="snapshots">
+          <div className="flex flex-row justify-between items-center gap-4">
+            <Label>Snapshots</Label>
+            <div className="flex flex-row items-center gap-2">
+              <Tooltip delayDuration={350}>
+                <TooltipTrigger asChild>
+                  <MappableButton
+                    className="rounded-full"
+                    moduleId="snapshots"
+                    moduleName="Snapshots"
+                    paramName="Save any"
+                    variant="ghost"
+                    size="icon"
+                    onAction={() => onSaveSnapshot(currentSnapshot)}
+                  >
+                    <ArrowBigUp />
+                  </MappableButton>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Save to the currently selected snapshot
+                </TooltipContent>
+              </Tooltip>
 
-            <SnapshotInstructions />
-            <AccordionTrigger />
+              <SnapshotInstructions />
+              <AccordionTrigger />
+            </div>
+          </div>
+        </AccordionItem>
+      </Accordion>
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows] duration-300 ease-in-out",
+          isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr] pointer-events-none"
+        )}
+        aria-hidden={!isOpen}
+        inert={!isOpen ? true : undefined}
+      >
+        <div className="overflow-hidden">
+          <div className="w-full flex flex-col gap-3 px-1 pt-2 pb-4">
+            <RadioGroup
+              value={String(currentSnapshot)}
+              className="flex flex-row justify-stretch items-stretch gap-2"
+            >
+              {snapshots.map((snapshot, i) => {
+                const num = String(i + 1);
+                return (
+                  <MappableRadioGroupPrimitiveItem
+                    moduleId="snapshots"
+                    moduleName="Snapshots"
+                    paramName={`Snapshot ${num}`}
+                    onAction={() => handleSnapshotSelect(i)}
+                    key={num}
+                    value={String(i)}
+                    aria-label={`Snapshot ${num}`}
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "icon" }),
+                      "rounded-md border shadow-xs outline-none flex-1",
+                      "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary data-[state=checked]:hover:bg-primary/90",
+                      "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                      "dark:data-[state=checked]:bg-primary dark:data-[state=checked]:text-primary-foreground dark:data-[state=checked]:border-primary dark:data-[state=checked]:hover:bg-primary/90",
+                      snapshot.isDefaultSnapshot ? "opacity-50" : ""
+                    )}
+                  >
+                    {num}
+                  </MappableRadioGroupPrimitiveItem>
+                );
+              })}
+            </RadioGroup>
+            <div className="flex flex-row gap-2">
+              {snapshots.map((_snapshot, i) => {
+                return (
+                  <MappableButton
+                    moduleId="snapshots"
+                    moduleName="Snapshots"
+                    paramName={`Save ${i + 1}`}
+                    key={i}
+                    variant="ghost"
+                    className="flex-1"
+                    onAction={() => onSaveSnapshot(i)}
+                  >
+                    <ArrowBigUp />
+                  </MappableButton>
+                );
+              })}
+            </div>
           </div>
         </div>
-        <AccordionContent className="w-full flex flex-col gap-5 px-1 pt-2">
-          <RadioGroup
-            value={String(currentSnapshot)}
-            className="flex flex-row justify-stretch items-stretch gap-2"
-          >
-            {snapshots.map((snapshot, i) => {
-              const num = String(i + 1);
-              return (
-                <MappableRadioGroupPrimitiveItem
-                  moduleId="snapshots"
-                  moduleName="Snapshots"
-                  paramName={`Snapshot ${num}`}
-                  onAction={() => handleSnapshotSelect(i)}
-                  key={num}
-                  value={String(i)}
-                  aria-label={`Snapshot ${num}`}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "icon" }),
-                    "rounded-md border shadow-xs outline-none flex-1",
-                    "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary data-[state=checked]:hover:bg-primary/90",
-                    "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-                    "dark:data-[state=checked]:bg-primary dark:data-[state=checked]:text-primary-foreground dark:data-[state=checked]:border-primary dark:data-[state=checked]:hover:bg-primary/90",
-                    snapshot.isDefaultSnapshot ? "opacity-50" : ""
-                  )}
-                >
-                  {num}
-                </MappableRadioGroupPrimitiveItem>
-              );
-            })}
-          </RadioGroup>
-          <div className="flex flex-row gap-2">
-            {snapshots.map((_snapshot, i) => {
-              return (
-                <MappableButton
-                  moduleId="snapshots"
-                  moduleName="Snapshots"
-                  paramName={`Save ${i + 1}`}
-                  key={i}
-                  variant="ghost"
-                  className="flex-1"
-                  onAction={() => onSaveSnapshot(i)}
-                >
-                  <ArrowBigUp />
-                </MappableButton>
-              );
-            })}
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+      </div>
+    </div>
   );
 };
 
